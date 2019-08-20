@@ -1,0 +1,174 @@
+# 基本配置
+server:
+  port: ${serve.prot:8888}
+  servlet:
+    context-path: /
+    session:
+      timeout: 60m
+
+# debug模式
+debug: false
+
+# spring配置
+spring:
+  profiles:
+    active: dev
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+
+  cache:
+    type: caffeine
+    caffeine:
+      spec: initialCapacity=10,maximumSize=500,expireAfterAccess=86400s
+
+  redis:
+    port: 6379
+    timeout: 5000
+
+  output:
+    ansi:
+      enabled: detect
+
+  servlet:
+    multipart:
+      max-request-size: 10MB
+      max-file-size: 10MB
+
+#MyBatisPlus配置
+mybatis-plus:
+  # java目录: classpath:/com/yourpackage/*/mapper/*Mapper.xml
+  # resource目录: classpath:/mapper/*Mapper.xml
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  # 别名包扫描路径
+  typeAliasesPackage: com.test.website.domains
+  # MyBatis-Plus 全局策略配置
+  global-config:
+    # DB策略配置
+    db-config:
+      # 全局默认主键类型 :
+      # INPUT 用户输入ID
+      # ID_WORKER 全局唯一ID，Long类型的主键
+      # ID_WORKER_STR 字符串全局唯一IDs
+      # UUID 全局唯一ID，UUID类型的主键
+      # NONE 该类型为未设置主键类型
+      id-type: AUTO
+      # 字段策略
+      field-strategy: not_null
+      # 表名是否使用下划线命名
+      table-underline: true
+      # 逻辑已删除值
+      logic-delete-value: 1
+      # 逻辑未删除值
+      logic-not-delete-value: 0
+
+  #原生MyBatis配置
+  configuration:
+    # 是否开启下划线转驼峰命名规则
+    map-underscore-to-camel-case: true
+    # 全局地开启或关闭配置文件中的所有映射器已经配置的任何缓存
+    # cache-enabled: false
+    # 配置JdbcTypeForNull
+    jdbc-type-for-null: 'null'
+
+app:
+  storage:
+    ali-oss:
+      region: oss-cn-shenzhen
+      bucket: wqbwebsite
+      accessKeyId: LTAILBKZh1nEZtk1
+      accessKeySecret: OtXdhK7A6ybMe4iutoNMWRJla5Z03i
+
+  notification:
+    sms:
+      lc:
+        url: http://vsms.253.com/msg/send/json
+        app-id: N2080702
+        secret: i97EbGlRs
+
+  rest-url:
+    mall:
+      prepare-login-url: https://www.wqbol.com/passport/getaccshoptax
+      login-url: https://www.wqbol.com/public-login
+      buy-url: https://www.wqbol.com/goods?category=608
+    cloud-account:
+      tried-login-url: https://acct.wqbol.com/wqb/system/testToUserLoing
+      paid-login-url: https://acct.wqbol.com/wqb/system/userToLogin
+
+  security:
+    browser:
+      responseType: JSON
+      #session管理相关配置，参见SessionProperties
+      session:
+        maximumSessions: 10
+        maxSessionsPreventsLogin: false
+    # 验证码配置 参见ValidateCodeProperties
+    code:
+      #图片验证码配置项，参见ImageCodeProperties
+      image:
+        length: 4
+        width: 60
+        height: 30
+        expireIn: 3600
+        # 配置需要图形验证码验证的url, 两个验证码如果配的url中相同部分则短信优先级要高
+        url:
+
+      #短信验证码配置项，参见SmsCodeProperties
+      sms:
+        length: 6
+        expireIn: 60
+        # 配置需要短信验证码验证的url
+        url: /partner/contact,/trialCustomer/status
+
+---
+# 开发环境
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: root
+    password: root
+  redis:
+    host: 127.0.0.1
+  data:
+    elasticsearch:
+      cluster-nodes: 192.168.1.165:9300
+      cluster-name: docker-cluster
+
+mybatis-plus:
+  configuration:
+    cache-enabled: false
+
+logging:
+  level:
+    root: info
+    com:
+      wqb: debug
+#    org:
+#      springframework:
+#        security: debug
+---
+
+# 生产环境
+spring:
+  profiles: prod
+  datasource:
+    url: jdbc:mysql://${mysql.host:}:3306/test?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: ${mysql.username:}
+    password: ${mysql.password:}
+
+  redis:
+    host: ${redis.host:}
+    password: ${redis.password:}
+
+mybatis-plus:
+  configuration:
+    cache-enabled: true
+
+logging:
+  level:
+    root: info
+  path: ./logs/
+
+---
