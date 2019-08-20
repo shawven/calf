@@ -1,10 +1,9 @@
 package com.test.security.app.authentication;
 
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
-import org.springframework.stereotype.Component;
 
 /**
  * 非匿名用户且没有记住我，验证是失败时会走这里

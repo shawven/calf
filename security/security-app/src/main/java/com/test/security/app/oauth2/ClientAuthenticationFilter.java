@@ -1,5 +1,6 @@
 package com.test.security.app.oauth2;
 
+import com.test.security.oauth2.property.OAuth2Constants;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,11 +33,10 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        if (!"/oauth/token".equals(request.getRequestURI())) {
+        if (!OAuth2Constants.DEFAULT_OAUTH_TOKEN_ENDPOINTS.equals(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }

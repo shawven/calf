@@ -1,11 +1,10 @@
 package com.test.security.app.authentication;
 
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Shoven

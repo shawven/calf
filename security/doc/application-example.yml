@@ -65,7 +65,6 @@ app:
 
     # 验证码配置 参见ValidateCodeProperties
     code:
-      restUrl: /code
       #图片验证码配置项，参见ImageCodeProperties
       image:
         length: 4
@@ -73,19 +72,19 @@ app:
         height: 30
         expireIn: 30
         # 配置需要图形验证码验证的url, 两个验证码如果配的url中相同部分则短信优先级要高
-        url: /user/*
+        url: /code/sms
 
       #短信验证码配置项，参见SmsCodeProperties
       sms:
         length: 6
         expireIn: 60
         # 配置需要短信验证码验证的url
-        url: /user/*
+        url:
 
-    #社交登录功能拦截的url,参见SocilaProperties
+    #社交登录功能拦截的url,参见SocialProperties
     social:
       # 拦截器处理的url
-      filterProcessesUrl: /connect
+      filterProcessesUrl: /login/connect
 #      signUpUrl:
       #QQ登录配置，参见QQProperties
       qq:

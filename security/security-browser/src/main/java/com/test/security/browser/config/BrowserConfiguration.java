@@ -7,7 +7,7 @@ import com.test.security.browser.property.BrowserProperties;
 import com.test.security.browser.session.BrowserExpiredSessionStrategy;
 import com.test.security.browser.session.BrowserInvalidSessionStrategy;
 import com.test.security.browser.session.SessionValidateCodeRepository;
-import com.test.security.core.authentication.configurer.AuthorizationConfigurerProvider;
+import com.test.security.base.authentication.configurer.AuthorizationConfigurerProvider;
 import com.test.security.social.property.SocialProperties;
 import com.test.security.validate.ValidateCodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,9 +128,9 @@ public class BrowserConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public FormLoginSecurityConfig FormLoginSecurityConfig(AuthenticationSuccessHandler authenticationSuccessHandler,
-                                                            AuthenticationFailureHandler authenticationFailureHandler) {
-	    return new FormLoginSecurityConfig(browserProperties, authenticationSuccessHandler, authenticationFailureHandler);
+    public LoginSecurityConfig FormLoginSecurityConfig(AuthenticationSuccessHandler authenticationSuccessHandler,
+                                                       AuthenticationFailureHandler authenticationFailureHandler) {
+	    return new LoginSecurityConfig(browserProperties, authenticationSuccessHandler, authenticationFailureHandler);
     }
 
     /**

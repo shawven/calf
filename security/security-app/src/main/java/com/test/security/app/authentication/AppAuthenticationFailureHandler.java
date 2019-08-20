@@ -2,11 +2,10 @@
 package com.test.security.app.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

@@ -87,40 +87,6 @@ app:
         app-id: N2080702
         secret: i97EbGlRs
 
-  rest-url:
-    mall:
-      prepare-login-url: https://www.wqbol.com/passport/getaccshoptax
-      login-url: https://www.wqbol.com/public-login
-      buy-url: https://www.wqbol.com/goods?category=608
-    cloud-account:
-      tried-login-url: https://acct.wqbol.com/wqb/system/testToUserLoing
-      paid-login-url: https://acct.wqbol.com/wqb/system/userToLogin
-
-  security:
-    browser:
-      responseType: JSON
-      #session管理相关配置，参见SessionProperties
-      session:
-        maximumSessions: 10
-        maxSessionsPreventsLogin: false
-    # 验证码配置 参见ValidateCodeProperties
-    code:
-      #图片验证码配置项，参见ImageCodeProperties
-      image:
-        length: 4
-        width: 60
-        height: 30
-        expireIn: 3600
-        # 配置需要图形验证码验证的url, 两个验证码如果配的url中相同部分则短信优先级要高
-        url:
-
-      #短信验证码配置项，参见SmsCodeProperties
-      sms:
-        length: 6
-        expireIn: 60
-        # 配置需要短信验证码验证的url
-        url: /partner/contact,/trialCustomer/status
-
 ---
 # 开发环境
 spring:

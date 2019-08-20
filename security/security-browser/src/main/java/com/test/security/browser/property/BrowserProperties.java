@@ -1,8 +1,7 @@
 
 package com.test.security.browser.property;
 
-import com.test.security.core.ResponseType;
-import com.test.security.core.properties.OAuth2Constants;
+import com.test.security.base.ResponseType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -23,7 +22,7 @@ public class BrowserProperties {
     /**
      * 登陆处理url
      */
-    private String signInProcessUrl = OAuth2Constants.DEFAULT_SIGN_IN_PROCESSING_URL_FORM;
+    private String signInProcessUrl = BrowserConstants.DEFAULT_SIGN_IN_PROCESSING_URL_FORM;
 
     /**
      * 登录成功后跳转的地址，如果设置了此属性，则登录成功后总是会跳到这个地址上。

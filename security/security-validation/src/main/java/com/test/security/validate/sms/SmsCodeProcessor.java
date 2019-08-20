@@ -3,7 +3,7 @@ package com.test.security.validate.sms;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
 import com.test.security.validate.*;
 import com.test.security.validate.message.SmsMessage;
 import org.slf4j.Logger;

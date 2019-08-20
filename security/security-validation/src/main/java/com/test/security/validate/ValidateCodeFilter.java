@@ -2,7 +2,7 @@
 package com.test.security.validate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
 import com.test.security.validate.property.ValidationProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

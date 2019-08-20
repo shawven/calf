@@ -1,5 +1,5 @@
 
-package com.test.security.core.authentication.configurer;
+package com.test.security.base.authentication.configurer;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;

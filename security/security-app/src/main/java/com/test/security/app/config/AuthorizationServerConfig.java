@@ -2,6 +2,7 @@
 package com.test.security.app.config;
 
 import com.test.security.oauth2.property.OAuth2ClientProperties;
+import com.test.security.oauth2.property.OAuth2Constants;
 import com.test.security.oauth2.property.OAuth2Properties;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +71,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints.tokenStore(tokenStore)
 				.authenticationManager(authenticationManager)
-				.userDetailsService(userDetailsService);
+				.userDetailsService(userDetailsService)
+                .pathMapping("/oauth/token", OAuth2Constants.DEFAULT_OAUTH_TOKEN_ENDPOINTS);
 
 		if (jwtAccessTokenConverter != null && jwtTokenEnhancer != null) {
             jwtAccessTokenConverter.setSigningKey(oAuth2Properties.getJwtSigningKey());

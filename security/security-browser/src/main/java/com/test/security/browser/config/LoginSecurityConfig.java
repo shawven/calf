@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * 表单登录配置
  *
  */
-public class FormLoginSecurityConfig {
+public class LoginSecurityConfig {
 
     private BrowserProperties browserProperties;
 
@@ -20,9 +20,9 @@ public class FormLoginSecurityConfig {
 
     protected AuthenticationFailureHandler browserAuthenticationFailureHandler;
 
-    public FormLoginSecurityConfig(BrowserProperties browserProperties,
-                                   AuthenticationSuccessHandler browserAuthenticationSuccessHandler,
-                                   AuthenticationFailureHandler browserAuthenticationFailureHandler) {
+    public LoginSecurityConfig(BrowserProperties browserProperties,
+                               AuthenticationSuccessHandler browserAuthenticationSuccessHandler,
+                               AuthenticationFailureHandler browserAuthenticationFailureHandler) {
         this.browserProperties = browserProperties;
         this.browserAuthenticationSuccessHandler = browserAuthenticationSuccessHandler;
         this.browserAuthenticationFailureHandler = browserAuthenticationFailureHandler;

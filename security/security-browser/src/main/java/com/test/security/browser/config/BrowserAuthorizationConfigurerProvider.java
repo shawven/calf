@@ -1,12 +1,11 @@
 package com.test.security.browser.config;
 
 import com.test.security.browser.property.BrowserProperties;
-import com.test.security.core.authentication.configurer.AuthorizationConfigurerProvider;
-import com.test.security.core.properties.OAuth2Constants;
+import com.test.security.base.authentication.configurer.AuthorizationConfigurerProvider;
+import com.test.security.oauth2.property.OAuth2Constants;
 import com.test.security.social.property.SocialConstants;
 import com.test.security.social.property.SocialProperties;
 import com.test.security.validate.property.ValidationConstants;
-import com.test.security.validate.property.ValidationProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;

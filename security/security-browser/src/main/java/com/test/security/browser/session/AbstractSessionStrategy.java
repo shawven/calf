@@ -3,8 +3,8 @@ package com.test.security.browser.session;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.security.browser.property.BrowserProperties;
-import com.test.security.core.ResponseType;
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseType;
+import com.test.security.base.ResponseData;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.web.DefaultRedirectStrategy;

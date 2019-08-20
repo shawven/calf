@@ -3,7 +3,7 @@ package com.test.security.app.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.security.app.oauth2.ClientUtils;
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;

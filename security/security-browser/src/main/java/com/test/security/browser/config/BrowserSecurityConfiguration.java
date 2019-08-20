@@ -2,7 +2,7 @@
 package com.test.security.browser.config;
 
 import com.test.security.browser.property.BrowserProperties;
-import com.test.security.core.authentication.configurer.AuthorizationConfigurerManager;
+import com.test.security.base.authentication.configurer.AuthorizationConfigurerManager;
 import com.test.security.oauth2.config.SmsCodeAuthenticationSecurityConfig;
 import com.test.security.validate.config.ValidationSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class BrowserSecurityConfiguration {
 	private AuthorizationConfigurerManager authorizationConfigurerManager;
 
 	@Autowired
-	private FormLoginSecurityConfig formLoginSecurityConfig;
+	private LoginSecurityConfig loginSecurityConfig;
 
     @Autowired
     private AccessDeniedHandler browserAccessDeniedHandler;
@@ -80,7 +80,7 @@ public class BrowserSecurityConfiguration {
 
 	public void configureHttp(HttpSecurity http) throws Exception {
 
-		formLoginSecurityConfig.configure(http);
+		loginSecurityConfig.configure(http);
 
 		http
             .exceptionHandling()

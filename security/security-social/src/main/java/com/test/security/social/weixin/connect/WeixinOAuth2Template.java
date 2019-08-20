@@ -2,7 +2,7 @@
 package com.test.security.social.weixin.connect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.test.security.core.InvalidArgumentException;
+import com.test.security.base.InvalidArgumentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;

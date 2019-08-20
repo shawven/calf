@@ -3,7 +3,7 @@ package com.test.security.app.config;
 import com.test.security.app.RedisValidateCodeRepository;
 import com.test.security.app.authentication.*;
 import com.test.security.app.oauth2.ClientAuthenticationFilter;
-import com.test.security.core.authentication.configurer.AuthorizationConfigurerProvider;
+import com.test.security.base.authentication.configurer.AuthorizationConfigurerProvider;
 import com.test.security.social.property.SocialProperties;
 import com.test.security.validate.ValidateCodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;

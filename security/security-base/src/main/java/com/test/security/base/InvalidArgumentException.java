@@ -1,4 +1,4 @@
-package com.test.security.core;
+package com.test.security.base;
 
 
 import org.springframework.security.core.AuthenticationException;

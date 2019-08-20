@@ -2,8 +2,8 @@ package com.test.security.browser.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.security.browser.property.BrowserProperties;
-import com.test.security.core.ResponseType;
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseType;
+import com.test.security.base.ResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;

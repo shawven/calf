@@ -1,8 +1,7 @@
 
 package com.test.security.app.authentication.openid;
 
-import com.test.security.core.InvalidArgumentException;
-import com.test.security.core.properties.OAuth2Constants;
+import com.test.security.base.InvalidArgumentException;
 import com.test.security.social.property.SocialConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AuthenticationServiceException;

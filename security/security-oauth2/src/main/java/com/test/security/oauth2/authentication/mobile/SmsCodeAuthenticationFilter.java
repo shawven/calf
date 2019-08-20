@@ -1,8 +1,8 @@
 
 package com.test.security.oauth2.authentication.mobile;
 
-import com.test.security.core.InvalidArgumentException;
-import com.test.security.core.properties.OAuth2Constants;
+import com.test.security.base.InvalidArgumentException;
+import com.test.security.oauth2.property.OAuth2Constants;
 import com.test.security.validate.property.ValidationConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -23,7 +23,6 @@ public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessin
 	// =====================================================================================
 
 	private String mobileParameter = ValidationConstants.DEFAULT_PARAMETER_NAME_MOBILE;
-	private boolean postOnly = true;
 
 	// ~ Constructors
 	// ===================================================================================================
@@ -38,7 +37,7 @@ public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessin
 	@Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
-		if (postOnly && !"POST".equals(request.getMethod())) {
+		if (!"POST".equals(request.getMethod())) {
 			throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
 		}
 
@@ -63,20 +62,6 @@ public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessin
 	public void setMobileParameter(String usernameParameter) {
 		Assert.hasText(usernameParameter, "Username parameter must not be empty or null");
 		this.mobileParameter = usernameParameter;
-	}
-
-
-	/**
-	 * Defines whether only HTTP POST requests will be allowed by this filter.
-	 * If set to true, and an authentication request is received which is not a
-	 * POST request, an exception will be raised immediately and authentication
-	 * will not be attempted. The <tt>unsuccessfulAuthentication()</tt> method
-	 * will be called as if handling a failed authentication.
-	 * <p>
-	 * Defaults to <tt>true</tt> but may be overridden by subclasses.
-	 */
-	public void setPostOnly(boolean postOnly) {
-		this.postOnly = postOnly;
 	}
 
 	public final String getMobileParameter() {

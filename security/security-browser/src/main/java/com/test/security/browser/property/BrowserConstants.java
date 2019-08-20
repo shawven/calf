@@ -11,6 +11,11 @@ public interface BrowserConstants {
     String DEFAULT_SIGN_IN_URL = "/login";
 
     /**
+     * 默认的用户名密码登录请求处理url
+     */
+    String DEFAULT_SIGN_IN_PROCESSING_URL_FORM = "/login/form";
+
+    /**
      * 默认退出登录的url
      */
     String DEFAULT_SIGN_OUT_URL = "/logout";

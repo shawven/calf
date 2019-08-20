@@ -8,14 +8,12 @@ public interface SocialConstants {
     /**
      * 默认的OPENID登录请求处理url
      */
-    String DEFAULT_TOKEN_PROCESSING_URL_OPENID = "/oauth/connect/token";
+    String DEFAULT_TOKEN_PROCESSING_URL_OPENID = "/login/connect";
 
     /**
      * 社交登陆需要注册时获取用户信息的处理url
      */
     String DEFAULT_CURRENT_SOCIAL_USER_INFO_URL = "/social/user";
-
-
 
     /**
      * openid参数名

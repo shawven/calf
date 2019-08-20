@@ -2,7 +2,7 @@
 package com.test.security.browser.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;

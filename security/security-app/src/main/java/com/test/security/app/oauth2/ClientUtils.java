@@ -1,7 +1,7 @@
 package com.test.security.app.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -1,7 +1,8 @@
 package com.test.security.app;
 
 import com.test.security.app.config.social.AppSingUpUtils;
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
+import com.test.security.oauth2.property.OAuth2Constants;
 import com.test.security.social.SocialController;
 import com.test.security.social.property.SocialConstants;
 import com.test.security.social.support.SocialUserInfo;
@@ -19,6 +20,9 @@ import org.springframework.web.context.request.ServletWebRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.Map;
+
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 
 @RestController
@@ -41,7 +45,7 @@ public class AppSecurityController extends SocialController {
      * @return
      */
     @ResponseBody
-    @RequestMapping(value = "/oauth/token", method = {RequestMethod.POST, RequestMethod.GET})
+    @RequestMapping(value = OAuth2Constants.DEFAULT_OAUTH_TOKEN_ENDPOINTS, method = {POST, GET})
     public ResponseEntity postAccessToken(Principal principal, @RequestParam Map<String, String> parameters) {
         ResponseEntity<OAuth2AccessToken> result;
         String message;

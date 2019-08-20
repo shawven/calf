@@ -1,7 +1,7 @@
 
 package com.test.security.app.config;
 
-import com.test.security.core.authentication.configurer.AuthorizationConfigurerManager;
+import com.test.security.base.authentication.configurer.AuthorizationConfigurerManager;
 import com.test.security.oauth2.config.SmsCodeAuthenticationSecurityConfig;
 import com.test.security.validate.config.ValidationSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;

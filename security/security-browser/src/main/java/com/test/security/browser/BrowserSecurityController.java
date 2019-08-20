@@ -2,7 +2,7 @@
 package com.test.security.browser;
 
 
-import com.test.security.core.ResponseData;
+import com.test.security.base.ResponseData;
 import com.test.security.social.SocialController;
 import com.test.security.social.property.SocialConstants;
 import com.test.security.social.support.SocialUserInfo;

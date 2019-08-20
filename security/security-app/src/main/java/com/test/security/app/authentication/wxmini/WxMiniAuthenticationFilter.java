@@ -1,7 +1,7 @@
 package com.test.security.app.authentication.wxmini;
 
 import com.test.security.app.config.social.AppSingUpUtils;
-import com.test.security.core.InvalidArgumentException;
+import com.test.security.base.InvalidArgumentException;
 import com.test.security.social.MyJdbcConnectionRepository;
 import com.test.security.social.property.SocialConstants;
 import com.test.security.social.property.SocialProperties;
