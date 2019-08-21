@@ -56,16 +56,29 @@ public class ControllerExceptionHandler {
     /**
      * 处理业务异常
      *
-     * @param e BusinessException
+     * @param e BizException
      * @return
      */
     @ExceptionHandler(BizException.class)
     @ResponseBody
     public ResponseEntity handleBusinessException(BizException e) {
-        String errorMsg = e.getMessage() != null ? e.getMessage() : DEFAULT_MESSAGE;
+        String errorMsg = getErrorMessage(e);
         return Response.unprocesable(errorMsg);
     }
 
+
+    /**
+     * 处理系统级异常，必须记入日志系统，不应该将信息展示给用户
+     *
+     * @param e Exception
+     * @return
+     */
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public ResponseEntity handleException(Exception e) {
+        logger.error(e.getMessage(), e);
+        return Response.error(withDetail() ? e.getMessage() : DEFAULT_MESSAGE);
+    }
 
     /**
      * 处理url未匹配
@@ -103,19 +116,16 @@ public class ControllerExceptionHandler {
         return Response.error(errorMsg);
     }
 
-    /**
-     * 处理系统级异常
-     *
-     * @param e Exception
-     * @return
-     */
-    @ExceptionHandler(Exception.class)
-    @ResponseBody
-    public ResponseEntity handleException(Exception e) {
-        logger.error(e.getMessage(), e);
-        return Response.error(withDetail() ? e.getMessage() : DEFAULT_MESSAGE);
+    private String getErrorMessage(Exception e) {
+        return e.getMessage() != null ? e.getMessage() : DEFAULT_MESSAGE;
     }
 
+    /**
+     * 是否携带详细信息
+     * 只有在开发和测试环境才展示系统的错误信息
+     *
+     * @return
+     */
     private boolean withDetail() {
         if (active == null) {
             return true;

@@ -39,5 +39,6 @@
     <modules>
         <module>app</module>
         <module>security</module>
+        <module>log</module>
     </modules>
 </project>
