@@ -8,7 +8,7 @@ import org.aspectj.lang.annotation.Pointcut;
  */
 public class LogPointcutConfiguration {
 
-    @Pointcut("execution(* com.test.controller..*.*(..))")
+    @Pointcut("execution(* com.test.*.controller..*.*(..))")
     public void packageScanner(){}
 
     @Pointcut("@annotation(com.test.log.annotation.Log)")

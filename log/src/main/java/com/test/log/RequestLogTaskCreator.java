@@ -1,6 +1,5 @@
 package com.test.log;
 
-import com.test.log.UserContext;
 import com.test.log.core.JoinPointExtractor;
 import com.test.log.core.LogRepository;
 import com.test.log.core.LogTask;

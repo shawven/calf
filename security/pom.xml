@@ -27,11 +27,11 @@
     </dependencyManagement>
 
     <modules>
-        <module>security-app</module>
-        <module>security-browser</module>
-        <module>security-social</module>
-        <module>security-oauth2</module>
-        <module>security-validation</module>
-        <module>security-base</module>
+        <module>api</module>
+        <module>browser</module>
+        <module>social</module>
+        <module>oauth2</module>
+        <module>verification</module>
+        <module>base</module>
     </modules>
 </project>

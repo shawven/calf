@@ -63,10 +63,10 @@ app:
         maxSessionsPreventsLogin: false
         sessionInvalidUrl: /session-invalid.html
 
-    # 验证码配置 参见ValidateCodeProperties
-    code:
+    # 验证码配置 参见VerificationProperties
+    verification:
       #图片验证码配置项，参见ImageCodeProperties
-      image:
+      captcha:
         length: 4
         width: 100
         height: 30

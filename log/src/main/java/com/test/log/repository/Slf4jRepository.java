@@ -1,8 +1,8 @@
 package com.test.log.repository;
 
-import com.test.log.annotation.Log;
 import com.test.log.core.LogRepository;
 import com.test.log.core.Recordable;
+import com.test.log.annotation.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

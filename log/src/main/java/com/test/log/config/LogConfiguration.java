@@ -1,9 +1,9 @@
 package com.test.log.config;
 
-import com.test.log.core.JoinPointInfoExtractor;
-import com.test.log.RequestRecordBuilder;
 import com.test.log.RequestLogTaskCreator;
+import com.test.log.RequestRecordBuilder;
 import com.test.log.core.JoinPointExtractor;
+import com.test.log.core.JoinPointInfoExtractor;
 import com.test.log.core.LogRepository;
 import com.test.log.core.RecordBuilder;
 import com.test.log.core.LogTaskCreator;
@@ -23,11 +23,13 @@ import java.util.List;
 public class LogConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean
     public LogRepository slf4jRepository() {
         return new Slf4jRepository();
     }
 
     @Bean
+    @ConditionalOnMissingBean()
     public LogRepository databaseRepository() {
         return new DatabaseRepository();
     }
