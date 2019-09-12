@@ -1,6 +1,5 @@
 package com.test.log;
 
-import com.test.app.log.core.*;
 import com.test.log.core.*;
 import org.aspectj.lang.JoinPoint;
 

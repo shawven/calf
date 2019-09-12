@@ -1,34 +1,28 @@
 package com.test.app.controller;
 
 import com.test.app.common.Response;
-import com.test.app.domain.User;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @author Shoven
  * @date 2019-03-21 16:03
  */
-@RestController
+@Controller
 public class IndexController {
 
-    @RequestMapping
-    public void index(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+    @GetMapping(value = "/", produces = "text/html")
+    public String indexHtml() throws IOException {
+        return "index";
     }
 
-    @PostMapping("objects")
-    public ResponseEntity testObjects(@RequestBody List<User> users2) {
-        return Response.ok();
+    @GetMapping("/")
+    public ResponseEntity indexBody() {
+        return Response.ok("hello world");
     }
 
-    @DeleteMapping("{id}")
-    ResponseEntity delete(@PathVariable(value = "id") String id) {
-        return Response.noContent();
-    }
+
 }

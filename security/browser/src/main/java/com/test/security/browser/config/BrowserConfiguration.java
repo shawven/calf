@@ -12,6 +12,7 @@ import com.test.security.social.properties.SocialProperties;
 import com.test.security.verification.VerificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -32,6 +33,7 @@ import org.springframework.security.web.session.SessionInformationExpiredStrateg
  */
 @Configuration
 @EnableSocialSupport
+@EnableConfigurationProperties(BrowserProperties.class)
 public class BrowserConfiguration {
 
 	@Autowired

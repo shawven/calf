@@ -4,11 +4,12 @@ import com.test.app.support.util.ReflectHelpers;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * @author Shoven
@@ -82,13 +83,16 @@ public class QueryParser<T> {
      * @param biConsumer
      */
     private <V> void parseMapConditions(Map<String, V> map, BiConsumer<String, V> biConsumer) {
-        if (MapUtils.isEmpty(map)) {
+        if (MapUtils.isEmpty(map) || biConsumer == null) {
             return;
         }
         for (Map.Entry<String, V> entry : map.entrySet()) {
             String key = entry.getKey();
             V value = entry.getValue();
-            if (StringUtils.isBlank(key) || !isValidValue(value) || isConflict(key)) {
+
+            if (StringUtils.isBlank(key) || invalidValue(value)
+                // 排除刚好实体属性值有效的情况，因为是等值条件优先于其他条件
+                    || !invalidValue(equals.get(key))) {
                 continue;
             }
             biConsumer.accept(propertyTranslator.apply(key), value);
@@ -105,27 +109,27 @@ public class QueryParser<T> {
         Map<String, Object> properties;
         try {
             properties = ReflectHelpers.objectToMap(obj);
+            if (properties.isEmpty()) {
+                return emptyMap();
+            }
         } catch (Exception ignored) {
-            return Collections.emptyMap();
-        }
-        if (properties == null || properties.isEmpty()) {
-            return Collections.emptyMap();
+            return emptyMap();
         }
 
         HashMap<String, Object> conditions = new HashMap<>(properties.size());
         properties.entrySet().stream()
-                .filter(entry -> isValidValue(entry.getValue()))
+                .filter(entry -> !invalidValue(entry.getValue()))
                 .forEach(entry -> conditions.put(entry.getKey(), entry.getValue()));
         return conditions;
     }
 
     /**
-     * 是否有效值
+     * 是否无效值
      *
      * @param value
      * @return
      */
-    private boolean isValidValue(Object value) {
+    private boolean invalidValue(Object value) {
         if (value == null) {
             return false;
         }
@@ -133,16 +137,5 @@ public class QueryParser<T> {
             return StringUtils.isNotBlank((String) value);
         }
         return true;
-    }
-
-    /**
-     * 是否有冲突
-     * 如果实体设置的属性有值，体属性的条件为等值条件优先于其他
-     *
-     * @param key
-     * @return
-     */
-    private boolean isConflict(String key)  {
-        return isValidValue(equals.get(key));
     }
 }

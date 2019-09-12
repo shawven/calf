@@ -1,18 +1,20 @@
 package com.test.security.verification.config;
 
+import com.test.security.verification.VerificationFilter;
+import com.test.security.verification.VerificationProcessor;
+import com.test.security.verification.VerificationProcessorHolder;
+import com.test.security.verification.VerificationRepository;
 import com.test.security.verification.captcha.CaptchaGenerator;
 import com.test.security.verification.captcha.CaptchaProcessor;
+import com.test.security.verification.properties.VerificationProperties;
+import com.test.security.verification.sms.DefaultSmsSender;
 import com.test.security.verification.sms.SmsGenerator;
 import com.test.security.verification.sms.SmsProcessor;
 import com.test.security.verification.sms.SmsSender;
-import com.test.security.verification.VerificationProcessor;
-import com.test.security.verification.VerificationFilter;
-import com.test.security.verification.VerificationProcessorHolder;
-import com.test.security.verification.VerificationRepository;
-import com.test.security.verification.sms.DefaultSmsSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,10 +25,11 @@ import java.util.Map;
  * @date 2019-08-19
  */
 @Configuration
+@EnableConfigurationProperties(VerificationProperties.class)
 public class VerificationSupportConfiguration {
 
     @Autowired
-    private com.test.security.verification.properties.VerificationProperties VerificationProperties;
+    private VerificationProperties verificationProperties;
 
     /**
      * 短信验证码生成器
@@ -35,7 +38,7 @@ public class VerificationSupportConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SmsGenerator smsCodeGenerator() {
-        return new SmsGenerator(VerificationProperties);
+        return new SmsGenerator(verificationProperties);
     }
 
     /**
@@ -55,7 +58,7 @@ public class VerificationSupportConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public CaptchaGenerator imageCodeGenerator() {
-        return new CaptchaGenerator(VerificationProperties);
+        return new CaptchaGenerator(verificationProperties);
     }
 
     /**
@@ -110,7 +113,7 @@ public class VerificationSupportConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public VerificationFilter verificationFilter(VerificationProcessorHolder verificationProcessorHolder) {
-        return new VerificationFilter(verificationProcessorHolder, VerificationProperties);
+        return new VerificationFilter(verificationProcessorHolder, verificationProperties);
     }
 
     @Bean

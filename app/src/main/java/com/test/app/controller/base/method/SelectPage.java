@@ -66,6 +66,6 @@ public interface SelectPage<T> extends ServiceProvider<T> {
         if (pageData.getTotal() == 0) {
             return Response.ok("暂无数据！", pageData);
         }
-        return Response.ok(pageData);
+        return Response.ok("获取数据成功！", pageData);
     }
 }

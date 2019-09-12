@@ -2,8 +2,10 @@
 package com.test.security.oauth2.config;
 
 import com.test.security.oauth2.DefaultUserDetailsService;
+import com.test.security.oauth2.properties.OAuth2Properties;
 import com.test.security.verification.annotation.EnableVerificationSupport;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  */
 @Configuration
 @EnableVerificationSupport
+@EnableConfigurationProperties(OAuth2Properties.class)
 public class OAuth2Configuration {
 
 	/**

@@ -6,6 +6,7 @@ import com.test.security.browser.properties.BrowserProperties;
 import com.test.security.oauth2.config.SmsAuthenticationSecurityConfig;
 import com.test.security.verification.config.VerificationSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;

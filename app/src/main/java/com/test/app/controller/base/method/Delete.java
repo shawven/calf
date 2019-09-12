@@ -13,7 +13,7 @@ import java.util.Arrays;
  * @author Shoven
  * @date 2019-05-17 15:46
  */
-public interface Delete<T> extends ServiceProvider<T>, CacheDeletable {
+public interface Delete<T> extends ServiceProvider<T> {
 
     /**
      * 根据id删除记录
@@ -35,7 +35,6 @@ public interface Delete<T> extends ServiceProvider<T>, CacheDeletable {
         } else if (!service.removeByIds(Arrays.asList(ids))) {
             return Response.error("批量删除失败！");
         }
-        deleteCache();
         return Response.noContent();
     }
 }

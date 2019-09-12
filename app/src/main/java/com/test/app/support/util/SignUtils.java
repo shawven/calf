@@ -37,7 +37,7 @@ public class SignUtils {
 
     public static Map<String, String> splitPairString(String pairString) {
         if (StringUtils.isBlank(pairString)) {
-            return null;
+            return emptyMap();
         }
         String[] keyValuePairs = pairString.split("&");
         if (keyValuePairs.length == 0) {
@@ -126,7 +126,7 @@ public class SignUtils {
     public static String rsaEncrypt(String content, String publicKey, String charset) throws RuntimeException {
         try {
             PublicKey pubKey = getPublicKeyFromX509("RSA", publicKey);
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.ENCRYPT_MODE, pubKey);
             byte[] data = StringUtils.isEmpty(charset) ? content.getBytes() : content.getBytes(charset);
             int inputLen = data.length;
@@ -153,7 +153,7 @@ public class SignUtils {
     public static String rsaDecrypt(String content, String privateKey, String charset) throws RuntimeException {
         try {
             PrivateKey priKey = getPrivateKeyFromPKCS8("RSA", privateKey);
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, priKey);
             byte[] bytes = StringUtils.isEmpty(charset) ? content.getBytes() : content.getBytes(charset);
             byte[] encryptedData = Base64.getDecoder().decode(bytes);

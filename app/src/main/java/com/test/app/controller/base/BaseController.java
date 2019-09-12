@@ -2,7 +2,6 @@ package com.test.app.controller.base;
 
 import com.test.app.controller.base.method.*;
 import com.test.app.service.base.BaseService;
-import com.test.controller.base.method.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;

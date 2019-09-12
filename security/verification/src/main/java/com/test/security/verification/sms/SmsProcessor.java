@@ -4,7 +4,6 @@ package com.test.security.verification.sms;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.security.base.ResponseData;
-import com.test.app.security.verification.*;
 import com.test.security.verification.*;
 import com.test.security.verification.message.SmsMessage;
 import org.slf4j.Logger;

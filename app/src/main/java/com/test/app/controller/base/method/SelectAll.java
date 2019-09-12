@@ -21,11 +21,9 @@ public interface SelectAll<T> extends ServiceProvider<T> {
     @GetMapping("/all")
     default ResponseEntity selectAll(T entity) {
         List<T> list = getBaseService().list(entity);
-
         if (CollectionUtils.isEmpty(list)) {
             return Response.ok("暂无数据！");
         }
-
         return Response.ok("获取数据成功！", list);
     }
 }

@@ -20,19 +20,19 @@ public class CaptchaGenerator implements VerificationGenerator<Captcha> {
 	/**
 	 * 系统配置
 	 */
-	private VerificationProperties VerificationProperties;
+	private VerificationProperties verificationProperties;
 
 
-    public CaptchaGenerator(VerificationProperties VerificationProperties) {
-        this.VerificationProperties = VerificationProperties;
+    public CaptchaGenerator(VerificationProperties verificationProperties) {
+        this.verificationProperties = verificationProperties;
     }
 
     @Override
 	public Captcha generate(ServletWebRequest request) {
 		int width = ServletRequestUtils.getIntParameter(request.getRequest(), "width",
-                VerificationProperties.getCaptcha().getWidth());
+                verificationProperties.getCaptcha().getWidth());
 		int height = ServletRequestUtils.getIntParameter(request.getRequest(), "height",
-                VerificationProperties.getCaptcha().getHeight());
+                verificationProperties.getCaptcha().getHeight());
 
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
@@ -67,7 +67,7 @@ public class CaptchaGenerator implements VerificationGenerator<Captcha> {
 
 		g.dispose();
 
-		return new Captcha(image, randomString, VerificationProperties.getCaptcha().getExpireIn());
+		return new Captcha(image, randomString, verificationProperties.getCaptcha().getExpireIn());
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class CaptchaGenerator implements VerificationGenerator<Captcha> {
 	private String getRandomString() {
         String str;
         do {
-            str = RandomStringUtils.randomAlphanumeric(VerificationProperties.getCaptcha().getLength());
+            str = RandomStringUtils.randomAlphanumeric(verificationProperties.getCaptcha().getLength());
             // 排除I l 1 这种模糊不清的
         } while (str.contains("I") || str.contains("l") || str.contains("1"));
         return str;

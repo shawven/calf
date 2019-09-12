@@ -35,6 +35,13 @@ spring:
     multipart:
       max-request-size: 10MB
       max-file-size: 10MB
+  freemarker:
+    template-loader-path: classpath:/template/
+  mvc:
+    static-path-pattern: /statics/**
+  resources:
+    static-locations: classpath:/statics/
+
 
 #MyBatisPlus配置
 mybatis-plus:
@@ -42,7 +49,7 @@ mybatis-plus:
   # resource目录: classpath:/mapper/*Mapper.xml
   mapper-locations: classpath:/mapper/*Mapper.xml
   # 别名包扫描路径
-  typeAliasesPackage: com.test.website.domains
+  typeAliasesPackage: com.test.app.domain
   # MyBatis-Plus 全局策略配置
   global-config:
     # DB策略配置
@@ -72,21 +79,6 @@ mybatis-plus:
     # 配置JdbcTypeForNull
     jdbc-type-for-null: 'null'
 
-app:
-  storage:
-    ali-oss:
-      region: oss-cn-shenzhen
-      bucket: wqbwebsite
-      accessKeyId: LTAILBKZh1nEZtk1
-      accessKeySecret: OtXdhK7A6ybMe4iutoNMWRJla5Z03i
-
-  notification:
-    sms:
-      lc:
-        url: http://vsms.253.com/msg/send/json
-        app-id: N2080702
-        secret: i97EbGlRs
-
 ---
 # 开发环境
 spring:
@@ -110,7 +102,7 @@ logging:
   level:
     root: info
     com:
-      wqb: debug
+      test: debug
 #    org:
 #      springframework:
 #        security: debug

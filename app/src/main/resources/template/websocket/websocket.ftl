@@ -8,7 +8,6 @@
 
 </body>
 <script src="/statics/js/jquery.min.js"></script>
-<script src="/statics/js/bootstrap.min.js"></script>
 <script src="/statics/js/socket/sockjs.min.js"></script>
 <script src="/statics/js/socket/stomp.min.js"></script>
 <script type="text/javascript">

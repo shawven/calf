@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @author Shoven
  * @date 2019-05-17 15:44
  */
-public interface Update<T> extends ServiceProvider<T>, CacheDeletable {
+public interface Update<T> extends ServiceProvider<T> {
 
     /**
      * 根据主键id更新记录
@@ -26,7 +26,6 @@ public interface Update<T> extends ServiceProvider<T>, CacheDeletable {
         if (!getBaseService().updateById(entity)) {
             return Response.error("更新失败！");
         }
-        deleteCache();
         return Response.created("更新成功！", entity);
     }
 }

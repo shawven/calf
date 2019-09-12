@@ -2,12 +2,14 @@ package com.test.app.support.handler;
 
 import com.test.app.common.Response;
 import com.test.app.support.exception.BizException;
+import org.apache.http.MethodNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -52,6 +54,17 @@ public class ControllerExceptionHandler {
         return Response.badRequest(str);
     }
 
+
+    /**
+     * HTTP方法不匹配
+     *
+     * @param e MethodNotSupportedException
+     * @return
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        return Response.badRequest(e.getMessage());
+    }
 
     /**
      * 处理业务异常
