@@ -29,11 +29,6 @@ public class UnionpayTradeQueryRequest extends UnionpayTradeRequest {
      */
     private String tradeSubType = "00";
 
-    /**
-     *  业务类型，B2C网关支付，手机wap支付
-     */
-    private String bizType = "000201";
-
     public String getOutTradeNo() {
         return outTradeNo;
     }
@@ -66,14 +61,6 @@ public class UnionpayTradeQueryRequest extends UnionpayTradeRequest {
         this.tradeSubType = tradeSubType;
     }
 
-    public String getBizType() {
-        return bizType;
-    }
-
-    public void setBizType(String bizType) {
-        this.bizType = bizType;
-    }
-
     @Override
     public String toString() {
         return "UnionpayTradeQueryRequest{" +
@@ -81,7 +68,6 @@ public class UnionpayTradeQueryRequest extends UnionpayTradeRequest {
                 ", tradeNo='" + tradeNo + '\'' +
                 ", tradeType='" + tradeType + '\'' +
                 ", tradeSubType='" + tradeSubType + '\'' +
-                ", bizType='" + bizType + '\'' +
                 '}';
     }
 }

@@ -42,17 +42,6 @@ public class UnionpayTradePagePayRequest extends UnionpayTradeRequest {
      */
     private String tradeSubType = "01";
 
-    /**
-     *  业务类型，B2C网关支付，手机wap支付
-     */
-    private String bizType = "000201";
-
-    /**
-     * 渠道类型，这个字段区分B2C网关支付和手机wap支付；07：PC,平板  08：手机
-     */
-    private String channelType = "07";
-
-
     public String getOutTradeNo() {
         return outTradeNo;
     }
@@ -101,14 +90,6 @@ public class UnionpayTradePagePayRequest extends UnionpayTradeRequest {
         return tradeSubType;
     }
 
-    public String getBizType() {
-        return bizType;
-    }
-
-    public String getChannelType() {
-        return channelType;
-    }
-
     @Override
     public String toString() {
         return "UnionpayTradePagePayRequest{" +
@@ -119,8 +100,6 @@ public class UnionpayTradePagePayRequest extends UnionpayTradeRequest {
                 ", notifyUrl='" + notifyUrl + '\'' +
                 ", tradeType='" + tradeType + '\'' +
                 ", tradeSubType='" + tradeSubType + '\'' +
-                ", bizType='" + bizType + '\'' +
-                ", channelType='" + channelType + '\'' +
                 '}';
     }
 }

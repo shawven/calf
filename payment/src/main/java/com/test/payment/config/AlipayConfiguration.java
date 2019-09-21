@@ -32,4 +32,11 @@ public class AlipayConfiguration {
         wap.setProperties(alipayProperties);
         return wap;
     }
+
+    @Bean
+    public PaymentOperations alipayQrcPaymentProvider() {
+        AlipayTemplate.Qrc qrc = new AlipayTemplate.Qrc();
+        qrc.setProperties(alipayProperties);
+        return qrc;
+    }
 }

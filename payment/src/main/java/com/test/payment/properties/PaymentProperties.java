@@ -24,6 +24,9 @@ public class PaymentProperties {
     @Value("${useSandbox}")
     private Boolean useSandbox;
 
+    @Value("${appName}")
+    private String appName;
+
     public String getServerUrl() {
         return serverUrl;
     }
@@ -46,5 +49,18 @@ public class PaymentProperties {
 
     public void setUseSandbox(Boolean useSandbox) {
         this.useSandbox = useSandbox;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public String getServerDomain() {
+        // 去除端口
+        return getServerUrl().replaceAll("(:\\d{2,})", "");
     }
 }

@@ -24,6 +24,11 @@ public enum PaymentClientTypeEnum {
     APP("APP客户端"),
 
     /**
+     * 二维码
+     */
+    QRC("二维码"),
+
+    /**
      * 当面付
      */
     F2F("当面付"),

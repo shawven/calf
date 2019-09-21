@@ -22,11 +22,32 @@ public class UnionpayTradeRequest {
      */
     private String currencyCode = "156";
 
-
     /**
      * 接入类型，0：直连商户
      */
     private String accessType = "0";
+
+    /**
+     *  业务类型，B2C网关支付，手机wap支付
+     */
+    private String bizType = "000201";
+
+    /**
+     * 渠道类型，这个字段区分B2C网关支付和手机wap支付；07：PC,平板  08：手机
+     */
+    private String channelType = "07";
+
+    public UnionpayTradeRequest() {
+    }
+
+    public UnionpayTradeRequest(String bizType) {
+        this.bizType = bizType;
+    }
+
+    public UnionpayTradeRequest(String bizType, String channelType) {
+        this.bizType = bizType;
+        this.channelType = channelType;
+    }
 
     public String getRequestTime() {
         return requestTime;
@@ -50,6 +71,22 @@ public class UnionpayTradeRequest {
 
     public void setAccessType(String accessType) {
         this.accessType = accessType;
+    }
+
+    public String getBizType() {
+        return bizType;
+    }
+
+    public void setBizType(String bizType) {
+        this.bizType = bizType;
+    }
+
+    public String getChannelType() {
+        return channelType;
+    }
+
+    public void setChannelType(String channelType) {
+        this.channelType = channelType;
     }
 
     @Override

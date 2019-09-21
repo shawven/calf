@@ -1,8 +1,10 @@
 package com.test.payment.supplier.wechat;
 
+import com.test.payment.client.QrcTradeClientType;
 import com.test.payment.client.WapTradeClientType;
 import com.test.payment.client.WebTradeClientType;
 import com.test.payment.domain.*;
+import com.test.payment.properties.PaymentProperties;
 import com.test.payment.properties.WechatPayProperties;
 import com.test.payment.supplier.AbstractPaymentTemplate;
 import com.test.payment.supplier.PaymentSupplierEnum;
@@ -166,11 +168,21 @@ public abstract class WechatPayTemplate  extends AbstractPaymentTemplate {
         this.properties = properties;
     }
 
-    public static class Web extends WechatPayTemplate implements WebTradeClientType {
+    protected Map<String, String> retryablePay(Map<String, String> params) throws Exception {
+        try {
+            return getWechatPayClient().unifiedOrder(params);
+        } catch (Exception e) {
+            if (!(e instanceof IOException)) {
+                throw e;
+            }
+        }
+        return getWechatPaySlaveClient().unifiedOrder(params);
+    }
+
+    public static class Qrc extends WechatPayTemplate implements QrcTradeClientType {
 
         @Override
         public PaymentTradeResponse pay(PaymentTradeRequest request) {
-            WXPay client = getWechatPayClient();
             Map<String, String> params = new HashMap<>();
             params.put("body", request.getSubject());
             params.put("detail", request.getBody());
@@ -207,25 +219,56 @@ public abstract class WechatPayTemplate  extends AbstractPaymentTemplate {
             }
             return response;
         }
-
-        private Map<String, String> retryablePay(Map<String, String> params) throws Exception {
-            try {
-                return getWechatPayClient().unifiedOrder(params);
-            } catch (Exception e) {
-                if (!(e instanceof IOException)) {
-                    throw e;
-                }
-            }
-            return getWechatPaySlaveClient().unifiedOrder(params);
-        }
     }
 
     public static class Wap extends WechatPayTemplate implements WapTradeClientType {
 
         @Override
         public PaymentTradeResponse pay(PaymentTradeRequest request) {
-            return null;
-        }
+            Map<String, String> params = new HashMap<>();
+            params.put("body", request.getSubject());
+            params.put("detail", request.getBody());
+            params.put("out_trade_no", request.getOutTradeNo());
+            params.put("total_fee", CurrencyTools.toCent(request.getAmount()));
+            params.put("spbill_create_ip", request.getIp());
+            params.put("trade_type", "MWEB");
 
+            // 场景信息
+            StringBuilder sb = new StringBuilder("{")
+                .append("\"h5_info\":{")
+                    .append("\"type\":\"").append("Wap").append("\"")
+                    .append("\"wap_url\":\"").append(getPaymentProperties().getServerDomain()).append("\"")
+                    .append("\"wap_name\":\"").append(getPaymentProperties().getAppName()).append("\"")
+                .append("}}");
+            params.put("scene_info", sb.toString());
+
+            PaymentTradeResponse response = new PaymentTradeResponse();
+            try {
+                logger.info(request, "预支付请求参数：{}", params);
+                Map<String, String> rsp = retryablePay(params);
+                logger.info(request, "预支付响应参数：{}", rsp);
+
+                String returnCode = rsp.get("return_code");
+                if (WXPayConstants.SUCCESS.equals(returnCode)) {
+                    String resultCode = rsp.get("result_code");
+                    if (WXPayConstants.SUCCESS.equals(resultCode)) {
+                        response.setSuccess(true);
+                        response.putBody("url", rsp.get("mweb_url"));
+                    } else {
+                        String errorMsg = rsp.get("err_code_des");
+                        response.setErrorMsg(errorMsg);
+                        logger.info(request, "预支付失败：{}", errorMsg);
+                    }
+                } else {
+                    String errorMsg = rsp.get("return_msg");
+                    response.setErrorMsg("预支付请求失败：" + errorMsg);
+                    logger.info(request, "预支付请求失败：{}", errorMsg);
+                }
+            } catch (Exception e) {
+                response.setErrorMsg("预支付错误：" + e.getMessage());
+                logger.error(request, "预支付错误：{}", e.getMessage());
+            }
+            return response;
+        }
     }
 }

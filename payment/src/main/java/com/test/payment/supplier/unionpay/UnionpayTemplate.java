@@ -7,6 +7,7 @@ import com.test.payment.properties.UnionpayProperties;
 import com.test.payment.supplier.AbstractPaymentTemplate;
 import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.unionpay.sdk.UnionpayClient;
+import com.test.payment.supplier.unionpay.sdk.UnionpayConstants;
 import com.test.payment.supplier.unionpay.sdk.UnionpayException;
 import com.test.payment.supplier.unionpay.sdk.domain.UnionpayTradePagePayRequest;
 import com.test.payment.supplier.unionpay.sdk.domain.UnionpayTradeQueryRequest;
@@ -28,6 +29,33 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
     @Override
     public PaymentSupplierEnum getSupplier() {
         return UNIONPAY;
+    }
+
+    @Override
+    public PaymentTradeResponse pay(PaymentTradeRequest request) {
+        UnionpayTradePagePayRequest unionpayRequest = new UnionpayTradePagePayRequest();
+        unionpayRequest.setBizType(getBizType());
+        unionpayRequest.setChannelType(getBizType());
+
+        unionpayRequest.setOutTradeNo(request.getOutTradeNo());
+        unionpayRequest.setAmount(CurrencyTools.toCent(request.getAmount()));
+        unionpayRequest.setSubject(request.getSubject());
+        unionpayRequest.setNotifyUrl(properties.getNotifyUrl());
+        unionpayRequest.setReturnUrl(properties.getReturnUrl());
+
+        PaymentTradeResponse response = new PaymentTradeResponse();
+        try {
+            logger.info(request, "预支付请求参数：{}", unionpayRequest);
+            //网页支付
+            String form = getUnionpayClient().pagePay(unionpayRequest);
+            logger.info(request, "预支付响应参数：{}", unionpayRequest);
+            response.setSuccess(true);
+            response.putBody("form", form);
+        } catch (UnionpayException e) {
+            logger.error(request, "预支付错误：{}", e.getMessage());
+            response.setErrorMsg("预支付失败：" + e.getMessage());
+        }
+        return response;
     }
 
     @Override
@@ -87,6 +115,7 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
     public PaymentTradeQueryResponse query(PaymentTradeQueryRequest request) {
         PaymentTradeQueryResponse response = new PaymentTradeQueryResponse();
         UnionpayTradeQueryRequest unionpayRequest = new UnionpayTradeQueryRequest();
+        unionpayRequest.setBizType(getBizType());
         unionpayRequest.setOutTradeNo(request.getOutTradeNo());
         try {
             logger.info(request, "查询支付交易请求参数：{}", unionpayRequest);
@@ -138,46 +167,34 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
         return UnionpayClientFacotry.getInstance(properties);
     }
 
-    public UnionpayProperties getProperties() {
-        return properties;
-    }
-
     public void setProperties(UnionpayProperties properties) {
         this.properties = properties;
     }
 
+    public abstract String getBizType();
+
+    public abstract String getChannelType();
+
     public static class Web extends UnionpayTemplate implements WebTradeClientType {
 
         @Override
-        public PaymentTradeResponse pay(PaymentTradeRequest request) {
-            UnionpayTradePagePayRequest unionpayRequest = new UnionpayTradePagePayRequest();
-            unionpayRequest.setOutTradeNo(request.getOutTradeNo());
-            unionpayRequest.setAmount(CurrencyTools.toCent(request.getAmount()));
-            unionpayRequest.setSubject(request.getSubject());
-            unionpayRequest.setNotifyUrl(properties.getNotifyUrl());
-            unionpayRequest.setReturnUrl(properties.getReturnUrl());
-
-            PaymentTradeResponse response = new PaymentTradeResponse();
-            try {
-                logger.info(request, "预支付请求参数：{}", unionpayRequest);
-                //网页支付
-                String form = getUnionpayClient().pagePay(unionpayRequest);
-                logger.info(request, "预支付响应参数：{}", unionpayRequest);
-                response.setSuccess(true);
-                response.putBody("form", form);
-            } catch (UnionpayException e) {
-                logger.error(request, "预支付错误：{}", e.getMessage());
-                response.setErrorMsg("预支付失败：" + e.getMessage());
-            }
-            return response;
+        public String getBizType() {
+            return UnionpayConstants.B2C;
+        }
+        @Override
+        public String getChannelType() {
+            return UnionpayConstants.PC;
         }
     }
 
     public static class Wap extends UnionpayTemplate implements WapTradeClientType {
-
         @Override
-        public PaymentTradeResponse pay(PaymentTradeRequest request) {
-            return null;
+        public String getBizType() {
+            return UnionpayConstants.B2C;
+        }
+        @Override
+        public String getChannelType() {
+            return UnionpayConstants.WAP;
         }
     }
 }

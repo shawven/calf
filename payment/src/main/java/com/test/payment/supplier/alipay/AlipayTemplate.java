@@ -2,13 +2,18 @@ package com.test.payment.supplier.alipay;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
+import com.alipay.api.AlipayRequest;
+import com.alipay.api.AlipayResponse;
 import com.alipay.api.domain.AlipayTradePagePayModel;
 import com.alipay.api.domain.AlipayTradeQueryModel;
+import com.alipay.api.domain.AlipayTradeWapPayModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
+import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
+import com.test.payment.client.QrcTradeClientType;
 import com.test.payment.client.WapTradeClientType;
 import com.test.payment.client.WebTradeClientType;
 import com.test.payment.domain.*;
@@ -33,6 +38,30 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
     @Override
     public PaymentSupplierEnum getSupplier() {
         return ALIPAY;
+    }
+
+    @Override
+    public PaymentTradeResponse pay(PaymentTradeRequest request) {
+        PaymentTradeResponse response = new PaymentTradeResponse();
+        AlipayRequest<? extends AlipayResponse> alipayRequest = getAlipayRequest(request);
+        try {
+            logger.info(request, "预支付请求参数：{}", PaymentUtils.toString(alipayRequest));
+            //网页支付
+            AlipayResponse alipayResponse = getAlipayClient().pageExecute(alipayRequest);
+            logger.info(request, "预支付响应参数：{}", PaymentUtils.toString(response));
+
+            if (alipayResponse.isSuccess()) {
+                response.setSuccess(true);
+                response.putBody("form", alipayResponse.getBody());
+            } else {
+                logger.error(request, "预支付请求失败：{}", alipayResponse.getMsg());
+                response.setErrorMsg(alipayResponse.getSubMsg());
+            }
+        } catch (AlipayApiException e) {
+            logger.error(request, "预支付错误：{}", e.getMessage());
+            response.setErrorMsg("预支付失败：" + e.getMessage());
+        }
+        return response;
     }
 
     @Override
@@ -172,10 +201,12 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
         return AlipayClientFactory.getInstance(properties);
     }
 
+    public abstract AlipayRequest<? extends AlipayResponse> getAlipayRequest(PaymentTradeRequest request);
+
     public static class Web extends AlipayTemplate implements WebTradeClientType {
 
         @Override
-        public PaymentTradeResponse pay(PaymentTradeRequest request) {
+        public AlipayTradePagePayRequest getAlipayRequest(PaymentTradeRequest request) {
             AlipayTradePagePayRequest alipayRequest = new AlipayTradePagePayRequest();
             AlipayTradePagePayModel alipayModel = new AlipayTradePagePayModel();
             alipayModel.setOutTradeNo(request.getOutTradeNo());
@@ -184,50 +215,55 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
             alipayModel.setBody(request.getBody());
             alipayModel.setProductCode("FAST_INSTANT_TRADE_PAY");
 
-            if (!PaymentUtils.isBlankString(request.getOption().get("qrCode"))) {
-                String width = request.getOption().get("width");
-                long l;
-                if (width == null || (l = Long.parseLong(width)) == 0L) {
-                    alipayModel.setQrPayMode("1");
-                } else {
-                    alipayModel.setQrPayMode("4");
-                    alipayModel.setQrcodeWidth(l);
-                }
-            } else {
-                // 非扫码需要用跳转
-                alipayRequest.setReturnUrl(properties.getReturnUrl());
-            }
-
             alipayRequest.setBizModel(alipayModel);
+            alipayRequest.setReturnUrl(properties.getReturnUrl());
             alipayRequest.setNotifyUrl(properties.getNotifyUrl());
-
-            PaymentTradeResponse response = new PaymentTradeResponse();
-            try {
-                logger.info(request, "预支付请求参数：{}", PaymentUtils.toString(alipayRequest));
-                //网页支付
-                AlipayTradePagePayResponse alipayResponse = getAlipayClient().pageExecute(alipayRequest);
-                logger.info(request, "预支付响应参数：{}", PaymentUtils.toString(response));
-
-                if (alipayResponse.isSuccess()) {
-                    response.setSuccess(true);
-                    response.putBody("form", alipayResponse.getBody());
-                } else {
-                    logger.error(request, "预支付请求失败：{}", alipayResponse.getMsg());
-                    response.setErrorMsg(alipayResponse.getSubMsg());
-                }
-            } catch (AlipayApiException e) {
-                logger.error(request, "预支付错误：{}", e.getMessage());
-                response.setErrorMsg("预支付失败：" + e.getMessage());
-            }
-            return response;
+            return alipayRequest;
         }
     }
 
     public static class Wap extends AlipayTemplate implements WapTradeClientType {
 
         @Override
-        public PaymentTradeResponse pay(PaymentTradeRequest request) {
-            return null;
+        public AlipayTradeWapPayRequest getAlipayRequest(PaymentTradeRequest request) {
+            AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();
+            AlipayTradeWapPayModel alipayModel = new AlipayTradeWapPayModel();
+            alipayModel.setOutTradeNo(request.getOutTradeNo());
+            alipayModel.setTotalAmount(CurrencyTools.toYuan(request.getAmount()));
+            alipayModel.setSubject(request.getSubject());
+            alipayModel.setBody(request.getBody());
+            alipayModel.setProductCode("QUICK_WAP_WAY");
+
+            alipayRequest.setBizModel(alipayModel);
+            alipayRequest.setReturnUrl(properties.getReturnUrl());
+            alipayRequest.setNotifyUrl(properties.getNotifyUrl());
+            return alipayRequest;
+        }
+    }
+
+    public static class Qrc extends AlipayTemplate implements QrcTradeClientType {
+
+        @Override
+        public AlipayTradePagePayRequest getAlipayRequest(PaymentTradeRequest request) {
+            AlipayTradePagePayRequest alipayRequest = new AlipayTradePagePayRequest();
+            AlipayTradePagePayModel alipayModel = new AlipayTradePagePayModel();
+            alipayModel.setOutTradeNo(request.getOutTradeNo());
+            alipayModel.setTotalAmount(CurrencyTools.toYuan(request.getAmount()));
+            alipayModel.setSubject(request.getSubject());
+            alipayModel.setBody(request.getBody());
+            alipayModel.setProductCode("FAST_INSTANT_TRADE_PAY");
+
+            String width = request.getOption().get("width");
+            long l;
+            if (width == null || (l = Long.parseLong(width)) == 0L) {
+                alipayModel.setQrPayMode("1");
+            } else {
+                alipayModel.setQrPayMode("4");
+                alipayModel.setQrcodeWidth(l);
+            }
+            alipayRequest.setBizModel(alipayModel);
+            alipayRequest.setNotifyUrl(properties.getNotifyUrl());
+            return alipayRequest;
         }
     }
 }

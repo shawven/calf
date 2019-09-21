@@ -22,8 +22,6 @@ import java.util.Objects;
  */
 public class UnionpayClient {
 
-    private Logger logger = LoggerFactory.getLogger(UnionpayClient.class);
-
     private String mchId;
 
     private String gatewayUrl;
@@ -81,7 +79,7 @@ public class UnionpayClient {
         //业务类型，B2C网关支付，手机wap支付
         params.put(UnionpayConstants.param_bizType, request.getBizType());
         //渠道类型，这个字段区分B2C网关支付和手机wap支付
-        params.put("channelType", request.getChannelType());
+        params.put(UnionpayConstants.param_channelType, request.getChannelType());
         // 商户订单号
         params.put(UnionpayConstants.param_orderId, request.getOutTradeNo());
         // 订单发送时间，每次发交易测试需修改为被查询的交易的订单发送时间
@@ -91,7 +89,7 @@ public class UnionpayClient {
         //交易金额，单位分，不要带小数点
         params.put(UnionpayConstants.param_txnAmt, request.getAmount());
         // 风控信息域 商品名称之类的
-        params.put("riskRateInfo", "{commodityName="+request.getSubject()+"}");
+        params.put(UnionpayConstants.param_riskRateInfo, "{commodityName="+request.getSubject()+"}");
         // 前台跳转地址
         params.put(UnionpayConstants.param_frontUrl, request.getReturnUrl());
         // 后台通知地址
@@ -106,7 +104,6 @@ public class UnionpayClient {
         params.put(UnionpayConstants.param_bizType, request.getBizType());
         params.put(UnionpayConstants.param_orderId, request.getOutTradeNo());
         params.put(UnionpayConstants.param_txnTime, request.getRequestTime());
-
         return execute(UnionpayConstants.SINGLE_QUERY_URL, params);
     }
 
