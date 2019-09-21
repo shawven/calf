@@ -7,11 +7,21 @@ package com.test.payment.domain;
 public class PaymentTradeRefundQueryRequest extends PaymentRequest {
 
     /**
-     * 支付交易号
+     * 商户交易号
      */
     private String outTradeNo;
 
-    private Object option;
+
+    /**
+     * 平台交易号
+     */
+    private String tradeNo;
+
+    /**
+     * 商户退款号
+     */
+    private String outRefundNo;
+
 
     public PaymentTradeRefundQueryRequest(PaymentRequest request) {
         super(request);
@@ -29,19 +39,28 @@ public class PaymentTradeRefundQueryRequest extends PaymentRequest {
         this.outTradeNo = outTradeNo;
     }
 
-    public Object getOption() {
-        return option;
+    public String getTradeNo() {
+        return tradeNo;
     }
 
-    public void setOption(Object option) {
-        this.option = option;
+    public void setTradeNo(String tradeNo) {
+        this.tradeNo = tradeNo;
+    }
+
+    public String getOutRefundNo() {
+        return outRefundNo;
+    }
+
+    public void setOutRefundNo(String outRefundNo) {
+        this.outRefundNo = outRefundNo;
     }
 
     @Override
     public String toString() {
-        return "PaymentTradeQueryRequest{" +
-                ", platformTradeNo='" + outTradeNo + '\'' +
-                ", option=" + option +
+        return "PaymentTradeRefundQueryRequest{" +
+                "outTradeNo='" + outTradeNo + '\'' +
+                ", tradeNo='" + tradeNo + '\'' +
+                ", outRefundNo='" + outRefundNo + '\'' +
                 '}';
     }
 }

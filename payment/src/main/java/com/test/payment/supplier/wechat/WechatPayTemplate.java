@@ -1,19 +1,18 @@
 package com.test.payment.supplier.wechat;
 
-import com.test.payment.PaymentOperations;
 import com.test.payment.client.WapTradeClientType;
 import com.test.payment.client.WebTradeClientType;
 import com.test.payment.domain.*;
 import com.test.payment.properties.WechatPayProperties;
+import com.test.payment.supplier.AbstractPaymentTemplate;
 import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.wechat.sdk.WXPay;
 import com.test.payment.supplier.wechat.sdk.WXPayConstants;
 import com.test.payment.supplier.wechat.sdk.WXPayUtil;
-import com.test.payment.support.PaymentLogger;
+import com.test.payment.support.CurrencyTools;
 import com.test.payment.support.PaymentUtils;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,15 +20,9 @@ import java.util.Map;
  * @author Shoven
  * @date 2019-09-02
  */
-public abstract class WechatPayTemplate implements PaymentOperations {
-
-    protected PaymentLogger logger = PaymentLogger.getLogger(getClass());
+public abstract class WechatPayTemplate  extends AbstractPaymentTemplate {
 
     protected WechatPayProperties properties;
-
-    public WechatPayTemplate(WechatPayProperties properties) {
-        this.properties = properties;
-    }
 
     @Override
     public PaymentSupplierEnum getSupplier() {
@@ -58,7 +51,7 @@ public abstract class WechatPayTemplate implements PaymentOperations {
                         response.setSuccess(true);
                         response.setOutTradeNo(request.getOutTradeNo());
                         response.setTradeNo(rsp.get("transaction_id"));
-                        response.setAmount(Long.parseLong(rsp.get("total_fee")) * 100 + "");
+                        response.setAmount(CurrencyTools.ofCent(rsp.get("total_fee")));
                     } else {
                         response.setErrorMsg(tradeStateDesc);
                     }
@@ -95,8 +88,7 @@ public abstract class WechatPayTemplate implements PaymentOperations {
         replay.put("return_msg", WXPayConstants.FAIL);
 
         try {
-            String paramsStr = PaymentUtils.read(request.getInputStream());
-            if (PaymentUtils.isBlankString(paramsStr)) {
+            if (PaymentUtils.isBlankString(request.getRowBody())) {
                 try {
                     String s = WXPayUtil.mapToXml(replay);
                     response.setReplayMessage(s);
@@ -104,7 +96,7 @@ public abstract class WechatPayTemplate implements PaymentOperations {
                 return response;
             }
 
-            Map<String, String> params = WXPayUtil.xmlToMap(paramsStr);
+            Map<String, String> params = WXPayUtil.xmlToMap(request.getRowBody());
             logger.info(request, "异步回调接受参数：{}", params);
 
             if (WXPayConstants.SUCCESS.equals(params.get("result_code"))) {
@@ -120,7 +112,7 @@ public abstract class WechatPayTemplate implements PaymentOperations {
                         response.setSuccess(true);
                         response.setOutTradeNo(outTradeNo);
                         response.setTradeNo(tradeNo);
-                        response.setAmount(totalAmount);
+                        response.setAmount(CurrencyTools.ofCent(totalAmount));
                         replay.put("return_code", "SUCCESS");
                         replay.put("return_msg", "OK");
                     } else {
@@ -154,7 +146,7 @@ public abstract class WechatPayTemplate implements PaymentOperations {
     }
 
     @Override
-    public PaymentResponse queryRefund(PaymentRequest request) {
+    public PaymentTradeRefundQueryResponse queryRefund(PaymentTradeRefundQueryRequest request) {
         return null;
     }
 
@@ -166,11 +158,15 @@ public abstract class WechatPayTemplate implements PaymentOperations {
         return WechatPayClientFactory.getInstance2(properties);
     }
 
-    public static class Web extends WechatPayTemplate implements WebTradeClientType {
+    public WechatPayProperties getProperties() {
+        return properties;
+    }
 
-        public Web(WechatPayProperties properties) {
-            super(properties);
-        }
+    public void setProperties(WechatPayProperties properties) {
+        this.properties = properties;
+    }
+
+    public static class Web extends WechatPayTemplate implements WebTradeClientType {
 
         @Override
         public PaymentTradeResponse pay(PaymentTradeRequest request) {
@@ -179,8 +175,7 @@ public abstract class WechatPayTemplate implements PaymentOperations {
             params.put("body", request.getSubject());
             params.put("detail", request.getBody());
             params.put("out_trade_no", request.getOutTradeNo());
-            String amount = new BigDecimal(request.getAmount()).multiply(new BigDecimal(100)).toBigInteger().toString();
-            params.put("total_fee", amount);
+            params.put("total_fee", CurrencyTools.toCent(request.getAmount()));
             params.put("spbill_create_ip", request.getIp());
             params.put("trade_type", "NATIVE");
 
@@ -226,9 +221,6 @@ public abstract class WechatPayTemplate implements PaymentOperations {
     }
 
     public static class Wap extends WechatPayTemplate implements WapTradeClientType {
-        public Wap(WechatPayProperties properties) {
-            super(properties);
-        }
 
         @Override
         public PaymentTradeResponse pay(PaymentTradeRequest request) {

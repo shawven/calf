@@ -12,7 +12,7 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @PropertySource("classpath:payment.properties")
 @ConfigurationProperties(prefix = "wechat")
-public class WechatPayProperties implements PaymentProperties {
+public class WechatPayProperties {
 
     private String appId;
 

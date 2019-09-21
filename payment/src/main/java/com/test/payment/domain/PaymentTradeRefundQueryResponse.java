@@ -7,22 +7,93 @@ package com.test.payment.domain;
 public class PaymentTradeRefundQueryResponse extends PaymentResponse {
 
     /**
-     * 平台退款交易号
+     * 商户交易号
      */
-    private String refundNo;
+    private String outTradeNo;
 
-    public String getRefundNo() {
-        return refundNo;
+
+    /**
+     * 平台交易号
+     */
+    private String tradeNo;
+
+    /**
+     * 商户退款号
+     */
+    private String outRefundNo;
+
+    /**
+     * 退款金额
+     */
+    private String refundAmount;
+
+    /**
+     * 订单金额
+     */
+    private String totalAmount;
+
+    /**
+     * 退款原因
+     */
+    private String refundReason;
+
+    public String getOutTradeNo() {
+        return outTradeNo;
     }
 
-    public void setRefundNo(String refundNo) {
-        this.refundNo = refundNo;
+    public void setOutTradeNo(String outTradeNo) {
+        this.outTradeNo = outTradeNo;
+    }
+
+    public String getTradeNo() {
+        return tradeNo;
+    }
+
+    public void setTradeNo(String tradeNo) {
+        this.tradeNo = tradeNo;
+    }
+
+    public String getOutRefundNo() {
+        return outRefundNo;
+    }
+
+    public void setOutRefundNo(String outRefundNo) {
+        this.outRefundNo = outRefundNo;
+    }
+
+    public String getRefundAmount() {
+        return refundAmount;
+    }
+
+    public void setRefundAmount(String refundAmount) {
+        this.refundAmount = refundAmount;
+    }
+
+    public String getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(String totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public String getRefundReason() {
+        return refundReason;
+    }
+
+    public void setRefundReason(String refundReason) {
+        this.refundReason = refundReason;
     }
 
     @Override
     public String toString() {
         return "PaymentTradeRefundQueryResponse{" +
-                "refundNo='" + refundNo + '\'' +
+                "outTradeNo='" + outTradeNo + '\'' +
+                ", tradeNo='" + tradeNo + '\'' +
+                ", outRefundNo='" + outRefundNo + '\'' +
+                ", refundAmount='" + refundAmount + '\'' +
+                ", totalAmount='" + totalAmount + '\'' +
+                ", refundReason='" + refundReason + '\'' +
                 '}';
     }
 }

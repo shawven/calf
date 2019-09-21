@@ -90,7 +90,15 @@ public class ControllerExceptionHandler {
     @ResponseBody
     public ResponseEntity handleException(Exception e) {
         logger.error(e.getMessage(), e);
-        return Response.error(withDetail() ? e.getMessage() : DEFAULT_MESSAGE);
+        if (withDetail()) {
+            if (e instanceof NullPointerException) {
+                StackTraceElement stackTraceElement = e.getStackTrace()[0];
+                return Response.error(String.format("%s %s行空指针异常",
+                        stackTraceElement.getFileName(), stackTraceElement.getLineNumber()));
+            }
+            return Response.error(e.getMessage());
+        }
+        return Response.error(DEFAULT_MESSAGE);
     }
 
     /**

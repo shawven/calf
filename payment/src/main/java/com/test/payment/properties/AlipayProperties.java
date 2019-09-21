@@ -11,7 +11,7 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @PropertySource("classpath:payment.properties")
 @ConfigurationProperties(prefix = "alipay")
-public class AlipayProperties implements PaymentProperties {
+public class AlipayProperties {
 
     private String appId;
 
@@ -19,17 +19,19 @@ public class AlipayProperties implements PaymentProperties {
 
     private String publicKey;
 
+    private String encryptKey;
+
     private String notifyUrl;
 
     private String returnUrl;
-
-    private String gatewayUrl;
 
     private String charset = "UTF-8";
 
     private String format = "json";
 
     private String signType ;
+
+    private Boolean useSandbox;
 
     public String getAppId() {
         return appId;
@@ -55,6 +57,14 @@ public class AlipayProperties implements PaymentProperties {
         this.publicKey = publicKey;
     }
 
+    public String getEncryptKey() {
+        return encryptKey;
+    }
+
+    public void setEncryptKey(String encryptKey) {
+        this.encryptKey = encryptKey;
+    }
+
     public String getNotifyUrl() {
         return notifyUrl;
     }
@@ -69,14 +79,6 @@ public class AlipayProperties implements PaymentProperties {
 
     public void setReturnUrl(String returnUrl) {
         this.returnUrl = returnUrl;
-    }
-
-    public String getGatewayUrl() {
-        return gatewayUrl;
-    }
-
-    public void setGatewayUrl(String gatewayUrl) {
-        this.gatewayUrl = gatewayUrl;
     }
 
     public String getCharset() {
@@ -101,5 +103,13 @@ public class AlipayProperties implements PaymentProperties {
 
     public void setSignType(String signType) {
         this.signType = signType;
+    }
+
+    public Boolean getUseSandbox() {
+        return useSandbox;
+    }
+
+    public void setUseSandbox(Boolean useSandbox) {
+        this.useSandbox = useSandbox;
     }
 }

@@ -21,11 +21,15 @@ public class AlipayConfiguration {
 
     @Bean
     public PaymentOperations alipayPcPaymentProvider() {
-        return new AlipayTemplate.Web(alipayProperties);
+        AlipayTemplate.Web web = new AlipayTemplate.Web();
+        web.setProperties(alipayProperties);
+        return web;
     }
 
     @Bean
     public PaymentOperations alipayWapPaymentProvider() {
-        return new AlipayTemplate.Wap(alipayProperties);
+        AlipayTemplate.Wap wap = new AlipayTemplate.Wap();
+        wap.setProperties(alipayProperties);
+        return wap;
     }
 }

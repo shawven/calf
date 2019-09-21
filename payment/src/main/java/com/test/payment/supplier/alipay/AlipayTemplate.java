@@ -9,14 +9,13 @@ import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
-import com.test.payment.PaymentOperations;
-import com.test.payment.domain.PaymentResponse;
-import com.test.payment.client.WebTradeClientType;
 import com.test.payment.client.WapTradeClientType;
+import com.test.payment.client.WebTradeClientType;
 import com.test.payment.domain.*;
 import com.test.payment.properties.AlipayProperties;
+import com.test.payment.supplier.AbstractPaymentTemplate;
 import com.test.payment.supplier.PaymentSupplierEnum;
-import com.test.payment.support.PaymentLogger;
+import com.test.payment.support.CurrencyTools;
 import com.test.payment.support.PaymentUtils;
 
 import java.util.Map;
@@ -27,15 +26,9 @@ import static com.test.payment.supplier.PaymentSupplierEnum.ALIPAY;
  * @author Shoven
  * @date 2019-08-27
  */
-public abstract class AlipayTemplate implements PaymentOperations {
-
-    protected PaymentLogger logger = PaymentLogger.getLogger(getClass());
+public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
 
     protected AlipayProperties properties;
-
-    public AlipayTemplate(AlipayProperties properties) {
-        this.properties = properties;
-    }
 
     @Override
     public PaymentSupplierEnum getSupplier() {
@@ -60,7 +53,7 @@ public abstract class AlipayTemplate implements PaymentOperations {
                 PaymentTradeQueryResponse queryResponse = query(queryRequest);
 
                 response.setSuccess(queryResponse.isSuccess());
-                response.setAmount(queryResponse.getAmount());
+                response.setAmount(CurrencyTools.ofYuan(queryResponse.getAmount()));
                 response.setTradeNo(queryResponse.getTradeNo());
                 response.setOutTradeNo(outTradeNo);
             }else{
@@ -78,11 +71,7 @@ public abstract class AlipayTemplate implements PaymentOperations {
     public PaymentTradeCallbackResponse asyncNotify(PaymentTradeCallbackRequest request) {
         PaymentTradeCallbackResponse response = new PaymentTradeCallbackResponse();
         try {
-            Map<String, String> postParams = request.getParams();
-            Map<String, String> params = postParams == null || postParams.isEmpty()
-                    ? PaymentUtils.readUrlParamsToMap(request.getInputStream())
-                    : request.getParams();
-
+            Map<String, String> params = request.getParams();
             logger.info(request, "异步回调接受参数：{}", params);
             boolean validation = AlipaySignature.rsaCheckV1(params, properties.getPublicKey(),
                     properties.getCharset(), properties.getSignType());
@@ -96,7 +85,7 @@ public abstract class AlipayTemplate implements PaymentOperations {
                     response.setSuccess(true);
                     response.setOutTradeNo(outTradeNo);
                     response.setTradeNo(tradeNo);
-                    response.setAmount(totalAmount);
+                    response.setAmount(CurrencyTools.ofYuan(totalAmount));
                     response.setReplayMessage("success");
                     tradeStatusDesc = "TRADE_SUCCESS".equals(tradeStatus) ? "支付成功" : "交易结束";
                 } else {
@@ -140,7 +129,7 @@ public abstract class AlipayTemplate implements PaymentOperations {
                     response.setSuccess(true);
                     response.setOutTradeNo(alipayResponse.getOutTradeNo());
                     response.setTradeNo(alipayResponse.getTradeNo());
-                    response.setAmount(alipayResponse.getTotalAmount());
+                    response.setAmount(CurrencyTools.ofYuan(alipayResponse.getTotalAmount()));
                     tradeStatusDesc = "TRADE_SUCCESS".equals(tradeStatus) ? "支付成功" : "交易结束";
                 } else {
                     tradeStatusDesc = "WAIT_BUYER_PAY".equals(tradeStatus)
@@ -167,8 +156,16 @@ public abstract class AlipayTemplate implements PaymentOperations {
     }
 
     @Override
-    public PaymentResponse queryRefund(PaymentRequest request) {
+    public PaymentTradeRefundQueryResponse queryRefund(PaymentTradeRefundQueryRequest request) {
         return null;
+    }
+
+    public AlipayProperties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(AlipayProperties properties) {
+        this.properties = properties;
     }
 
     public AlipayClient getAlipayClient() {
@@ -177,15 +174,12 @@ public abstract class AlipayTemplate implements PaymentOperations {
 
     public static class Web extends AlipayTemplate implements WebTradeClientType {
 
-        public Web(AlipayProperties properties) {
-            super(properties);
-        }
-
         @Override
         public PaymentTradeResponse pay(PaymentTradeRequest request) {
+            AlipayTradePagePayRequest alipayRequest = new AlipayTradePagePayRequest();
             AlipayTradePagePayModel alipayModel = new AlipayTradePagePayModel();
             alipayModel.setOutTradeNo(request.getOutTradeNo());
-            alipayModel.setTotalAmount(request.getAmount());
+            alipayModel.setTotalAmount(CurrencyTools.toYuan(request.getAmount()));
             alipayModel.setSubject(request.getSubject());
             alipayModel.setBody(request.getBody());
             alipayModel.setProductCode("FAST_INSTANT_TRADE_PAY");
@@ -199,11 +193,12 @@ public abstract class AlipayTemplate implements PaymentOperations {
                     alipayModel.setQrPayMode("4");
                     alipayModel.setQrcodeWidth(l);
                 }
+            } else {
+                // 非扫码需要用跳转
+                alipayRequest.setReturnUrl(properties.getReturnUrl());
             }
 
-            AlipayTradePagePayRequest alipayRequest = new AlipayTradePagePayRequest();
             alipayRequest.setBizModel(alipayModel);
-            alipayRequest.setReturnUrl(properties.getReturnUrl());
             alipayRequest.setNotifyUrl(properties.getNotifyUrl());
 
             PaymentTradeResponse response = new PaymentTradeResponse();
@@ -224,15 +219,11 @@ public abstract class AlipayTemplate implements PaymentOperations {
                 logger.error(request, "预支付错误：{}", e.getMessage());
                 response.setErrorMsg("预支付失败：" + e.getMessage());
             }
-            logger.debug(request, "预支付结果：{}", response);
             return response;
         }
     }
 
     public static class Wap extends AlipayTemplate implements WapTradeClientType {
-        public Wap(AlipayProperties properties) {
-            super(properties);
-        }
 
         @Override
         public PaymentTradeResponse pay(PaymentTradeRequest request) {

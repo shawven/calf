@@ -3,7 +3,9 @@ package com.test.payment.domain;
 import com.test.payment.support.PaymentUtils;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * @author Shoven
@@ -17,29 +19,36 @@ public class PaymentTradeCallbackRequest extends PaymentRequest {
     private Map<String, String> params;
 
     /**
-     * 元素输入流
+     * 原始请求体
      */
-    private InputStream inputStream;
+    private String rowBody;
 
     public PaymentTradeCallbackRequest(String paymentSupplier, Map<String, ?> params, InputStream inputStream) {
         super(paymentSupplier);
-        this.params = PaymentUtils.parseParameterMap(params);
-        this.inputStream = inputStream;
+        this.rowBody = PaymentUtils.read(inputStream);
+        this.params = selectParams(params, rowBody);
     }
 
-    public Map<String, String> getParams() {
+    private Map<String, String> selectParams(Map<String, ?> formParams, String str) {
+        params = PaymentUtils.parseParameterMap(formParams);
+        if (params.isEmpty()) {
+            params = PaymentUtils.splitPairString(str);
+        }
         return params;
     }
 
-    public InputStream getInputStream() {
-        return inputStream;
+    public Map<String, String> getParams() {
+        return new HashMap<>(params);
+    }
+
+    public String getRowBody() {
+        return rowBody;
     }
 
     @Override
     public String toString() {
         return "PaymentTradeCallbackRequest{" +
-                "params=" + params +
-                ", inputStream=" + inputStream +
+                "params=" +  getParams().toString() +
                 '}';
     }
 }

@@ -43,13 +43,17 @@
                 <div class="row my-4">
                     <div class="col-md-6">
                         <button class="btn btn-dark">跳转到银联</button>
+                        <div class="d-none direct"></div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 unionpay-alert">
 
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    <div class="alert-success text-center d-none font-weight-bold ">
+
     </div>
 </div>
 <#include '*/footer.ftl'>
@@ -63,33 +67,26 @@
         $(this).tab('show')
     })
 
-    var timer
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         var supplier = e.target.hash
         if (supplier === "#alipay") {
             // getAlipayQrCode()
-            console.log("清除定时器")
-            clearTimeout(timer)
         }
         if (supplier === "#wechat") {
             // getWechatQrCode()
-            // showQrCode(".wechat-qrcode", "weixin://wxpay/s/An4baqw")
-            callback("wx20190904103016157592", 1500)
-
         }
         if (supplier === "#unionpay") {
-            console.log("清除定时器")
-            clearTimeout(timer)
-            // getQrCode("alipay")
+            getUnionpay()
         }
 
     })
 
     function getAlipayQrCode() {
+        var orderId = new Date().getTime();
         var tabPane = document.querySelector("#alipay")
 
         // 1. 自动构造iframe显示二维码支付
-        $.post("${baseUrl}/payment/pay/alipay/web?qrCode=true&width=200&orderId=" + new Date().getTime(), function (result) {
+        $.post("${baseUrl}/payment/pay/alipay/web?qrCode=true&width=200&orderId=" + orderId, function (result) {
             var formHtml = result.data.form;
             // 构造iframe
             var iframe = document.createElement("iframe")
@@ -112,36 +109,62 @@
         // 在当前页面填充表单
         // 给按钮设置提交提交表单事件
         tabPane.querySelector("button").onclick = function() {
-            $.post("${baseUrl}/payment/pay/alipay/web",{orderId:  new Date().getTime()}, function (result) {
+            $.post("${baseUrl}/payment/pay/alipay/web",{orderId:  orderId}, function (result) {
+                query(result.data.orderId, "unionpay", function(){
+                    document.querySelector(".alert-success").innerHTML = "支付宝支付成功"
+                })
                 tabPane.querySelector(".direct").innerHTML = result.data.form
                 tabPane.querySelector("form").target = "_blank"
                 tabPane.querySelector("form").submit()
             }, "json").fail(function (result) {
-                console.log(result.code + ":" + result.message)
+                console.log(result)
             })
         }
     }
 
     function getWechatQrCode() {
         $.post("${baseUrl}/payment/pay/wechat/web", {orderId:  new Date().getTime()}, function (result) {
-            var orderId= result.data.orderId
             showQrCode(".wechat-qrcode", result.data.codeUrl)
-            callback(orderId, 1500, 5)
+            query(result.data.orderId, "wechat", function(){
+                document.querySelector(".alert-success").innerHTML = "微信支付成功"
+            })
         }, "json").fail(function (result) {
             console.log(result.code + ":" + result.message)
         })
     }
 
-
-    function callback(orderId, timeout) {
-        timer = setTimeout(function(){
-            console.log("轮训查询支付结果")
-            $.get("${baseUrl}/payment/query/wechat", {orderId: orderId}, function () {
-                document.querySelector(".wechat-qrcode").innerHTML = "支付成功"
+    function getUnionpay() {
+        var tabPane = document.querySelector("#unionpay")
+        // 2. 跳转页面支付
+        // 在当前页面填充表单
+        // 给按钮设置提交提交表单事件
+        tabPane.querySelector("button").onclick = function() {
+            $.post("${baseUrl}/payment/pay/unionpay/web",{orderId: new Date().getTime()}, function (result) {
+                query(result.data.orderId, "unionpay", function(){
+                    document.querySelector(".alert-success").innerHTML = "银联支付成功"
+                })
+                tabPane.querySelector(".direct").innerHTML = result.data.form
+                tabPane.querySelector("form").target = "_blank"
+                tabPane.querySelector("form").submit()
             }, "json").fail(function (result) {
-                callback(orderId, timeout)
+                console.log(result)
             })
-        }, timeout)
+        }
+    }
+
+    var timer
+    function query(orderId, payWay, callback) {
+        document.querySelector(".alert-success").classList.add("d-none")
+        window.clearInterval(timer)
+        timer = setInterval(function(){
+            console.log("轮训查询支付结果")
+            $.get("${baseUrl}/payment/query/" + payWay, {orderId: orderId}, function () {
+                callback()
+                document.querySelector(".alert-success").classList.remove("d-none")
+            }, "json").fail(function (result) {
+
+            })
+        }, 3000)
     }
 
     function showQrCode(selector, url) {

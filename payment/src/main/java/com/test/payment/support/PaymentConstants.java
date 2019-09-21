@@ -1,0 +1,26 @@
+package com.test.payment.support;
+
+/**
+ * @author Shoven
+ * @date 2019-09-18
+ */
+public class PaymentConstants {
+
+    public static final String ALGORITHM_SHA1 = "SHA-1";
+
+    public static final String ALGORITHM_SHA256 = "SHA-256";
+
+    public static final String SIGN_TYPE_RSA = "RSA";
+
+    public static final String SIGN_TYPE_RSA2 = "RSA2";
+
+    public static final String SIGN_ALGORITHMS = "SHA1WithRSA";
+
+    public static final String SIGN_SHA256RSA_ALGORITHMS = "SHA256WithRSA";
+
+    public static final String FORMAT_JSON = "json";
+
+    public static final String FORMAT_XML = "xml";
+
+    public static final String VERSION = "version";
+}

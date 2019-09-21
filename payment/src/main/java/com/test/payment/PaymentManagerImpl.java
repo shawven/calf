@@ -2,7 +2,10 @@ package com.test.payment;
 
 import com.test.payment.client.PaymentClientTypeEnum;
 import com.test.payment.domain.*;
+import com.test.payment.properties.PaymentProperties;
+import com.test.payment.supplier.AbstractPaymentTemplate;
 import com.test.payment.supplier.PaymentSupplierEnum;
+import com.test.payment.support.CurrencyTools;
 import com.test.payment.support.PaymentLogger;
 import com.test.payment.support.PaymentUtils;
 
@@ -12,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.test.payment.support.PaymentUtils.isBlankString;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toSet;
@@ -26,8 +30,8 @@ public class PaymentManagerImpl implements PaymentManager {
 
     private Map<PaymentSupplierEnum, Map<PaymentClientTypeEnum, PaymentOperations>> suppliers;
 
-    public PaymentManagerImpl(List<PaymentOperations> suppliers) {
-        this.suppliers = index(suppliers);
+    public PaymentManagerImpl(List<PaymentOperations> suppliers, PaymentProperties paymentProperties) {
+        this.suppliers = index(suppliers, paymentProperties);
     }
 
     @Override
@@ -40,11 +44,11 @@ public class PaymentManagerImpl implements PaymentManager {
 
     @Override
     public PaymentTradeResponse pay(PaymentTradeRequest request) {
-        if (PaymentUtils.isBlankString(request.getOutTradeNo())) {
-            throw new IllegalArgumentException("预支付交易订单号不能为空");
+        if (isBlankString(request.getOutTradeNo())) {
+            throw new IllegalArgumentException("预支付商户交易号不能为空");
         }
-        if (PaymentUtils.isBlankString(request.getSubject())) {
-            throw new IllegalArgumentException("预支付交易主题不能为空");
+        if (isBlankString(request.getSubject())) {
+            throw new IllegalArgumentException("预支付商品主题不能为空");
         }
         PaymentOperations paymentOperations = getProvider(request);
         PaymentTradeResponse response = paymentOperations.pay(request);
@@ -54,8 +58,8 @@ public class PaymentManagerImpl implements PaymentManager {
 
     @Override
     public PaymentTradeQueryResponse query(PaymentTradeQueryRequest request) {
-        if (PaymentUtils.isBlankString(request.getOutTradeNo())) {
-            throw new IllegalArgumentException("查询支付交易订单号不能为空");
+        if (isBlankString(request.getOutTradeNo())) {
+            throw new IllegalArgumentException("查询支付商户交易号不能为空");
         }
         PaymentOperations paymentOperations = getProvider(request);
         PaymentTradeQueryResponse response = paymentOperations.query(request);
@@ -81,8 +85,11 @@ public class PaymentManagerImpl implements PaymentManager {
 
     @Override
     public PaymentTradeRefundResponse refund(PaymentTradeRefundRequest request) {
-        if (PaymentUtils.isBlankString(request.getOutTradeNo())) {
-            throw new IllegalArgumentException("交易退款订单号不能为空");
+        if (isBlankString(request.getOutRefundNo())) {
+            throw new IllegalArgumentException("商户退款号不能为空");
+        }
+        if (isBlankString(request.getOutTradeNo()) && isBlankString(request.getTradeNo())) {
+            throw new IllegalArgumentException("商户交易号和平台交易号不能同时为空");
         }
         PaymentOperations paymentOperations = getProvider(request);
         PaymentTradeRefundResponse response = paymentOperations.refund(request);
@@ -91,9 +98,12 @@ public class PaymentManagerImpl implements PaymentManager {
     }
 
     @Override
-    public PaymentResponse queryRefund(PaymentRequest request) {
+    public PaymentTradeRefundQueryResponse queryRefund(PaymentTradeRefundQueryRequest request) {
+        if (isBlankString(request.getOutRefundNo())) {
+            throw new IllegalArgumentException("商户退款号不能为空");
+        }
         PaymentOperations paymentOperations = getProvider(request);
-        PaymentResponse response = paymentOperations.queryRefund(request);
+        PaymentTradeRefundQueryResponse response = paymentOperations.queryRefund(request);
         logger.debug(request,  "查询交易退款结果：[{}]", response);
         return response;
     }
@@ -130,10 +140,13 @@ public class PaymentManagerImpl implements PaymentManager {
      * 索引化提供者
      *
      * @param operationsList
+     * @param paymentProperties
      * @return
      */
     private Map<PaymentSupplierEnum, Map<PaymentClientTypeEnum, PaymentOperations>>
-    index(List<PaymentOperations> operationsList) {
+    index(List<PaymentOperations> operationsList, PaymentProperties paymentProperties) {
+        CurrencyTools.setUnitOfCents(paymentProperties.getCurrencyCents());
+
         if (operationsList == null) {
             return emptyMap();
         }
@@ -166,6 +179,10 @@ public class PaymentManagerImpl implements PaymentManager {
                             clientTypes.put(client, operations);
                             suppliers.put(supplier, clientTypes);
                         } else {
+                            if (operations instanceof AbstractPaymentTemplate) {
+                                AbstractPaymentTemplate template = (AbstractPaymentTemplate) operations;
+                                template.setPaymentProperties(paymentProperties);
+                            }
                             clientTypes.put(client, operations);
                         }
                         loaded.append(client.getName()).append(",");

@@ -14,7 +14,7 @@ public class PaymentTradeRequest extends PaymentRequest {
     }
 
     /**
-     * 订单号
+     * 商户交易号
      */
     private String outTradeNo;
 

@@ -21,11 +21,15 @@ public class WechatConfiguration {
 
     @Bean
     public PaymentOperations wechatPayPcOperations() {
-        return new WechatPayTemplate.Web(wechatPayProperties);
+        WechatPayTemplate.Web web = new WechatPayTemplate.Web();
+        web.setProperties(wechatPayProperties);
+        return web;
     }
 
     @Bean
     public PaymentOperations wechatPayWapOperations() {
-        return new WechatPayTemplate.Wap(wechatPayProperties);
+        WechatPayTemplate.Wap wap = new WechatPayTemplate.Wap();
+        wap.setProperties(wechatPayProperties);
+        return wap;
     }
 }

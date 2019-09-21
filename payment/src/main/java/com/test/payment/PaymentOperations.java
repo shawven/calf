@@ -48,5 +48,5 @@ public interface PaymentOperations extends PaymentWayType {
      *
      * @return
      */
-    PaymentResponse queryRefund(PaymentRequest request);
+    PaymentTradeRefundQueryResponse queryRefund(PaymentTradeRefundQueryRequest request);
 }

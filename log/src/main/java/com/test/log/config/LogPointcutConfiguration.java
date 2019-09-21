@@ -8,9 +8,6 @@ import org.aspectj.lang.annotation.Pointcut;
  */
 public class LogPointcutConfiguration {
 
-    @Pointcut("execution(* com.test.*.controller..*.*(..))")
-    public void packageScanner(){}
-
     @Pointcut("@annotation(com.test.log.annotation.Log)")
     public void methodsExistLog(){}
 
@@ -29,7 +26,7 @@ public class LogPointcutConfiguration {
     @Pointcut("(methodsExistInsertLog() || methodExistUpdateLog() || methodsExistDeleteLog()))")
     public void methodExistSubLog(){}
 
-    @Pointcut("packageScanner() && (methodsExistLog() || (classExistLog() && methodExistSubLog()))")
+    @Pointcut("(methodsExistLog() || (classExistLog() && methodExistSubLog()))")
     public void logPointcut(){}
 
 }

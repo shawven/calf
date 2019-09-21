@@ -7,12 +7,12 @@ package com.test.payment.domain;
 public class PaymentTradeCallbackResponse extends PaymentResponse {
 
     /**
-     * 支付交易号
+     * 商户交易号
      */
     private String outTradeNo;
 
     /**
-     * 平台支付交易号
+     * 平台交易号
      */
     private String tradeNo;
 
@@ -24,7 +24,7 @@ public class PaymentTradeCallbackResponse extends PaymentResponse {
     /**
      * 回复给上游的消息
      */
-    private String replayMessage;
+    private String replayMessage = "";
 
     public String getOutTradeNo() {
         return outTradeNo;

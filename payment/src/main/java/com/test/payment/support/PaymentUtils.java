@@ -59,8 +59,18 @@ public class PaymentUtils {
         return writer.toString();
     }
 
-    public static Map<String, String> readUrlParamsToMap(InputStream inputStream){
-        return splitPairString(read(inputStream));
+    public static byte[] readBytes(InputStream inputStream) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
+        int n;
+        try {
+            while (-1 != (n = inputStream.read(buf))) {
+                output.write(buf, 0, n);
+            }
+        } catch (IOException e) {
+            return new byte[]{};
+        }
+        return output.toByteArray();
     }
 
     public static Map<String, String> splitPairString(String pairString) {
@@ -78,31 +88,60 @@ public class PaymentUtils {
                 continue;
             }
             try {
-                String decode = URLDecoder.decode(elements[1], "UTF-8");
+                String element = elements[1];
+                // 不符合规范的字符预转换decode容错
+                element = element.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+                element = element.replaceAll("\\+", "%2B");
+                String decode = URLDecoder.decode(element, "UTF-8");
                 newPairs.put(elements[0], decode);
             } catch (UnsupportedEncodingException ignored) {}
         }
         return newPairs;
     }
 
-    public static <T> Class<T> getSuperClassGenericType(Class cls, int index) {
-        String simpleName = cls.getSimpleName();
-        Type genType = cls.getGenericSuperclass();
-        if (!(genType instanceof ParameterizedType)) {
-            throw new RuntimeException(String.format("%s's superclass not ParameterizedType", simpleName));
-        } else {
-            Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
-            if (index < params.length && index >= 0) {
-                if (!(params[index] instanceof Class)) {
-                    throw new RuntimeException(String.format("%s not set the actual class on" +
-                            " superclass generic parameter", simpleName));
-                } else {
-                    return (Class<T>) params[index];
-                }
-            } else {
-                throw new RuntimeException(String.format("Warn: Index: %s, Size of %s's ParameterizedType: %s .",
-                        index, cls.getSimpleName(), params.length));
+    public static String toPairString(Map<String, ?> params) {
+        StringBuilder content = new StringBuilder();
+        List<String> keys = new ArrayList<>(params.keySet());
+        Collections.sort(keys);
+        int index = 0;
+        for (String key : keys) {
+            Object value = params.get(key);
+            if (!isBlankString(key) && value != null) {
+                content.append(index == 0 ? "" : "&").append(key).append("=").append(value);
+                ++index;
             }
+        }
+        return content.toString();
+    }
+
+    public static String buildForm(String baseUrl, Map<String, String> parameters) {
+        StringBuilder form = new StringBuilder();
+        form.append("<form name=\"punchout_form\" method=\"post\" action=\"");
+        form.append(baseUrl);
+        form.append("\">\n");
+        form.append(buildHiddenFields(parameters));
+        form.append("<input type=\"submit\" value=\"立即支付\" style=\"display:none\" >\n");
+        form.append("</form>\n");
+        form.append("<script>document.forms[0].submit();</script>");
+        return form.toString();
+    }
+
+    private static String buildHiddenFields(Map<String, String> parameters) {
+        if (parameters != null && !parameters.isEmpty()) {
+            StringBuilder hiddenInput = new StringBuilder();
+            Set<String> keys = parameters.keySet();
+            for (String key : keys) {
+                String value =  parameters.get(key);
+                if (key != null && value != null) {
+                    hiddenInput.append("<input type=\"hidden\" name=\"");
+                    hiddenInput.append(key);
+                    hiddenInput.append("\" value=\"");
+                    hiddenInput.append( value.replace("\"", "&quot;")).append("\">\n");
+                }
+            }
+            return hiddenInput.toString();
+        } else {
+            return "";
         }
     }
 

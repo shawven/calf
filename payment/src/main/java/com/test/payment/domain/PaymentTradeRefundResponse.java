@@ -7,22 +7,51 @@ package com.test.payment.domain;
 public class PaymentTradeRefundResponse extends PaymentResponse {
 
     /**
-     * 平台退款交易号
+     * 商户交易号
      */
-    private String refundNo;
+    private String outTradeNo;
 
-    public String getRefundNo() {
-        return refundNo;
+    /**
+     * 平台交易号
+     */
+    private String tradeNo;
+
+    /**
+     * 退款金额
+     */
+    private String refundAmount;
+
+
+    public String getOutTradeNo() {
+        return outTradeNo;
     }
 
-    public void setRefundNo(String refundNo) {
-        this.refundNo = refundNo;
+    public void setOutTradeNo(String outTradeNo) {
+        this.outTradeNo = outTradeNo;
+    }
+
+    public String getTradeNo() {
+        return tradeNo;
+    }
+
+    public void setTradeNo(String tradeNo) {
+        this.tradeNo = tradeNo;
+    }
+
+
+    public String getRefundAmount() {
+        return refundAmount;
+    }
+
+    public void setRefundAmount(String refundAmount) {
+        this.refundAmount = refundAmount;
     }
 
     @Override
     public String toString() {
         return "PaymentTradeRefundResponse{" +
-                "refundNo='" + refundNo + '\'' +
+                "outTradeNo='" + outTradeNo + '\'' +
+                ", tradeNo='" + tradeNo + '\'' +
                 '}';
     }
 }

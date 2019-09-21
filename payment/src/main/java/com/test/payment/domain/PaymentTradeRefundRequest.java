@@ -7,24 +7,29 @@ package com.test.payment.domain;
 public class PaymentTradeRefundRequest extends PaymentRequest {
 
     /**
-     * 支付交易号
+     * 商户交易号
      */
     private String outTradeNo;
 
     /**
-     * 退款交易号
+     * 平台交易号
      */
-    private String outRefundNo;
+    private String tradeNo;
 
     /**
-     * 总金额
+     * 商户退款号
      */
-    private String totalAmount;
+    private String outRefundNo;
 
     /**
      * 退款金额
      */
     private String refundAmount;
+
+    /**
+     * 退款原因
+     */
+    private String refundReason;
 
     public PaymentTradeRefundRequest(String paymentSupplier) {
         super(paymentSupplier);
@@ -38,20 +43,20 @@ public class PaymentTradeRefundRequest extends PaymentRequest {
         this.outTradeNo = outTradeNo;
     }
 
+    public String getTradeNo() {
+        return tradeNo;
+    }
+
+    public void setTradeNo(String tradeNo) {
+        this.tradeNo = tradeNo;
+    }
+
     public String getOutRefundNo() {
         return outRefundNo;
     }
 
     public void setOutRefundNo(String outRefundNo) {
         this.outRefundNo = outRefundNo;
-    }
-
-    public String getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(String totalAmount) {
-        this.totalAmount = totalAmount;
     }
 
     public String getRefundAmount() {
@@ -62,13 +67,22 @@ public class PaymentTradeRefundRequest extends PaymentRequest {
         this.refundAmount = refundAmount;
     }
 
+    public String getRefundReason() {
+        return refundReason;
+    }
+
+    public void setRefundReason(String refundReason) {
+        this.refundReason = refundReason;
+    }
+
     @Override
     public String toString() {
         return "PaymentTradeRefundRequest{" +
                 "outTradeNo='" + outTradeNo + '\'' +
+                ", tradeNo='" + tradeNo + '\'' +
                 ", outRefundNo='" + outRefundNo + '\'' +
-                ", totalAmount='" + totalAmount + '\'' +
                 ", refundAmount='" + refundAmount + '\'' +
+                ", refundReason='" + refundReason + '\'' +
                 '}';
     }
 }

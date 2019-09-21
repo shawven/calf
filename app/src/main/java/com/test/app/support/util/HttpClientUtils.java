@@ -693,12 +693,12 @@ public class HttpClientUtils {
                 for (Map.Entry entry : input.entrySet()) {
                     String key = String.valueOf(entry.getKey());
                     Object value = entry.getValue();
-                    if (strIsBlank(key) || value == null) {
+                    if (isBlankString(key) || value == null) {
                         continue;
                     }
 
                     if (value instanceof String) {
-                        if (strIsBlank(value.toString())) {
+                        if (isBlankString(value.toString())) {
                             continue;
                         }
                         builder.addTextBody(key, value.toString(), contentType);
@@ -760,10 +760,10 @@ public class HttpClientUtils {
         }
 
         private static boolean isValidPair(String key, Object value) {
-            return !strIsBlank(key) && value != null && !strIsBlank(value.toString());
+            return !isBlankString(key) && value != null && !isBlankString(value.toString());
         }
 
-        private static boolean strIsBlank(CharSequence cs) {
+        private static boolean isBlankString(CharSequence cs) {
             int strLen;
             if (cs != null && (strLen = cs.length()) != 0) {
                 for (int i = 0; i < strLen; ++i) {

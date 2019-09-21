@@ -7,12 +7,12 @@ package com.test.payment.domain;
 public class PaymentTradeQueryResponse extends PaymentResponse {
 
     /**
-     * 支付交易号
+     * 商户交易号
      */
     private String outTradeNo;
 
     /**
-     * 平台支付交易号
+     * 平台交易号
      */
     private String tradeNo;
 
