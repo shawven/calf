@@ -1,6 +1,6 @@
 package com.test.payment.properties;
 
-import com.test.payment.properties.PaymentProperties;
+import com.test.payment.supplier.PaymentSupplierEnum;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -16,9 +16,11 @@ public class WechatPayProperties {
 
     private String appId;
 
+    private String appSecret;
+
     private String mchId;
 
-    private String appKey;
+    private String apiKey;
 
     private String certUrl;
 
@@ -36,6 +38,14 @@ public class WechatPayProperties {
         this.appId = appId;
     }
 
+    public String getAppSecret() {
+        return appSecret;
+    }
+
+    public void setAppSecret(String appSecret) {
+        this.appSecret = appSecret;
+    }
+
     public String getMchId() {
         return mchId;
     }
@@ -44,12 +54,12 @@ public class WechatPayProperties {
         this.mchId = mchId;
     }
 
-    public String getAppKey() {
-        return appKey;
+    public String getApiKey() {
+        return apiKey;
     }
 
-    public void setAppKey(String appKey) {
-        this.appKey = appKey;
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 
     public String getCertUrl() {

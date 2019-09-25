@@ -25,6 +25,9 @@ public class CurrencyTools {
      * @return
      */
     public static String toCent(String innerAmount) {
+        if (innerAmount == null) {
+            innerAmount = "0";
+        }
         return new BigDecimal(innerAmount).multiply(BigDecimal.valueOf(unitOfCents)).toBigInteger().toString();
     }
 
@@ -36,6 +39,9 @@ public class CurrencyTools {
      * @return
      */
     public static String toYuan(String innerAmount) {
+        if (innerAmount == null) {
+            innerAmount = "0";
+        }
         return new BigDecimal(innerAmount)
                 // 系统金额转成分
                 .multiply(BigDecimal.valueOf(unitOfCents))
@@ -51,6 +57,9 @@ public class CurrencyTools {
      * @return
      */
     public static String ofCent(String outerAmount) {
+        if (outerAmount == null) {
+            outerAmount = "0";
+        }
         return new BigDecimal(outerAmount)
                 .divide(BigDecimal.valueOf(unitOfCents), 2, RoundingMode.DOWN)
                 .toString();
@@ -64,6 +73,9 @@ public class CurrencyTools {
      * @return
      */
     public static String ofYuan(String outerAmount) {
+        if (outerAmount == null) {
+            outerAmount = "0";
+        }
         return new BigDecimal(outerAmount)
                 // 转成分
                 .multiply(new BigDecimal(100))

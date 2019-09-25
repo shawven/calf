@@ -70,10 +70,7 @@ public class IpUtils {
      * @return
      */
     private static String httpGet(String urlStr) throws IOException {
-        return HttpClientUtils.executor()
-                .get(urlStr)
-                .withBrowserHeaders()
-                .execute();
+        return new HttpUtil().request().get(urlStr).withBrowserHeaders().execute();
     }
 
 

@@ -1,6 +1,7 @@
 package com.test.payment.config;
 
 import com.test.payment.PaymentOperations;
+import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.alipay.AlipayTemplate;
 import com.test.payment.properties.AlipayProperties;
 import org.springframework.beans.factory.annotation.Autowired;

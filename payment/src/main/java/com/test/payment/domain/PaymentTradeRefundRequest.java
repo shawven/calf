@@ -22,6 +22,11 @@ public class PaymentTradeRefundRequest extends PaymentRequest {
     private String outRefundNo;
 
     /**
+     * 订单总金额
+     */
+    private String totalAmount;
+
+    /**
      * 退款金额
      */
     private String refundAmount;
@@ -59,6 +64,14 @@ public class PaymentTradeRefundRequest extends PaymentRequest {
         this.outRefundNo = outRefundNo;
     }
 
+    public String getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(String totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
     public String getRefundAmount() {
         return refundAmount;
     }
@@ -81,6 +94,7 @@ public class PaymentTradeRefundRequest extends PaymentRequest {
                 "outTradeNo='" + outTradeNo + '\'' +
                 ", tradeNo='" + tradeNo + '\'' +
                 ", outRefundNo='" + outRefundNo + '\'' +
+                ", totalAmount='" + totalAmount + '\'' +
                 ", refundAmount='" + refundAmount + '\'' +
                 ", refundReason='" + refundReason + '\'' +
                 '}';

@@ -1,5 +1,7 @@
 package com.test.payment.domain;
 
+import com.test.payment.support.PaymentUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,8 +11,9 @@ import java.util.Map;
  */
 public class PaymentTradeRequest extends PaymentRequest {
 
-    public PaymentTradeRequest(String paymentSupplier, String paymentClient) {
+    public PaymentTradeRequest(String paymentSupplier, String paymentClient, Map<String, ?> formParams) {
         super(paymentSupplier, paymentClient);
+        params = PaymentUtils.parseParameterMap(formParams);
     }
 
     /**
@@ -38,7 +41,7 @@ public class PaymentTradeRequest extends PaymentRequest {
      */
     private String ip;
 
-    private Map<String, String> option;
+    private Map<String, String> params;
 
     public String getOutTradeNo() {
         return outTradeNo;
@@ -80,23 +83,12 @@ public class PaymentTradeRequest extends PaymentRequest {
         this.ip = ip;
     }
 
-    public Map<String, String> getOption() {
-        return option;
+    public Map<String, String> getParams() {
+        return new HashMap<>(params);
     }
 
-    public void setOption(Map<String, String> option) {
-        this.option = option;
-    }
-
-    public void putOption(String key, String value) {
-        Map<String, String> option = getOption();
-        if (option == null) {
-            option = new HashMap<>();
-            option.put(key, value);
-            setOption(option);
-        } else {
-            option.put(key, value);
-        }
+    public String get(String key) {
+        return params.get(key);
     }
 
     @Override

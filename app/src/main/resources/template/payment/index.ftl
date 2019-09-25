@@ -75,7 +75,7 @@
             // getAlipayQrCode()
         }
         if (supplier === "#wechat") {
-            // getWechatQrCode()
+            getWechatQrCode()
         }
         if (supplier === "#unionpay") {
             getUnionpay()
@@ -196,11 +196,14 @@
         window.clearInterval(timer)
         timer = setInterval(function(){
             console.log("轮训查询支付结果")
-            $.get("${baseUrl}/payment/query/" + payWay, {orderId: orderId}, function () {
-                callback()
-                document.querySelector(".alert-success").classList.remove("d-none")
+            $.get("${baseUrl}/payment/query/" + payWay, {orderId: orderId}, function (result) {
+                if (result.data.success) {
+                    callback()
+                    document.querySelector(".alert-success").classList.remove("d-none")
+                    window.clearInterval(timer)
+                }
             }, "json").fail(function (result) {
-
+                console.log(result)
             })
         }, 3000)
     }

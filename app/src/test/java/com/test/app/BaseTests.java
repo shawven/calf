@@ -1,24 +1,11 @@
 package com.test.app;
 
-import com.google.common.hash.Hashing;
-import com.test.app.support.util.HttpClientUtils;
-import com.test.payment.support.CertUtils;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.CharUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.Security;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @author Shoven
@@ -41,8 +28,7 @@ public class BaseTests {
 
     @Test
     public void main() throws Exception {
-        String path = "D:\\workspace\\java\\starter\\payment\\src\\main\\resources\\acp_test_sign.pfx";
-        CertUtils.getPrivateKeyByPfx(path, "000000");
+
     }
 
     private static String byte2Hex(byte[] bytes) {

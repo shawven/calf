@@ -44,9 +44,16 @@ public interface PaymentOperations extends PaymentWayType {
     PaymentTradeRefundResponse refund(PaymentTradeRefundRequest request);
 
     /**
+     * 退款
+     *
+     * @return
+     */
+    PaymentTradeCallbackResponse refundNotify(PaymentTradeCallbackRequest request);
+
+    /**
      * 查询退款状态
      *
      * @return
      */
-    PaymentTradeRefundQueryResponse queryRefund(PaymentTradeRefundQueryRequest request);
+    PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request);
 }

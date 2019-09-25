@@ -2,6 +2,7 @@ package com.test.payment.config;
 
 import com.test.payment.PaymentOperations;
 import com.test.payment.properties.UnionpayProperties;
+import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.unionpay.UnionpayB2BTemplate;
 import com.test.payment.supplier.unionpay.UnionpayTemplate;
 import org.springframework.beans.factory.annotation.Autowired;

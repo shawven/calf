@@ -35,7 +35,7 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
     public PaymentTradeResponse pay(PaymentTradeRequest request) {
         UnionpayTradePagePayRequest unionpayRequest = new UnionpayTradePagePayRequest();
         unionpayRequest.setBizType(getBizType());
-        unionpayRequest.setChannelType(getBizType());
+        unionpayRequest.setChannelType(getChannelType());
 
         unionpayRequest.setOutTradeNo(request.getOutTradeNo());
         unionpayRequest.setAmount(CurrencyTools.toCent(request.getAmount()));
@@ -159,7 +159,7 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
     }
 
     @Override
-    public PaymentTradeRefundQueryResponse queryRefund(PaymentTradeRefundQueryRequest request) {
+    public PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
         return null;
     }
 

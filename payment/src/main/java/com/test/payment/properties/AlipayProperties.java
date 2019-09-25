@@ -1,5 +1,6 @@
 package com.test.payment.properties;
 
+import com.test.payment.supplier.PaymentSupplierEnum;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;

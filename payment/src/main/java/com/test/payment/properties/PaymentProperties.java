@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * @author Shoven
  * @date 2019-09-03
@@ -26,6 +29,16 @@ public class PaymentProperties {
 
     @Value("${appName}")
     private String appName;
+
+    private int connectTimeout;
+
+    private int socketTimeout;
+
+    private int connectionTimeToLive;
+
+    private int maxTotal;
+
+    private int maxPerRoute;
 
     public String getServerUrl() {
         return serverUrl;
@@ -56,7 +69,49 @@ public class PaymentProperties {
     }
 
     public void setAppName(String appName) {
-        this.appName = appName;
+        this.appName = appName != null
+            ? new String(appName.getBytes(ISO_8859_1), UTF_8)
+            : "";
+    }
+
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
+
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
+    }
+
+    public int getConnectionTimeToLive() {
+        return connectionTimeToLive;
+    }
+
+    public void setConnectionTimeToLive(int connectionTimeToLive) {
+        this.connectionTimeToLive = connectionTimeToLive;
+    }
+
+    public int getMaxTotal() {
+        return maxTotal;
+    }
+
+    public void setMaxTotal(int maxTotal) {
+        this.maxTotal = maxTotal;
+    }
+
+    public int getMaxPerRoute() {
+        return maxPerRoute;
+    }
+
+    public void setMaxPerRoute(int maxPerRoute) {
+        this.maxPerRoute = maxPerRoute;
     }
 
     public String getServerDomain() {

@@ -90,7 +90,7 @@ public class WXPay {
         if (this.config.getCertStream() == null) {
             throw new RuntimeException("cert stream in config is empty");
         }
-        if (this.config.getWXPayDomain() == null) {
+        if (this.config.getDomainList() == null || this.config.getDomainList().isEmpty()) {
             throw new RuntimeException("config.getWXPayDomain() is null");
         }
 
@@ -709,4 +709,14 @@ public class WXPay {
     }
 
 
+    public Map<String, String> prepareJsApiPay(String prepayId) throws Exception {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("appId", config.getAppID());
+        params.put("timeStamp", String.valueOf(System.currentTimeMillis() / 1000));
+        params.put("nonceStr", WXPayUtil.generateNonceStr());
+        params.put("package", "prepay_id=" + prepayId);
+        params.put("signType", signType.name());
+        params.put("paySign", WXPayUtil.generateSignature(params, this.config.getKey(), signType));
+        return params;
+    }
 }

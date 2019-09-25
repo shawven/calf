@@ -6,9 +6,9 @@ import com.test.payment.supplier.wechat.sdk.WXPay;
 import com.test.payment.supplier.wechat.sdk.WXPayConfig;
 import com.test.payment.supplier.wechat.sdk.WXPayConstants;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Shoven
@@ -17,46 +17,14 @@ import java.io.InputStream;
 public class WechatPayClientFactory {
 
     private static WXPay client = null;
-    private static WXPay client2 = null;
 
-    public static WXPay getInstance(WechatPayProperties properties) {
-        if (properties.getUseSandbox()) {
-            // 沙箱环境实例化时会自动获取沙箱密钥
-            try {
-                return getInstance1(properties);
-            } catch (Exception e) {
-                return getInstance2(properties);
-            }
+    public static WXPay getInstance(WechatPayProperties prop) {
+        if (prop.getUseSandbox() || client == null) {
+            client = new WXPay(new WxConfig(prop, true), prop.getNotifyUrl(),
+                    prop.getAutoReport(), prop.getUseSandbox());
         }
-        return getInstance1(properties);
-    }
-
-    /**
-     * 主域名
-     *
-     * @param properties
-     * @return
-     */
-    private static WXPay getInstance1(WechatPayProperties properties) {
-        if (client == null) {
-            client = new WXPay(new WxConfig(properties, true), properties.getNotifyUrl(),
-                    properties.getAutoReport(), properties.getUseSandbox());
-        }
-        return client;
-    }
-
-    /**
-     * 备用域名
-     *
-     * @param properties
-     * @return
-     */
-    public static WXPay getInstance2(WechatPayProperties properties) {
-        if (client2 == null) {
-            client2 = new WXPay(new WxConfig(properties, false), properties.getNotifyUrl(),
-                    properties.getAutoReport(), properties.getUseSandbox());
-        }
-        return client2;
+        return new WXPay(new WxConfig(prop, true), prop.getNotifyUrl(),
+                prop.getAutoReport(), prop.getUseSandbox());
     }
 
     private static class WxConfig extends WXPayConfig {
@@ -85,7 +53,7 @@ public class WechatPayClientFactory {
         @Override
         public String getKey() {
             if (key == null) {
-                key = properties.getAppKey();
+                key = properties.getApiKey();
             }
             return key;
         }
@@ -103,9 +71,10 @@ public class WechatPayClientFactory {
         }
 
         @Override
-        public IWXPayDomain getWXPayDomain() {
-            return slaveModel ? new DomainHolder.SlaveDomain() : new DomainHolder.MasterDomain();
+        public List<IWXPayDomain> getDomainList() {
+            return DomainHolder.getDomainList();
         }
+
         @Override
         public boolean shouldAutoReport() {
             return properties.getAutoReport();
@@ -114,6 +83,14 @@ public class WechatPayClientFactory {
     }
 
     static class DomainHolder {
+        public static List<IWXPayDomain> getDomainList() {
+            List<IWXPayDomain> domainList = new ArrayList<>();
+            domainList.add(new DomainHolder.MasterDomain());
+            domainList.add(new DomainHolder.SlaveDomain());
+            return domainList;
+        }
+
+
         static class MasterDomain implements IWXPayDomain {
             @Override
             public void report(long elapsedTimeMillis, Exception ex) {

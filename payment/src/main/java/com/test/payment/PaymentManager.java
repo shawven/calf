@@ -60,7 +60,7 @@ public interface PaymentManager {
      *
      * @return
      */
-    PaymentTradeRefundQueryResponse queryRefund(PaymentTradeRefundQueryRequest request);
+    PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request);
 
 
 }

@@ -15,7 +15,7 @@ public class AlipayClientFactory {
      * @return AlipayClient
      */
     public static AlipayClient getInstance(AlipayProperties prop) {
-        if (client == null) {
+        if (prop.getUseSandbox() || client == null) {
             // 网关
             String url = prop.getUseSandbox() ? AlipayConstants.SANDBOX_GATEWAY_URL : AlipayConstants.GATEWAY_URL;
             // 商户APP_ID

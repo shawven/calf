@@ -11,7 +11,6 @@ import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
-import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.test.payment.client.QrcTradeClientType;
 import com.test.payment.client.WapTradeClientType;
@@ -185,7 +184,7 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
     }
 
     @Override
-    public PaymentTradeRefundQueryResponse queryRefund(PaymentTradeRefundQueryRequest request) {
+    public PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
         return null;
     }
 
@@ -253,7 +252,7 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
             alipayModel.setBody(request.getBody());
             alipayModel.setProductCode("FAST_INSTANT_TRADE_PAY");
 
-            String width = request.getOption().get("width");
+            String width = request.get("width");
             long l;
             if (width == null || (l = Long.parseLong(width)) == 0L) {
                 alipayModel.setQrPayMode("1");

@@ -139,22 +139,19 @@ public class WXPayReport {
                     while (true) {
                         try {
                             StringBuilder sb = new StringBuilder();
-                            String firstMsg = reportMsgQueue.take();
-                            logger.debug("get first report msg: {}", firstMsg);
-                            String msg;
-                            sb.append(firstMsg); //会阻塞至有消息
+                            //会阻塞至有消息
+                            sb.append(reportMsgQueue.take());
                             for (int j = 0, remainNum = config.getReportBatchSize() - 1; j < remainNum; ++j) {
-                                logger.debug("try get remain report msg");
                                 // msg = reportMsgQueue.poll();  // 不阻塞了
-                                msg = reportMsgQueue.take();
-                                logger.debug("get remain report msg: {}", msg);
                                 sb.append("\n");
-                                sb.append(msg);
+                                sb.append(reportMsgQueue.take());
                             }
+                            String msg = sb.toString();
+                            logger.debug("微信支付上报消息: {}", msg);
                             // 上报
-                            httpRequest(sb.toString(), DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS);
+                            httpRequest(msg, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS);
                         } catch (Exception ex) {
-                            logger.warn("report fail. reason: {}", ex.getMessage());
+                            logger.warn("微信支付上报失败: {}", ex.getMessage());
                         }
                     }
                 });
@@ -188,7 +185,7 @@ public class WXPayReport {
                 firstDomain, primaryDomain, firstConnectTimeoutMillis, firstReadTimeoutMillis,
                 firstHasDnsError, firstHasConnectTimeout, firstHasReadTimeout);
         String data = reportInfo.toLineString(config.getKey());
-        logger.debug("report {}", data);
+        logger.debug("微信支付上报消息： {}", data);
         if (data != null) {
             reportMsgQueue.offer(data);
         }
@@ -206,7 +203,7 @@ public class WXPayReport {
             try {
                 httpRequest(data, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS);
             } catch (Exception ex) {
-                logger.warn("report fail. reason: {}", ex.getMessage());
+                logger.warn("微信支付上报失败: {}", ex.getMessage());
             }
         });
     }

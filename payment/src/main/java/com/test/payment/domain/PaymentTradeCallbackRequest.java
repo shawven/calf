@@ -5,7 +5,6 @@ import com.test.payment.support.PaymentUtils;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * @author Shoven
@@ -26,10 +25,10 @@ public class PaymentTradeCallbackRequest extends PaymentRequest {
     public PaymentTradeCallbackRequest(String paymentSupplier, Map<String, ?> params, InputStream inputStream) {
         super(paymentSupplier);
         this.rowBody = PaymentUtils.read(inputStream);
-        this.params = selectParams(params, rowBody);
+        this.params = getParams(params, rowBody);
     }
 
-    private Map<String, String> selectParams(Map<String, ?> formParams, String str) {
+    private Map<String, String> getParams(Map<String, ?> formParams, String str) {
         params = PaymentUtils.parseParameterMap(formParams);
         if (params.isEmpty()) {
             params = PaymentUtils.splitPairString(str);
@@ -39,6 +38,10 @@ public class PaymentTradeCallbackRequest extends PaymentRequest {
 
     public Map<String, String> getParams() {
         return new HashMap<>(params);
+    }
+
+    public String get(String key) {
+        return params.get(key);
     }
 
     public String getRowBody() {

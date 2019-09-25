@@ -1,30 +1,17 @@
 package com.test.payment.supplier.wechat.sdk;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import com.test.payment.support.HttpUtil;
+import com.test.payment.support.PaymentContextHolder;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.security.KeyStore;
-import java.security.SecureRandom;
+import java.util.Iterator;
 
 import static com.test.payment.supplier.wechat.sdk.WXPayConstants.USER_AGENT;
 
@@ -32,9 +19,17 @@ import static com.test.payment.supplier.wechat.sdk.WXPayConstants.USER_AGENT;
 public class WXPayRequest {
     private Logger logger = LoggerFactory.getLogger(WXPayRequest.class);
     private WXPayConfig config;
+    private HttpUtil commonHttp;
+    private HttpUtil sslHttp;
 
     public WXPayRequest(WXPayConfig config) {
         this.config = config;
+        this.commonHttp = PaymentContextHolder.getHttp();
+        this.sslHttp = HttpUtil.builder()
+                .setConnectTimeout(config.getHttpConnectTimeoutMs())
+                .setReadTimeout(config.getHttpReadTimeoutMs())
+                .setCertificate(config.getCertStream(), config.getMchID())
+                .build();
     }
 
     /**
@@ -50,57 +45,15 @@ public class WXPayRequest {
      * @throws Exception
      */
     private String requestOnce(final String domain, String urlSuffix, String data, int connectTimeoutMs, int readTimeoutMs, boolean useCert) throws Exception {
-        BasicHttpClientConnectionManager connManager;
-        if (useCert) {
-            // 证书
-            char[] password = config.getMchID().toCharArray();
-            InputStream certStream = config.getCertStream();
-            KeyStore ks = KeyStore.getInstance("PKCS12");
-            ks.load(certStream, password);
-
-            // 实例化密钥库 & 初始化密钥工厂
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            kmf.init(ks, password);
-
-            // 创建 SSLContext
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(kmf.getKeyManagers(), null, new SecureRandom());
-
-            SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(
-                    sslContext,
-                    new String[]{"TLSv1"},
-                    null,
-                    new DefaultHostnameVerifier());
-
-            connManager = new BasicHttpClientConnectionManager(
-                    RegistryBuilder.<ConnectionSocketFactory>create()
-                            .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                            .register("https", sslConnectionSocketFactory)
-                            .build(),
-                    null,
-                    null,
-                    null
-            );
-        } else {
-            connManager = new BasicHttpClientConnectionManager(
-                    RegistryBuilder.<ConnectionSocketFactory>create()
-                            .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                            .register("https", SSLConnectionSocketFactory.getSocketFactory())
-                            .build(),
-                    null,
-                    null,
-                    null
-            );
-        }
-
-        HttpClient httpClient = HttpClientBuilder.create()
-                .setConnectionManager(connManager)
-                .build();
+        HttpUtil httpUtil = useCert ? sslHttp : commonHttp;
 
         String url = "https://" + domain + urlSuffix;
         HttpPost httpPost = new HttpPost(url);
 
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(readTimeoutMs).setConnectTimeout(connectTimeoutMs).build();
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(readTimeoutMs)
+                .setConnectTimeout(connectTimeoutMs)
+                .build();
         httpPost.setConfig(requestConfig);
 
         StringEntity postEntity = new StringEntity(data, "UTF-8");
@@ -108,29 +61,51 @@ public class WXPayRequest {
         httpPost.addHeader("User-Agent", USER_AGENT + " " + config.getMchID());
         httpPost.setEntity(postEntity);
 
-        HttpResponse httpResponse = httpClient.execute(httpPost);
-        HttpEntity httpEntity = httpResponse.getEntity();
-        return EntityUtils.toString(httpEntity, "UTF-8");
-
+        return httpUtil.execute(httpPost);
     }
 
+    private String request(String urlSuffix, String uuid, String data, int connectTimeoutMs, int readTimeoutMs,
+                           boolean useCert, boolean autoReport) throws Exception {
+        Iterator<IWXPayDomain> iterator = config.getDomainList().iterator();
 
-    private String request(String urlSuffix, String uuid, String data, int connectTimeoutMs, int readTimeoutMs, boolean useCert, boolean autoReport) throws Exception {
+        boolean failed = true;
+        Exception lastException = null;
+        String response = null;
+
+        while (failed && iterator.hasNext()) {
+            IWXPayDomain next = iterator.next();
+            try {
+                response = request(next, urlSuffix, uuid, data, connectTimeoutMs, readTimeoutMs, useCert, autoReport);
+                failed = false;
+            } catch (Exception e) {
+                lastException = e;
+            }
+        }
+        if (failed && lastException != null) {
+            throw lastException;
+        }
+        return response;
+    }
+
+    private String request(IWXPayDomain domain, String urlSuffix, String uuid, String data,
+                           int connectTimeoutMs, int readTimeoutMs, boolean useCert, boolean autoReport)
+            throws Exception {
         Exception exception;
         long elapsedTimeMillis = 0;
         long startTimestampMs = WXPayUtil.getCurrentTimestampMs();
         boolean firstHasDnsErr = false;
         boolean firstHasConnectTimeout = false;
         boolean firstHasReadTimeout = false;
-        IWXPayDomain.DomainInfo domainInfo = config.getWXPayDomain().getDomain();
-        if (domainInfo == null) {
+
+        IWXPayDomain.DomainInfo domainInfo = domain.getDomain();
+        if (domain.getDomain() == null) {
             throw new Exception("WXPayConfig.getWXPayDomain().getDomain() is empty or null");
         }
         try {
             String result = requestOnce(domainInfo.domain, urlSuffix, data, connectTimeoutMs, readTimeoutMs, useCert);
             if (autoReport) {
                 elapsedTimeMillis = WXPayUtil.getCurrentTimestampMs() - startTimestampMs;
-                config.getWXPayDomain().report(elapsedTimeMillis, null);
+                domain.report(elapsedTimeMillis, null);
                 WXPayReport.getInstance(config).report(
                         uuid,
                         elapsedTimeMillis,
@@ -147,7 +122,6 @@ public class WXPayRequest {
             exception = ex;
             logger.warn("UnknownHostException for domainInfo {}", domainInfo);
             if (autoReport) {
-
                 firstHasDnsErr = true;
                 elapsedTimeMillis = WXPayUtil.getCurrentTimestampMs() - startTimestampMs;
                 WXPayReport.getInstance(config).report(
@@ -213,10 +187,9 @@ public class WXPayRequest {
                         firstHasConnectTimeout,
                         firstHasReadTimeout);
             }
-
         }
         if (autoReport) {
-            config.getWXPayDomain().report(elapsedTimeMillis, exception);
+            domain.report(elapsedTimeMillis, exception);
         }
         throw exception;
     }

@@ -3,6 +3,8 @@ package com.test.payment.supplier.wechat.sdk;
 import com.test.payment.supplier.wechat.sdk.WXPayConstants.SignType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -39,22 +41,20 @@ public class WXPayUtil {
     public static Map<String, String> xmlToMap(String strXML) throws Exception {
         try {
             Map<String, String> data = new HashMap<String, String>();
+
             DocumentBuilder documentBuilder = WXPayXmlUtil.newDocumentBuilder();
-            InputStream stream = new ByteArrayInputStream(strXML.getBytes(UTF_8));
-            org.w3c.dom.Document doc = documentBuilder.parse(stream);
-            doc.getDocumentElement().normalize();
-            NodeList nodeList = doc.getDocumentElement().getChildNodes();
+            Document doc = documentBuilder.parse( new ByteArrayInputStream(strXML.getBytes(UTF_8)));
+
+            Element rootElement = doc.getDocumentElement();
+            rootElement.normalize();
+            NodeList nodeList = rootElement.getChildNodes();
+
             for (int idx = 0; idx < nodeList.getLength(); ++idx) {
                 Node node = nodeList.item(idx);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    org.w3c.dom.Element element = (org.w3c.dom.Element) node;
+                    Element element = (Element) node;
                     data.put(element.getNodeName(), element.getTextContent());
                 }
-            }
-            try {
-                stream.close();
-            } catch (Exception ex) {
-                // do nothing
             }
             return data;
         } catch (Exception ex) {
@@ -78,7 +78,7 @@ public class WXPayUtil {
         for (String key : data.keySet()) {
             String value = data.get(key);
             if (value == null) {
-                value = "";
+               continue;
             }
             value = value.trim();
             org.w3c.dom.Element filed = document.createElement(key);
@@ -199,12 +199,13 @@ public class WXPayUtil {
         Arrays.sort(keyArray);
         StringBuilder sb = new StringBuilder();
         for (String k : keyArray) {
-            if (k.equals(WXPayConstants.FIELD_SIGN)) {
+            String value = data.get(k);
+            if (k.equals(WXPayConstants.FIELD_SIGN) || value == null) {
                 continue;
             }
             // 参数值为空，则不参与签名
-            if (data.get(k).trim().length() > 0) {
-                sb.append(k).append("=").append(data.get(k).trim()).append("&");
+            if (value.trim().length() > 0) {
+                sb.append(k).append("=").append(value.trim()).append("&");
             }
         }
         sb.append("key=").append(key);

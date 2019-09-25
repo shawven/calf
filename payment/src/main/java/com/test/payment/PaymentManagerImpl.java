@@ -3,11 +3,8 @@ package com.test.payment;
 import com.test.payment.client.PaymentClientTypeEnum;
 import com.test.payment.domain.*;
 import com.test.payment.properties.PaymentProperties;
-import com.test.payment.supplier.AbstractPaymentTemplate;
 import com.test.payment.supplier.PaymentSupplierEnum;
-import com.test.payment.support.CurrencyTools;
-import com.test.payment.support.PaymentLogger;
-import com.test.payment.support.PaymentUtils;
+import com.test.payment.support.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +27,24 @@ public class PaymentManagerImpl implements PaymentManager {
 
     private Map<PaymentSupplierEnum, Map<PaymentClientTypeEnum, PaymentOperations>> suppliers;
 
-    public PaymentManagerImpl(List<PaymentOperations> suppliers, PaymentProperties paymentProperties) {
-        this.suppliers = index(suppliers, paymentProperties);
+    public PaymentManagerImpl(List<PaymentOperations> suppliers, PaymentProperties globalProperties) {
+        this.suppliers = index(suppliers);
+        init(globalProperties);
+    }
+
+    private void init(PaymentProperties globalProperties) {
+        // 配置http工具
+        HttpUtil httpUtil = HttpUtil.builder()
+                .setConnectTimeout(globalProperties.getConnectTimeout())
+                .setReadTimeout(globalProperties.getSocketTimeout())
+                .setMaxTotal(globalProperties.getMaxTotal())
+                .setMaxPerRoute(globalProperties.getMaxPerRoute())
+                .setConnectionTimeToLive(globalProperties.getConnectionTimeToLive())
+                .build();
+
+        PaymentContextHolder.setHttp(httpUtil);
+        PaymentContextHolder.setGlobalProperties(globalProperties);
+        CurrencyTools.setUnitOfCents(globalProperties.getCurrencyCents());
     }
 
     @Override
@@ -50,9 +63,18 @@ public class PaymentManagerImpl implements PaymentManager {
         if (isBlankString(request.getSubject())) {
             throw new IllegalArgumentException("预支付商品主题不能为空");
         }
+        if (isBlankString(request.getAmount())) {
+            throw new IllegalArgumentException("订单金额为空");
+        }
         PaymentOperations paymentOperations = getProvider(request);
-        PaymentTradeResponse response = paymentOperations.pay(request);
-        logger.debug(request, "预支付结果：[{}]", response);
+        PaymentTradeResponse response;
+        try {
+            response = paymentOperations.pay(request);
+            logger.debug(request, "预支付结果：[{}]", response);
+        } catch (UnsupportedOperationException e) {
+            response = new PaymentTradeResponse();
+            logger.warn(request, "尚未支持");
+        }
         return response;
     }
 
@@ -62,24 +84,42 @@ public class PaymentManagerImpl implements PaymentManager {
             throw new IllegalArgumentException("查询支付商户交易号不能为空");
         }
         PaymentOperations paymentOperations = getProvider(request);
-        PaymentTradeQueryResponse response = paymentOperations.query(request);
-        logger.debug(request, "查询支付交易结果：[{}]", response);
+        PaymentTradeQueryResponse response;
+        try {
+            response = paymentOperations.query(request);
+            logger.debug(request, "查询支付交易结果：[{}]", response);
+        } catch (UnsupportedOperationException e) {
+            response = new PaymentTradeQueryResponse();
+            logger.warn(request, "尚未支持");
+        }
         return response;
     }
 
     @Override
     public PaymentTradeCallbackResponse syncReturn(PaymentTradeCallbackRequest request) {
         PaymentOperations paymentOperations = getProvider(request);
-        PaymentTradeCallbackResponse response = paymentOperations.syncReturn(request);
-        logger.debug(request,  "同步跳转结果：[{}]", response);
+        PaymentTradeCallbackResponse response;
+        try {
+            response = paymentOperations.syncReturn(request);
+            logger.debug(request, "同步跳转结果：[{}]", response);
+        } catch (UnsupportedOperationException e) {
+            response = new PaymentTradeCallbackResponse();
+            logger.warn(request, "尚未支持");
+        }
         return response;
     }
 
     @Override
     public PaymentTradeCallbackResponse asyncNotify(PaymentTradeCallbackRequest request) {
         PaymentOperations paymentOperations = getProvider(request);
-        PaymentTradeCallbackResponse response = paymentOperations.asyncNotify(request);
-        logger.debug(request,  "异步回调结果：[{}]", response);
+        PaymentTradeCallbackResponse response;
+        try {
+            response = paymentOperations.asyncNotify(request);
+            logger.debug(request, "异步回调结果：[{}]", response);
+        } catch (UnsupportedOperationException e) {
+            response = new PaymentTradeCallbackResponse();
+            logger.warn(request, "尚未支持");
+        }
         return response;
     }
 
@@ -91,20 +131,39 @@ public class PaymentManagerImpl implements PaymentManager {
         if (isBlankString(request.getOutTradeNo()) && isBlankString(request.getTradeNo())) {
             throw new IllegalArgumentException("商户交易号和平台交易号不能同时为空");
         }
+        if (isBlankString(request.getRefundAmount())) {
+            throw new IllegalArgumentException("申请退款金额为空");
+        }
+        if (isBlankString(request.getTotalAmount())) {
+            throw new IllegalArgumentException("订单总金额为空");
+        }
         PaymentOperations paymentOperations = getProvider(request);
-        PaymentTradeRefundResponse response = paymentOperations.refund(request);
-        logger.debug(request,  "交易退款结果：[{}]", response);
+        PaymentTradeRefundResponse response;
+        try {
+            response = paymentOperations.refund(request);
+            logger.debug(request, "申请退款结果：[{}]", response);
+        } catch (UnsupportedOperationException e) {
+            response = new PaymentTradeRefundResponse();
+            logger.warn(request, "尚未支持");
+        }
+
         return response;
     }
 
     @Override
-    public PaymentTradeRefundQueryResponse queryRefund(PaymentTradeRefundQueryRequest request) {
+    public PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
         if (isBlankString(request.getOutRefundNo())) {
             throw new IllegalArgumentException("商户退款号不能为空");
         }
         PaymentOperations paymentOperations = getProvider(request);
-        PaymentTradeRefundQueryResponse response = paymentOperations.queryRefund(request);
-        logger.debug(request,  "查询交易退款结果：[{}]", response);
+        PaymentTradeRefundQueryResponse response;
+        try {
+            response = paymentOperations.refundQuery(request);
+        } catch (UnsupportedOperationException e) {
+            response = new PaymentTradeRefundQueryResponse();
+            logger.warn(request, "尚未支持");
+        }
+        logger.debug(request, "查询退款结果：[{}]", response);
         return response;
     }
 
@@ -140,13 +199,10 @@ public class PaymentManagerImpl implements PaymentManager {
      * 索引化提供者
      *
      * @param operationsList
-     * @param paymentProperties
      * @return
      */
     private Map<PaymentSupplierEnum, Map<PaymentClientTypeEnum, PaymentOperations>>
-    index(List<PaymentOperations> operationsList, PaymentProperties paymentProperties) {
-        CurrencyTools.setUnitOfCents(paymentProperties.getCurrencyCents());
-
+    index(List<PaymentOperations> operationsList) {
         if (operationsList == null) {
             return emptyMap();
         }
@@ -179,10 +235,6 @@ public class PaymentManagerImpl implements PaymentManager {
                             clientTypes.put(client, operations);
                             suppliers.put(supplier, clientTypes);
                         } else {
-                            if (operations instanceof AbstractPaymentTemplate) {
-                                AbstractPaymentTemplate template = (AbstractPaymentTemplate) operations;
-                                template.setPaymentProperties(paymentProperties);
-                            }
                             clientTypes.put(client, operations);
                         }
                         loaded.append(client.getName()).append(",");

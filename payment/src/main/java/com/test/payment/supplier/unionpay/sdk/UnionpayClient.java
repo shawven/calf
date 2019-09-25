@@ -4,8 +4,6 @@ import com.test.payment.supplier.unionpay.sdk.domain.UnionpayTradePagePayRequest
 import com.test.payment.supplier.unionpay.sdk.domain.UnionpayTradeQueryRequest;
 import com.test.payment.supplier.unionpay.sdk.domain.UnionpayTradeRefundRequest;
 import com.test.payment.support.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -42,6 +40,8 @@ public class UnionpayClient {
 
     private UnionpayCertification certification;
 
+    private HttpUtil httpUtil;
+
     public UnionpayClient(String mchId, String gatewayUrl, String encryptKey, String version, Charset charset,
                           int connectTimeout, int readTimeout) {
         this.mchId = mchId;
@@ -53,6 +53,7 @@ public class UnionpayClient {
         this.readTimeout = readTimeout;
         this.useCert = false;
         this.signMethod = UnionpayConstants.SIGNMETHOD_SHA256;
+        this.httpUtil = PaymentContextHolder.getHttp();
     }
 
     public UnionpayClient(String mchId, String gatewayUrl, String signCertPath, String encryptCertPath,
@@ -66,6 +67,7 @@ public class UnionpayClient {
         this.readTimeout = readTimeout;
         this.useCert = true;
         this.signMethod = UnionpayConstants.SIGNMETHOD_RSA;
+        this.httpUtil = PaymentContextHolder.getHttp();
         this.certification = new UnionpayCertification(signCertPath, encryptCertPath, rootCertPath, middleCertPath,
                signCertPassword, validateCNName);
     }
@@ -135,7 +137,7 @@ public class UnionpayClient {
 
         String rsp;
         try {
-            rsp = PaymentHttpUtils.post(gatewayUrl + relativeUrl, params, connectTimeout, readTimeout);
+            rsp = httpUtil.post(gatewayUrl + relativeUrl, params, connectTimeout, readTimeout);
         } catch (IOException e) {
             throw new UnionpayException(e);
         }
