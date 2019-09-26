@@ -1,6 +1,6 @@
 package com.test.payment.support;
 
-import com.test.payment.properties.PaymentProperties;
+import com.test.payment.properties.GlobalProperties;
 
 /**
  * @author Shoven
@@ -8,16 +8,16 @@ import com.test.payment.properties.PaymentProperties;
  */
 public class PaymentContextHolder {
 
-    private static PaymentProperties globalProperties;
+    private static GlobalProperties globalProperties;
 
     private static HttpUtil http;
 
 
-    public static PaymentProperties getGlobalProperties() {
+    public static GlobalProperties getGlobalProperties() {
         return globalProperties;
     }
 
-    public static void setGlobalProperties(PaymentProperties globalProperties) {
+    public static void setGlobalProperties(GlobalProperties globalProperties) {
         PaymentContextHolder.globalProperties = globalProperties;
     }
 

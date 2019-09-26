@@ -23,8 +23,7 @@ public class WechatPayClientFactory {
             client = new WXPay(new WxConfig(prop, true), prop.getNotifyUrl(),
                     prop.getAutoReport(), prop.getUseSandbox());
         }
-        return new WXPay(new WxConfig(prop, true), prop.getNotifyUrl(),
-                prop.getAutoReport(), prop.getUseSandbox());
+        return client;
     }
 
     private static class WxConfig extends WXPayConfig {

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.test.app.common.Response;
 import com.test.payment.PaymentManager;
 import com.test.payment.domain.*;
-import com.test.payment.properties.WechatPayProperties;
 import com.test.payment.supplier.PaymentSupplierEnum;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -42,6 +41,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class PayController {
 
     private Map<String, String> refundMap = new ConcurrentHashMap<>();
+    private Map<String, String> orderMap = new ConcurrentHashMap<>();
 
     private Logger logger = LoggerFactory.getLogger(PayController.class);
 
@@ -87,7 +87,7 @@ public class PayController {
         tradeRequest.setSubject("测试商品 iphonexs 256G 黑色");
         tradeRequest.setBody("测试商品 iphonexs 256G 黑色仅售6666元，快速抢购");
         tradeRequest.setOutTradeNo(orderId);
-        tradeRequest.setAmount("0.01");
+        tradeRequest.setAmount("1.01");
         tradeRequest.setIp("127.0.0.1");
 
         PaymentTradeResponse rsp = paymentManager.pay(tradeRequest);
@@ -116,7 +116,7 @@ public class PayController {
         PaymentTradeCallbackResponse rsp = paymentManager.asyncNotify(callbackRequest);
 
         if (rsp.isSuccess()) {
-            processOrder(rsp.getOutTradeNo());
+            processOrder(rsp.getOutTradeNo(), rsp.getTradeNo());
         }
 
         try {
@@ -149,7 +149,7 @@ public class PayController {
         PaymentTradeCallbackResponse rsp = paymentManager.syncReturn(callbackRequest);
 
         if (rsp.isSuccess()) {
-            processOrder(rsp.getOutTradeNo());
+            processOrder(rsp.getOutTradeNo(), rsp.getTradeNo());
             return success();
         }
         model.addAttribute("message", rsp.getErrorMsg());
@@ -162,11 +162,11 @@ public class PayController {
 
         tradeQueryRequest.setPrincipal("13111111111");
         tradeQueryRequest.setOutTradeNo(orderId);
-        tradeQueryRequest.setTradeNo(orderId);
+        tradeQueryRequest.setTradeNo(orderMap.get(orderId));
         PaymentTradeQueryResponse rsp = paymentManager.query(tradeQueryRequest);
 
         if (rsp.isSuccess()) {
-            processOrder(rsp.getOutTradeNo());
+            processOrder(rsp.getOutTradeNo(), rsp.getTradeNo());
             return Response.ok(ImmutableMap.of("success", true));
         }
 
@@ -180,9 +180,11 @@ public class PayController {
         logger.info("退款单号[{}]", refundNo);
 
         refundMap.put(orderId, refundNo);
+
         refundRequest.setPrincipal("13111111111");
         refundRequest.setOutTradeNo(orderId);
         refundRequest.setOutRefundNo(refundNo);
+        refundRequest.setTradeNo(orderMap.get(orderId));
         refundRequest.setRefundAmount("0.01");
         refundRequest.setTotalAmount("0.01");
         refundRequest.setRefundReason("无条件退款");
@@ -202,48 +204,16 @@ public class PayController {
 
         refundQueryRequest.setPrincipal("13111111111");
         refundQueryRequest.setOutTradeNo(orderId);
+        refundQueryRequest.setTradeNo(orderMap.get(orderId));
         refundQueryRequest.setOutRefundNo(refundMap.get(orderId));
         PaymentTradeRefundQueryResponse rsp = paymentManager.refundQuery(refundQueryRequest);
 
         if (rsp.isSuccess()) {
-            processOrder(rsp.getOutTradeNo());
+            processOrder(rsp.getOutTradeNo(), rsp.getTradeNo());
             return Response.ok(rsp.getBody());
         }
 
         return Response.error(rsp.getErrorMsg());
-    }
-
-    @GetMapping("refund/notify/{supplier}")
-    public void refundNotify(@NotBlank @PathVariable String supplier,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response) {
-        ServletInputStream inputStream;
-        try {
-            inputStream = request.getInputStream();
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            return;
-        }
-        PaymentTradeCallbackRequest callbackRequest = new PaymentTradeCallbackRequest(supplier,
-                request.getParameterMap(), inputStream);
-        callbackRequest.setPrincipal("13111111111");
-        PaymentTradeCallbackResponse rsp = paymentManager.asyncNotify(callbackRequest);
-
-        if (rsp.isSuccess()) {
-            processRefundOrder(rsp.getOutTradeNo());
-        }
-
-        try {
-            // 直接将完整的表单html输出到页面
-            response.setContentType("text/html;charset=UTF-8");
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter writer = response.getWriter();
-            writer.write(rsp.getReplayMessage());
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
     }
 
     @GetMapping("redirect")
@@ -264,7 +234,8 @@ public class PayController {
         return "payment/fail";
     }
 
-    private void processOrder(String orderId) {
+    private void processOrder(String orderId, String tradeNo) {
+        orderMap.put(orderId, tradeNo);
         logger.warn("正在处理订单:[" + orderId + "]，必须先判断订单状态");
     }
 

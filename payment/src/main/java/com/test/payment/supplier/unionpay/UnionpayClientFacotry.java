@@ -14,11 +14,24 @@ import java.nio.charset.Charset;
  */
 public class UnionpayClientFacotry {
 
-    private static UnionpayClient client;
+    private static UnionpayClient b2cClient;
+    private static UnionpayClient b2bClient;
 
-    public static UnionpayClient getInstance(UnionpayProperties prop) {
+    public static UnionpayClient getB2CInstance(UnionpayProperties prop) {
+        b2cClient = loadInstance(b2cClient, prop);
+        return b2cClient;
+    }
+
+    public static UnionpayClient getB2BInstance(UnionpayProperties prop) {
+        b2bClient = loadInstance(b2bClient, prop);
+        return b2bClient;
+    }
+
+    public static UnionpayClient loadInstance(UnionpayClient client, UnionpayProperties prop) {
         if (prop.getUseSandbox() || client == null) {
-            String gatewayUrl = prop.getUseSandbox() ? UnionpayConstants.SANDBOX_GATEWAY_URL : UnionpayConstants.GATEWAY_URL;
+            String gatewayUrl = prop.getUseSandbox()
+                    ? UnionpayConstants.SANDBOX_GATEWAY_URL
+                    : UnionpayConstants.GATEWAY_URL;
             boolean useCert = PaymentUtils.isBlankString(prop.getEncryptKey());
             if (useCert) {
                 ClassLoader classLoader = UnionpayClientFacotry.class.getClassLoader();
@@ -49,7 +62,6 @@ public class UnionpayClientFacotry {
                         3000, 15000);
             }
         }
-
         return client;
     }
 }

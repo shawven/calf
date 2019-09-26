@@ -1,6 +1,5 @@
-package com.test.payment.supplier.unionpay.sdk.domain;
+package com.test.payment.supplier.unionpay.sdk.request;
 
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

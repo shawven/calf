@@ -4,14 +4,12 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayRequest;
 import com.alipay.api.AlipayResponse;
-import com.alipay.api.domain.AlipayTradePagePayModel;
-import com.alipay.api.domain.AlipayTradeQueryModel;
-import com.alipay.api.domain.AlipayTradeWapPayModel;
+import com.alipay.api.domain.*;
 import com.alipay.api.internal.util.AlipaySignature;
-import com.alipay.api.request.AlipayTradePagePayRequest;
-import com.alipay.api.request.AlipayTradeQueryRequest;
-import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.request.*;
+import com.alipay.api.response.AlipayTradeFastpayRefundQueryResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
+import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.test.payment.client.QrcTradeClientType;
 import com.test.payment.client.WapTradeClientType;
 import com.test.payment.client.WebTradeClientType;
@@ -42,6 +40,7 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
     @Override
     public PaymentTradeResponse pay(PaymentTradeRequest request) {
         PaymentTradeResponse response = new PaymentTradeResponse();
+
         AlipayRequest<? extends AlipayResponse> alipayRequest = getAlipayRequest(request);
         try {
             logger.info(request, "预支付请求参数：{}", PaymentUtils.toString(alipayRequest));
@@ -72,21 +71,21 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
             boolean validation = AlipaySignature.rsaCheckV1(params, properties.getPublicKey(),
                     properties.getCharset(), properties.getSignType());
             if (validation) {
-                String outTradeNo = params.get("out_trade_no");
+                String tradeNo = params.get("trade_no");
                 // 新版不支持交易状态 转用查询
                 logger.info(request, "同步回调转查询交易：{}", params);
 
                 PaymentTradeQueryRequest queryRequest = new PaymentTradeQueryRequest(request);
-                queryRequest.setOutTradeNo(outTradeNo);
+                queryRequest.setTradeNo(tradeNo);
                 PaymentTradeQueryResponse queryResponse = query(queryRequest);
 
                 response.setSuccess(queryResponse.isSuccess());
                 response.setAmount(CurrencyTools.ofYuan(queryResponse.getAmount()));
                 response.setTradeNo(queryResponse.getTradeNo());
-                response.setOutTradeNo(outTradeNo);
+                response.setOutTradeNo(queryResponse.getOutTradeNo());
             }else{
                 response.setErrorMsg("同步回调验签失败");
-                logger.info(request, "同步回调验签失败");
+                logger.error(request, "同步回调验签失败");
             }
         } catch (AlipayApiException e) {
             response.setErrorMsg("同步跳转错误：" + e.getMessage());
@@ -125,7 +124,7 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
                 logger.info(request, "异步回调交易状态[{}]", tradeStatusDesc);
             } else{
                 response.setErrorMsg("异步回调验签失败");
-                logger.info(request, "异步回调验签失败");
+                logger.error(request, "异步回调验签失败");
             }
         } catch (AlipayApiException e) {
             response.setErrorMsg("异步回调错误：" + e.getMessage());
@@ -137,7 +136,7 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
     @Override
     public PaymentTradeQueryResponse query(PaymentTradeQueryRequest request) {
         AlipayTradeQueryModel alipayModel = new AlipayTradeQueryModel();
-        alipayModel.setOutTradeNo(request.getOutTradeNo());
+        alipayModel.setTradeNo(request.getTradeNo());
 
         AlipayTradeQueryRequest alipayRequest = new AlipayTradeQueryRequest();
         alipayRequest.setBizModel(alipayModel);
@@ -172,7 +171,7 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
             }
         } catch (AlipayApiException e) {
             response.setErrorMsg("查询支付交易结果错误：" + e.getMessage());
-            logger.info(request, "查询支付交易结果错误：{}", e.getMessage());
+            logger.error(request, "查询支付交易结果错误：{}", e.getMessage());
         }
         return response;
     }
@@ -180,12 +179,72 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
 
     @Override
     public PaymentTradeRefundResponse refund(PaymentTradeRefundRequest request) {
-        return null;
+        AlipayTradeRefundModel alipayModel = new AlipayTradeRefundModel();
+        alipayModel.setTradeNo(request.getTradeNo());
+        alipayModel.setOutRequestNo(request.getOutRefundNo());
+        alipayModel.setRefundAmount(CurrencyTools.ofYuan(request.getRefundAmount()));
+        alipayModel.setRefundReason(request.getRefundReason());
+
+        AlipayTradeRefundRequest alipayRequest = new AlipayTradeRefundRequest();
+        alipayRequest.setBizModel(alipayModel);
+
+        AlipayClient alipayClient = getAlipayClient();
+        PaymentTradeRefundResponse response = new PaymentTradeRefundResponse();
+        try {
+            logger.info(request, "申请退款请求参数：{}", PaymentUtils.toString(request));
+            AlipayTradeRefundResponse alipayResponse = alipayClient.execute(alipayRequest);
+            logger.info(request, "申请退款响应参数：{}", PaymentUtils.toString(alipayResponse));
+            if (alipayResponse.isSuccess()) {
+                response.setSuccess(true);
+                response.setOutTradeNo(alipayResponse.getOutTradeNo());
+                response.setOutRefundNo(request.getOutRefundNo());
+                response.setTradeNo(alipayResponse.getTradeNo());
+                response.setRefundAmount(alipayResponse.getRefundFee());
+                response.setTotalAmount(request.getTotalAmount());
+                logger.info(request, "申请退款状态成功");
+            } else {
+                logger.error(request, "申请退款请求失败：{}", alipayResponse.getMsg());
+                response.setErrorMsg(alipayResponse.getSubMsg());
+            }
+        } catch (AlipayApiException e) {
+            response.setErrorMsg("申请退款错误：" + e.getMessage());
+            logger.error(request, "申请退款错误：{}", e.getMessage());
+        }
+        return response;
     }
 
     @Override
     public PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
-        return null;
+        AlipayTradeFastpayRefundQueryModel alipayModel = new AlipayTradeFastpayRefundQueryModel();
+        alipayModel.setTradeNo(request.getTradeNo());
+        alipayModel.setOutRequestNo(request.getOutRefundNo());
+
+        AlipayTradeFastpayRefundQueryRequest alipayRequest = new AlipayTradeFastpayRefundQueryRequest();
+        alipayRequest.setBizModel(alipayModel);
+
+        AlipayClient alipayClient = getAlipayClient();
+        PaymentTradeRefundQueryResponse response = new PaymentTradeRefundQueryResponse();
+        try {
+            logger.info(request, "查询退款请求参数：{}", PaymentUtils.toString(request));
+            AlipayTradeFastpayRefundQueryResponse alipayResponse = alipayClient.execute(alipayRequest);
+            logger.info(request, "查询退款响应参数：{}", PaymentUtils.toString(alipayResponse));
+            if (alipayResponse.isSuccess()) {
+                response.setSuccess(true);
+                response.setOutTradeNo(alipayResponse.getOutTradeNo());
+                response.setOutRefundNo(alipayResponse.getOutRequestNo());
+                response.setTradeNo(alipayResponse.getTradeNo());
+                response.setRefundAmount(alipayResponse.getRefundAmount());
+                response.setTotalAmount(alipayResponse.getTotalAmount());
+                logger.info(request, "查询退款状态成功");
+            } else {
+                logger.error(request, "查询退款请求失败：{}", alipayResponse.getMsg());
+                response.setErrorMsg(alipayResponse.getSubMsg());
+            }
+        } catch (AlipayApiException e) {
+            response.setErrorMsg("查询退款错误：" + e.getMessage());
+            logger.error(request, "查询退款错误：{}", e.getMessage());
+        }
+        return response;
     }
 
     public AlipayProperties getProperties() {
@@ -231,6 +290,7 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
             alipayModel.setTotalAmount(CurrencyTools.toYuan(request.getAmount()));
             alipayModel.setSubject(request.getSubject());
             alipayModel.setBody(request.getBody());
+            alipayModel.setQuitUrl(getGlobalProperties().getServerDomain());
             alipayModel.setProductCode("QUICK_WAP_WAY");
 
             alipayRequest.setBizModel(alipayModel);

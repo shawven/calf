@@ -25,7 +25,7 @@ public enum PaymentSupplierEnum {
     /**
      * 银联B2B
      */
-    UNIONPAY_B2B("银联（公账）");
+    UNIONPAY_B2B("银联(公账)");
 
     private String name;
 

@@ -1,7 +1,4 @@
-package com.test.payment.supplier.unionpay.sdk.domain;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
+package com.test.payment.supplier.unionpay.sdk.request;
 
 /**
  * @author Shoven
@@ -12,7 +9,7 @@ public class UnionpayTradeRefundRequest extends UnionpayTradeRequest {
     /**
      * 订单号
      */
-    private String outTradeNo;
+    private String outRefundNo;
 
     /**
      * 交易好啊
@@ -39,12 +36,12 @@ public class UnionpayTradeRefundRequest extends UnionpayTradeRequest {
      */
     private String tradeSubType = "00";
 
-    public String getOutTradeNo() {
-        return outTradeNo;
+    public String getOutRefundNo() {
+        return outRefundNo;
     }
 
-    public void setOutTradeNo(String outTradeNo) {
-        this.outTradeNo = outTradeNo;
+    public void setOutRefundNo(String outRefundNo) {
+        this.outRefundNo = outRefundNo;
     }
 
     public String getTradeNo() {
@@ -90,7 +87,7 @@ public class UnionpayTradeRefundRequest extends UnionpayTradeRequest {
     @Override
     public String toString() {
         return "UnionpayTradeRefundRequest{" +
-                "outTradeNo='" + outTradeNo + '\'' +
+                "outRefundNo='" + outRefundNo + '\'' +
                 ", tradeNo='" + tradeNo + '\'' +
                 ", refundAmount='" + refundAmount + '\'' +
                 ", notifyUrl='" + notifyUrl + '\'' +

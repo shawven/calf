@@ -91,7 +91,7 @@ public class UnionpayCertification {
             }
             encryptCert = CertUtils.getCertificate(encryptCertPath);
         } catch (Exception e) {
-            logger.error("初始化证书失败", e);
+            throw new RuntimeException("初始化证书失败：" + e.getMessage(), e);
         }
     }
 

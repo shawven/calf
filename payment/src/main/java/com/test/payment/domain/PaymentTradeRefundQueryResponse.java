@@ -11,7 +11,6 @@ public class PaymentTradeRefundQueryResponse extends PaymentResponse {
      */
     private String outTradeNo;
 
-
     /**
      * 平台交易号
      */
@@ -36,11 +35,6 @@ public class PaymentTradeRefundQueryResponse extends PaymentResponse {
      * 订单金额
      */
     private String totalAmount;
-
-    /**
-     * 退款原因
-     */
-    private String refundReason;
 
     public String getOutTradeNo() {
         return outTradeNo;
@@ -90,14 +84,6 @@ public class PaymentTradeRefundQueryResponse extends PaymentResponse {
         this.totalAmount = totalAmount;
     }
 
-    public String getRefundReason() {
-        return refundReason;
-    }
-
-    public void setRefundReason(String refundReason) {
-        this.refundReason = refundReason;
-    }
-
     @Override
     public String toString() {
         return "PaymentTradeRefundQueryResponse{" +
@@ -107,7 +93,6 @@ public class PaymentTradeRefundQueryResponse extends PaymentResponse {
                 ", refundNo='" + refundNo + '\'' +
                 ", refundAmount='" + refundAmount + '\'' +
                 ", totalAmount='" + totalAmount + '\'' +
-                ", refundReason='" + refundReason + '\'' +
                 '}';
     }
 }

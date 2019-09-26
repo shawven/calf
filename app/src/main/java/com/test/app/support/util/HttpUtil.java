@@ -49,7 +49,7 @@ import static org.apache.http.entity.ContentType.*;
 
 /**
  * HttpClient工具类 线程安全
- *
+ * <p>线程安全、涉及的超时时间都是秒</p>
  * <p>创建实例</p>
  * <pre>
  *  // 非连接池
@@ -68,7 +68,7 @@ import static org.apache.http.entity.ContentType.*;
  * <p>使用实例</p>
  * <pre>
  * http.get("http://www.xx.com")
- * http.post("http://www.xx.com", new HasMap())
+ * http.post("http://www.xx.com", new HashMap())
  *
  * 参数支持：
  *     Map:
@@ -99,7 +99,7 @@ import static org.apache.http.entity.ContentType.*;
  * 超时时间都是秒
  *
  * @author Shoven
- * @date 2019-08-26
+ * @date 2019-09-23
  */
 public class HttpUtil {
 

@@ -1,8 +1,9 @@
 package com.test.payment.supplier.unionpay.sdk;
 
-import com.test.payment.supplier.unionpay.sdk.domain.UnionpayTradePagePayRequest;
-import com.test.payment.supplier.unionpay.sdk.domain.UnionpayTradeQueryRequest;
-import com.test.payment.supplier.unionpay.sdk.domain.UnionpayTradeRefundRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradePagePayRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeQueryRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundQueryRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundRequest;
 import com.test.payment.support.*;
 
 import java.io.IOException;
@@ -72,6 +73,13 @@ public class UnionpayClient {
                signCertPassword, validateCNName);
     }
 
+    /**
+     * 网页支付下单
+     *
+     * @param request
+     * @return
+     * @throws UnionpayException
+     */
     public String pagePay(UnionpayTradePagePayRequest request) throws UnionpayException {
         Map<String, String> params = new HashMap<>();
         //交易类型
@@ -99,6 +107,13 @@ public class UnionpayClient {
         return pageExecute(UnionpayConstants.FRONT_TRANS_URL, params);
     }
 
+    /**
+     * 支付查询
+     *
+     * @param request
+     * @return
+     * @throws UnionpayException
+     */
     public Map<String, String> query(UnionpayTradeQueryRequest request) throws UnionpayException {
         Map<String, String> params = new HashMap<>();
         params.put(UnionpayConstants.param_txnType, request.getTradeType());
@@ -109,19 +124,46 @@ public class UnionpayClient {
         return execute(UnionpayConstants.SINGLE_QUERY_URL, params);
     }
 
+    /**
+     * 退款
+     *
+     * @param request
+     * @return
+     * @throws UnionpayException
+     */
     public Map<String, String> refund(UnionpayTradeRefundRequest request) throws UnionpayException {
         Map<String, String> params = new HashMap<>();
         params.put(UnionpayConstants.param_txnType, request.getTradeType());
         params.put(UnionpayConstants.param_txnSubType, request.getTradeSubType());
         params.put(UnionpayConstants.param_bizType, request.getBizType());
-        params.put(UnionpayConstants.param_orderId, request.getOutTradeNo());
+        params.put(UnionpayConstants.param_channelType, request.getChannelType());
+        // 这里的订单号是退款订单号，不是原订单号
+        params.put(UnionpayConstants.param_orderId, request.getOutRefundNo());
         // 交易流水号
         params.put(UnionpayConstants.param_origQryId, request.getTradeNo());
         // 退款金额
         params.put(UnionpayConstants.param_txnAmt, request.getRefundAmount());
         params.put(UnionpayConstants.param_txnTime, request.getRequestTime());
         params.put(UnionpayConstants.param_currencyCode, request.getCurrencyCode());
-        params.put(UnionpayConstants.param_backUrl, request.getNotifyUrl());
+        // 不需要退款通知固定值
+        params.put(UnionpayConstants.param_backUrl, "http://www.specialUrl.com");
+        return execute(UnionpayConstants.SINGLE_QUERY_URL, params);
+    }
+
+    /**
+     * 退款查询
+     *
+     * @param request
+     * @return
+     * @throws UnionpayException
+     */
+    public Map<String, String> refundQuery(UnionpayTradeRefundQueryRequest request) throws UnionpayException {
+        Map<String, String> params = new HashMap<>();
+        params.put(UnionpayConstants.param_txnType, request.getTradeType());
+        params.put(UnionpayConstants.param_txnSubType, request.getTradeSubType());
+        params.put(UnionpayConstants.param_bizType, request.getBizType());
+        params.put(UnionpayConstants.param_orderId, request.getOutRefundNo());
+        params.put(UnionpayConstants.param_txnTime, request.getRequestTime());
         return execute(UnionpayConstants.SINGLE_QUERY_URL, params);
     }
 

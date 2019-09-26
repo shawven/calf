@@ -15,6 +15,9 @@
             <li role="presentation" class="nav-item">
                 <a href="#unionpay" class="nav-link px-4" aria-controls="messages" role="tab" data-toggle="tab">银联</a>
             </li>
+            <li role="presentation" class="nav-item">
+                <a href="#unionpay_b2b" class="nav-link px-4" aria-controls="messages" role="tab" data-toggle="tab">银联(公账)</a>
+            </li>
         </ul>
 
         <!-- Tab panes -->
@@ -50,6 +53,17 @@
                     </div>
                 </div>
             </div>
+            <div role="tabpanel" class="tab-pane" id="unionpay_b2b">
+                <div class="row my-4">
+                    <div class="col-md-6">
+                        <button class="btn btn-dark">跳转到银联(公账)</button>
+                        <div class="d-none direct"></div>
+                    </div>
+                    <div class="col-md-6 unionpay_b2b-alert">
+
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="alert-success text-center d-none font-weight-bold ">
@@ -72,15 +86,21 @@
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         var supplier = e.target.hash
         if (supplier === "#alipay") {
-            // getAlipayQrCode()
+            window.clearInterval(timer)
+            getAlipayQrCode()
         }
         if (supplier === "#wechat") {
+            window.clearInterval(timer)
             getWechatQrCode()
         }
         if (supplier === "#unionpay") {
+            window.clearInterval(timer)
             getUnionpay()
         }
-
+        if (supplier === "#unionpay_b2b") {
+            window.clearInterval(timer)
+            getUnionpayB2B()
+        }
     })
 
     function getAlipayQrCode() {
@@ -90,6 +110,9 @@
         if (isPc) {
             // 1. 自动构造iframe显示二维码支付
             $.post("${baseUrl}/payment/pay/alipay/qrc?width=200&orderId=" + orderId, function (result) {
+                query(result.data.orderId, "alipay", function(){
+                    document.querySelector(".alert-success").innerHTML = "支付宝支付成功"
+                })
                 var formHtml = result.data.form;
                 // 构造iframe
                 var iframe = document.createElement("iframe")
@@ -113,7 +136,7 @@
             // 给按钮设置提交提交表单事件
             tabPane.querySelector("button").onclick = function() {
                 $.post("${baseUrl}/payment/pay/alipay/web",{orderId:  orderId}, function (result) {
-                    query(result.data.orderId, "unionpay", function(){
+                    query(result.data.orderId, "alipay", function(){
                         document.querySelector(".alert-success").innerHTML = "支付宝支付成功"
                     })
                     tabPane.querySelector(".direct").innerHTML = result.data.form
@@ -187,7 +210,43 @@
                 })
             }
         }
+    }
 
+    function getUnionpayB2B() {
+        var tabPane = document.querySelector("#unionpay_b2b")
+        if (isPc) {
+            // 2. 跳转页面支付
+            // 在当前页面填充表单
+            // 给按钮设置提交提交表单事件
+            tabPane.querySelector("button").onclick = function() {
+                $.post("${baseUrl}/payment/pay/unionpay_b2b/web",{orderId: new Date().getTime()}, function (result) {
+                    query(result.data.orderId, "unionpay_b2b", function(){
+                        document.querySelector(".alert-success").innerHTML = "银联支付成功"
+                    })
+                    tabPane.querySelector(".direct").innerHTML = result.data.form
+                    tabPane.querySelector("form").target = "_blank"
+                    tabPane.querySelector("form").submit()
+                }, "json").fail(function (result) {
+                    console.log(result)
+                })
+            }
+        } else {
+            // 2. 跳转页面支付
+            // 在当前页面填充表单
+            // 给按钮设置提交提交表单事件
+            tabPane.querySelector("button").onclick = function() {
+                $.post("${baseUrl}/payment/pay/unionpay_b2b/wap",{orderId: new Date().getTime()}, function (result) {
+                    query(result.data.orderId, "unionpay_b2b", function(){
+                        document.querySelector(".alert-success").innerHTML = "银联支付成功"
+                    })
+                    tabPane.querySelector(".direct").innerHTML = result.data.form
+                    tabPane.querySelector("form").target = "_blank"
+                    tabPane.querySelector("form").submit()
+                }, "json").fail(function (result) {
+                    console.log(result)
+                })
+            }
+        }
     }
 
     var timer
@@ -196,16 +255,16 @@
         window.clearInterval(timer)
         timer = setInterval(function(){
             console.log("轮训查询支付结果")
-            $.get("${baseUrl}/payment/query/" + payWay, {orderId: orderId}, function (result) {
-                if (result.data.success) {
-                    callback()
-                    document.querySelector(".alert-success").classList.remove("d-none")
-                    window.clearInterval(timer)
-                }
-            }, "json").fail(function (result) {
-                console.log(result)
-            })
-        }, 3000)
+            <#--$.get("${baseUrl}/payment/query/" + payWay, {orderId: orderId}, function (result) {-->
+            <#--    if (result.data.success) {-->
+            <#--        callback()-->
+            <#--        document.querySelector(".alert-success").classList.remove("d-none")-->
+            <#--        window.clearInterval(timer)-->
+            <#--    }-->
+            <#--}, "json").fail(function (result) {-->
+            <#--    console.log(result)-->
+            <#--})-->
+        }, 5000)
     }
 
     function showQrCode(selector, url) {

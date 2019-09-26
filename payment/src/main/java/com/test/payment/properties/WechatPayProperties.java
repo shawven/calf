@@ -30,6 +30,8 @@ public class WechatPayProperties {
 
     private Boolean autoReport;
 
+    private Integer reportWorkNum;
+
     public String getAppId() {
         return appId;
     }
@@ -92,5 +94,13 @@ public class WechatPayProperties {
 
     public void setAutoReport(Boolean autoReport) {
         this.autoReport = autoReport;
+    }
+
+    public Integer getReportWorkNum() {
+        return reportWorkNum;
+    }
+
+    public void setReportWorkNum(Integer reportWorkNum) {
+        this.reportWorkNum = reportWorkNum;
     }
 }

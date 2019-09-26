@@ -16,10 +16,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 
 /**
  * 交易保障
@@ -123,16 +120,19 @@ public class WXPayReport {
     private WXPayReport(final WXPayConfig config) {
         this.config = config;
         reportMsgQueue = new LinkedBlockingQueue<>(config.getReportQueueMaxSize());
-
         // 添加处理线程
-        executorService = Executors.newFixedThreadPool(config.getReportWorkerNum(), r -> {
-            Thread t = Executors.defaultThreadFactory().newThread(r);
-            t.setDaemon(true);
-            return t;
-        });
+        int workerNum = config.getReportWorkerNum();
+        executorService = new ThreadPoolExecutor(workerNum, 2 * workerNum,
+                60L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                r -> {
+                    Thread t = Executors.defaultThreadFactory().newThread(r);
+                    t.setDaemon(true);
+                    return t;
+                });
 
         if (config.shouldAutoReport()) {
-            logger.info("report worker num: {}", config.getReportWorkerNum());
+            logger.info("微信支付上报线程工作数量: {}", config.getReportWorkerNum());
             for (int i = 0; i < config.getReportWorkerNum(); ++i) {
                 executorService.execute(() -> {
                     // 先用 take 获取数据

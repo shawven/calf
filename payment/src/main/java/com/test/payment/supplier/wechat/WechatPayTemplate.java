@@ -40,7 +40,7 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
     public PaymentTradeQueryResponse query(PaymentTradeQueryRequest request) {
         WXPay client = getWechatPayClient();
         HashMap<String, String> params = new HashMap<>();
-        params.put("out_trade_no", request.getOutTradeNo());
+        params.put("transaction_id", request.getTradeNo());
 
         PaymentTradeQueryResponse response = new PaymentTradeQueryResponse();
         try {
@@ -56,8 +56,8 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                     String tradeStateDesc = rsp.get("trade_state_desc");
                     if (WXPayConstants.SUCCESS.equals(tradeState)) {
                         response.setSuccess(true);
-                        response.setOutTradeNo(request.getOutTradeNo());
-                        response.setTradeNo(rsp.get("transaction_id"));
+                        response.setOutTradeNo(rsp.get("out_trade_no"));
+                        response.setTradeNo(request.getOutTradeNo());
                         response.setAmount(CurrencyTools.ofCent(rsp.get("total_fee")));
                     } else {
                         response.setErrorMsg(tradeStateDesc);
@@ -80,12 +80,6 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
         return response;
     }
 
-
-    @Override
-    public PaymentTradeCallbackResponse syncReturn(PaymentTradeCallbackRequest request) {
-        return null;
-    }
-
     @Override
     public PaymentTradeCallbackResponse asyncNotify(PaymentTradeCallbackRequest request) {
         WXPay client = getWechatPayClient();
@@ -99,7 +93,8 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                 try {
                     String s = WXPayUtil.mapToXml(replay);
                     response.setReplayMessage(s);
-                } catch (Exception ignored) { }
+                } catch (Exception ignored) {
+                }
                 return response;
             }
 
@@ -128,12 +123,12 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                     logger.info(request, "异步回调交易状态[{}]", tradeStatusDesc);
                 } else {
                     response.setErrorMsg("异步回调验签失败");
-                    logger.info(request, "异步回调验签失败");
+                    logger.error(request, "异步回调验签失败");
                 }
             } else {
                 String errorMsg = params.get("return_msg");
                 response.setErrorMsg(errorMsg);
-                logger.info(request, "异步回调失败：{}", errorMsg);
+                logger.error(request, "异步回调失败：{}", errorMsg);
             }
         } catch (Exception e) {
             response.setErrorMsg("异步回调错误：" + e.getMessage());
@@ -143,7 +138,8 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
         try {
             String s = WXPayUtil.mapToXml(replay);
             response.setReplayMessage(s);
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
         return response;
     }
 
@@ -151,8 +147,7 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
     public PaymentTradeRefundResponse refund(PaymentTradeRefundRequest request) {
         WXPay client = getWechatPayClient();
         HashMap<String, String> params = new HashMap<>();
-        params.put("out_trade_no", request.getOutTradeNo());
-        params.put("out_refund_no", request.getOutRefundNo());
+        params.put("transaction_id", request.getTradeNo());
         params.put("total_fee", CurrencyTools.toCent(request.getRefundAmount()));
         params.put("refund_fee", CurrencyTools.toCent(request.getRefundAmount()));
         params.put("refund_desc", request.getRefundReason());
@@ -166,6 +161,7 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
             String returnCode = rsp.get("return_code");
             if (WXPayConstants.SUCCESS.equals(returnCode)) {
                 String resultCode = rsp.get("result_code");
+                String desc;
                 if (WXPayConstants.SUCCESS.equals(resultCode)) {
                     response.setSuccess(true);
                     response.setOutTradeNo(request.getOutTradeNo());
@@ -174,15 +170,16 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                     response.setRefundNo(rsp.get("refund_id"));
                     response.setRefundAmount(CurrencyTools.ofCent(rsp.get("refund_fee")));
                     response.setTotalAmount(CurrencyTools.ofCent(rsp.get("total_fee")));
+                    desc = "成功";
                 } else {
-                    String errorMsg = rsp.get("err_code_des");
-                    response.setErrorMsg(errorMsg);
-                    logger.info(request, "申请退款失败：{}", errorMsg);
+                    desc = rsp.get("err_code_des");
+                    response.setErrorMsg(desc);
                 }
+                logger.info(request, "申请退款状态[{}]", desc);
             } else {
                 String errorMsg = rsp.get("return_msg");
                 response.setErrorMsg(errorMsg);
-                logger.info(request, "申请退款请求失败：{}", errorMsg);
+                logger.error(request, "申请退款请求失败：{}", errorMsg);
             }
         } catch (Exception e) {
             response.setErrorMsg("申请退款错误：" + e.getMessage());
@@ -192,11 +189,10 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
     }
 
     @Override
-        public PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
+    public PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
         WXPay client = getWechatPayClient();
         HashMap<String, String> params = new HashMap<>();
-        params.put("out_refund_no", request.getOutRefundNo());
-        params.put("out_trade_no", request.getOutTradeNo());
+        params.put("refund_id", request.getOutRefundNo());
 
         PaymentTradeRefundQueryResponse response = new PaymentTradeRefundQueryResponse();
         try {
@@ -207,8 +203,9 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
             String returnCode = rsp.get("return_code");
             if (WXPayConstants.SUCCESS.equals(returnCode)) {
                 String resultCode = rsp.get("result_code");
+                String refundStatus;
                 if (WXPayConstants.SUCCESS.equals(resultCode)) {
-                    String refundStatus = rsp.get("refund_status_0");
+                    refundStatus = rsp.get("refund_status_0");
                     if (WXPayConstants.SUCCESS.equals(refundStatus)) {
                         response.setSuccess(true);
                         response.setOutTradeNo(request.getOutTradeNo());
@@ -229,16 +226,15 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                         }
                         response.setErrorMsg(refundStatus);
                     }
-                    logger.info(request, "查询退款状态[{}]", refundStatus);
                 } else {
-                    String errorMsg = rsp.get("err_code_des");
-                    response.setErrorMsg(errorMsg);
-                    logger.info(request, "查询退款失败：{}", errorMsg);
+                    refundStatus = rsp.get("err_code_des");
+                    response.setErrorMsg(refundStatus);
                 }
+                logger.info(request, "查询退款状态[{}]", refundStatus);
             } else {
                 String errorMsg = rsp.get("return_msg");
                 response.setErrorMsg(errorMsg);
-                logger.info(request, "查询退款请求失败：{}", errorMsg);
+                logger.error(request, "查询退款请求失败：{}", errorMsg);
             }
         } catch (Exception e) {
             response.setErrorMsg("查询退款错误：" + e.getMessage());
@@ -292,7 +288,7 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                 } else {
                     String errorMsg = rsp.get("return_msg");
                     response.setErrorMsg("预支付请求失败：" + errorMsg);
-                    logger.info(request, "预支付请求失败：{}", errorMsg);
+                    logger.error(request, "预支付请求失败：{}", errorMsg);
                 }
             } catch (Exception e) {
                 response.setErrorMsg("预支付错误：" + e.getMessage());
@@ -314,15 +310,8 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
             params.put("total_fee", CurrencyTools.toCent(request.getAmount()));
             params.put("spbill_create_ip", request.getIp());
             params.put("trade_type", "MWEB");
-
             // 场景信息
-            StringBuilder sb = new StringBuilder("{")
-                .append("\"h5_info\":{")
-                    .append("\"type\":\"").append("Wap").append("\"")
-                    .append("\"wap_url\":\"").append(getPaymentProperties().getServerDomain()).append("\"")
-                    .append("\"wap_name\":\"").append(getPaymentProperties().getAppName()).append("\"")
-                .append("}}");
-            params.put("scene_info", sb.toString());
+            params.put("scene_info", getSceneInfo());
 
             PaymentTradeResponse response = new PaymentTradeResponse();
             try {
@@ -352,12 +341,29 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
             }
             return response;
         }
+
+        private String getSceneInfo() {
+            return new StringBuilder("{")
+                    .append("\"h5_info\":{")
+                    .append("\"type\":\"").append("Wap").append("\"")
+                    .append("\"wap_url\":\"").append(getGlobalProperties().getServerDomain()).append("\"")
+                    .append("\"wap_name\":\"").append(getGlobalProperties().getAppName()).append("\"")
+                    .append("}}")
+                    .toString();
+        }
     }
 
     public static class JsApi extends WechatPayTemplate {
 
         @Override
         public PaymentTradeResponse pay(PaymentTradeRequest request) {
+            PaymentTradeResponse response = new PaymentTradeResponse();
+            String code = request.get("code");
+            if (PaymentUtils.isBlankString(code)) {
+                response.setErrorMsg("缺少code参数");
+                return response;
+            }
+
             WXPay client = getWechatPayClient();
             Map<String, String> params = new HashMap<>();
             params.put("body", request.getSubject());
@@ -366,18 +372,9 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
             params.put("total_fee", CurrencyTools.toCent(request.getAmount()));
             params.put("spbill_create_ip", request.getIp());
             params.put("trade_type", "JSAPI");
-            params.put("openId", getOpenId(request));
-
+            params.put("openid", getOpenId(request));
             // 场景信息
-            StringBuilder sb = new StringBuilder("{")
-                    .append("\"h5_info\":{")
-                    .append("\"type\":\"").append("Wap").append("\"")
-                    .append("\"wap_url\":\"").append(getPaymentProperties().getServerDomain()).append("\"")
-                    .append("\"wap_name\":\"").append(getPaymentProperties().getAppName()).append("\"")
-                    .append("}}");
-            params.put("scene_info", sb.toString());
-
-            PaymentTradeResponse response = new PaymentTradeResponse();
+            params.put("scene_info", getSceneInfo());
             try {
                 logger.info(request, "预支付请求参数：{}", params);
                 Map<String, String> rsp = client.unifiedOrder(params);
@@ -406,26 +403,35 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
             return response;
         }
 
+        private String getSceneInfo() {
+            return new StringBuilder("{")
+                    .append("\"h5_info\":{")
+                    .append("\"type\":\"").append("Wap").append("\"")
+                    .append("\"wap_url\":\"").append(getGlobalProperties().getServerDomain()).append("\"")
+                    .append("\"wap_name\":\"").append(getGlobalProperties().getAppName()).append("\"")
+                    .append("}}")
+                    .toString();
+
+        }
+
         public String getOpenId(PaymentTradeRequest request) {
-            String code = request.get("code");
-            if (PaymentUtils.isBlankString(code)) {
-                throw new RuntimeException("缺少code参数");
-            }
             String openId = null;
             try {
                 Map<String, String> query = new HashMap<>();
-                query.put("appid", "wx6b9ebd5d4e720f5f");
-                query.put("secret", "4c00fd00d8420c4023619bca25bb175e");
+                query.put("appid", properties.getAppId());
+                query.put("secret", properties.getAppSecret());
                 query.put("code", request.get("code"));
                 query.put("grant_type", "authorization_code");
 
                 logger.info(request, "获取openid请求：{}", query);
                 HttpUtil httpUtil = PaymentContextHolder.getHttp();
                 String s = httpUtil.get("https://api.weixin.qq.com/sns/oauth2/access_token", query);
-                Map<String, String> rsp = new Gson().fromJson(s, new TypeToken<Map<String, String>>(){}.getType());
+                Map<String, String> rsp = new Gson().fromJson(s, new TypeToken<Map<String, String>>() {
+                }.getType());
                 logger.info(request, "获取openid响应：{}", rsp);
                 if (rsp.get("errcode") != null) {
-                    throw new RuntimeException("获取openId失败:" + rsp.get("errmsg"));
+                    logger.error(request, "获取openId失败:" + rsp.get("errmsg"));
+                    throw new RuntimeException("出现错误无法进行支付,请更换其他支付方式");
                 } else {
                     openId = rsp.get("openid");
                 }

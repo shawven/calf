@@ -2,7 +2,7 @@ package com.test.payment;
 
 import com.test.payment.client.PaymentClientTypeEnum;
 import com.test.payment.domain.*;
-import com.test.payment.properties.PaymentProperties;
+import com.test.payment.properties.GlobalProperties;
 import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.support.*;
 
@@ -27,16 +27,16 @@ public class PaymentManagerImpl implements PaymentManager {
 
     private Map<PaymentSupplierEnum, Map<PaymentClientTypeEnum, PaymentOperations>> suppliers;
 
-    public PaymentManagerImpl(List<PaymentOperations> suppliers, PaymentProperties globalProperties) {
+    public PaymentManagerImpl(List<PaymentOperations> suppliers, GlobalProperties globalProperties) {
         this.suppliers = index(suppliers);
         init(globalProperties);
     }
 
-    private void init(PaymentProperties globalProperties) {
+    private void init(GlobalProperties globalProperties) {
         // 配置http工具
         HttpUtil httpUtil = HttpUtil.builder()
                 .setConnectTimeout(globalProperties.getConnectTimeout())
-                .setReadTimeout(globalProperties.getSocketTimeout())
+                .setReadTimeout(globalProperties.getReadTimeout())
                 .setMaxTotal(globalProperties.getMaxTotal())
                 .setMaxPerRoute(globalProperties.getMaxPerRoute())
                 .setConnectionTimeToLive(globalProperties.getConnectionTimeToLive())

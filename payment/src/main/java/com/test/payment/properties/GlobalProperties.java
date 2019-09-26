@@ -1,11 +1,8 @@
 package com.test.payment.properties;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -16,29 +13,61 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 @Configuration
 @PropertySource("classpath:payment.properties")
-public class PaymentProperties {
+public class GlobalProperties {
 
-    @Value("${serverUrl")
+    /**
+     * 服务器地址
+     */
+    @Value("${serverUrl}")
     private String serverUrl;
 
+    /**
+     * 货币基准（分） 订单金额以元为单位则100，以分为单位则是1
+     */
     @Value("${currencyCents}")
     private Long currencyCents;
 
-    @Value("${useSandbox}")
+    /**
+     * 是否使用沙箱环境（仅仅是起到placeholder的作用，实际具体要看配置文件每个供应商具体的值）
+     */
+    @Value("${useSandbox:true}")
     private Boolean useSandbox;
 
-    @Value("${appName}")
+    /**
+     * 应用名称（目前微信wap、公众号等需要使用）
+     */
+    @Value("${appName:}")
     private String appName;
 
+    /**
+     * 连接超时
+     */
+    @Value("${connectTimeout:0}")
     private int connectTimeout;
 
-    private int socketTimeout;
+    /**
+     * 读超时
+     */
+    @Value("${readTimeout:0}")
+    private int readTimeout;
 
-    private int connectionTimeToLive;
-
+    /**
+     * 连接池最大连接数
+     */
+    @Value("${maxTotal:0}")
     private int maxTotal;
 
+    /**
+     * 连接池每个路由最大连接数
+     */
+    @Value("${maxPerRoute:0}")
     private int maxPerRoute;
+
+    /**
+     * 连接池路由存活时间
+     */
+    @Value("${connectionTimeToLive:0}")
+    private int connectionTimeToLive;
 
     public String getServerUrl() {
         return serverUrl;
@@ -82,20 +111,12 @@ public class PaymentProperties {
         this.connectTimeout = connectTimeout;
     }
 
-    public int getSocketTimeout() {
-        return socketTimeout;
+    public int getReadTimeout() {
+        return readTimeout;
     }
 
-    public void setSocketTimeout(int socketTimeout) {
-        this.socketTimeout = socketTimeout;
-    }
-
-    public int getConnectionTimeToLive() {
-        return connectionTimeToLive;
-    }
-
-    public void setConnectionTimeToLive(int connectionTimeToLive) {
-        this.connectionTimeToLive = connectionTimeToLive;
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
     }
 
     public int getMaxTotal() {
@@ -112,6 +133,14 @@ public class PaymentProperties {
 
     public void setMaxPerRoute(int maxPerRoute) {
         this.maxPerRoute = maxPerRoute;
+    }
+
+    public int getConnectionTimeToLive() {
+        return connectionTimeToLive;
+    }
+
+    public void setConnectionTimeToLive(int connectionTimeToLive) {
+        this.connectionTimeToLive = connectionTimeToLive;
     }
 
     public String getServerDomain() {

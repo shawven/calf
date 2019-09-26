@@ -1,6 +1,7 @@
 package com.test.payment.properties;
 
 import com.test.payment.supplier.PaymentSupplierEnum;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -9,9 +10,7 @@ import org.springframework.context.annotation.PropertySource;
  * @author Shoven
  * @date 2019-09-17
  */
-@Configuration
 @PropertySource("classpath:payment.properties")
-@ConfigurationProperties(prefix = "unionpay")
 public class UnionpayProperties {
 
     private String mchId;

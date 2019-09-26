@@ -27,7 +27,9 @@ public interface PaymentOperations extends PaymentWayType {
      *
      * @return
      */
-    PaymentTradeCallbackResponse syncReturn(PaymentTradeCallbackRequest request);
+    default PaymentTradeCallbackResponse syncReturn(PaymentTradeCallbackRequest request) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * 异步通知
@@ -44,16 +46,21 @@ public interface PaymentOperations extends PaymentWayType {
     PaymentTradeRefundResponse refund(PaymentTradeRefundRequest request);
 
     /**
-     * 退款
-     *
-     * @return
-     */
-    PaymentTradeCallbackResponse refundNotify(PaymentTradeCallbackRequest request);
-
-    /**
      * 查询退款状态
      *
      * @return
      */
-    PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request);
+    default PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * 退款异步通知
+     *
+     * @return
+     */
+    default PaymentTradeCallbackResponse refundNotify(PaymentTradeCallbackRequest request) {
+        throw new UnsupportedOperationException();
+    }
+
 }

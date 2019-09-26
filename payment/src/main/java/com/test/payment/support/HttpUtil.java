@@ -41,11 +41,28 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * HttpClient工具类
- *
- * 超时时间都是秒
+ * <p>线程安全、涉及的超时时间都是秒</p>
+ * <p>创建实例</p>
+ * <pre>
+ *  // 非连接池
+ *  HttpUtil http = new HttpUtil()
+ *  // 连接池
+ *  HttpUtil http = new HttpUtil(4, 6, 200, 100, 60)
+ *  HttpUtil http = HttpUtil.builder()
+ *      .setReadTimeout(6)
+ *      .setConnectTimeout(4)
+ *      .setMaxTotal(200)
+ *      .setMaxPerRoute(100)
+ *      .setConnectionTimeToLive(60);
+ *      .build();
+ * </pre>
+ * <p>使用实例</p>
+ * <pre>
+ * http.get("http://www.xx.com")
+ * http.post("http://www.xx.com", new HashMap())
  *
  * @author Shoven
- * @date 2019-08-26
+ * @date 2019-09-23
  */
 public class HttpUtil {
 

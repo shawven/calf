@@ -1,4 +1,4 @@
-package com.test.payment.supplier.unionpay.sdk.domain;
+package com.test.payment.supplier.unionpay.sdk.request;
 
 /**
  * @author Shoven

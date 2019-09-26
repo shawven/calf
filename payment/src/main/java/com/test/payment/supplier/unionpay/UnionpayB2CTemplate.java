@@ -2,6 +2,7 @@ package com.test.payment.supplier.unionpay;
 
 import com.test.payment.client.WapTradeClientType;
 import com.test.payment.client.WebTradeClientType;
+import com.test.payment.properties.UnionpayB2CProperties;
 import com.test.payment.properties.UnionpayProperties;
 import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.unionpay.sdk.UnionpayClient;
@@ -14,18 +15,18 @@ import static com.test.payment.supplier.PaymentSupplierEnum.UNIONPAY_B2B;
  * @author Shoven
  * @date 2019-08-27
  */
-public abstract class UnionpayB2BTemplate extends UnionpayTemplate {
+public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
 
     private UnionpayProperties properties;
 
     @Override
     public PaymentSupplierEnum getSupplier() {
-        return UNIONPAY_B2B;
+        return UNIONPAY;
     }
 
     @Override
     public String getBizType() {
-        return UnionpayConstants.B2B;
+        return UnionpayConstants.B2C;
     }
 
     @Override
@@ -40,10 +41,10 @@ public abstract class UnionpayB2BTemplate extends UnionpayTemplate {
 
     @Override
     public UnionpayClient getUnionpayClient() {
-        return UnionpayClientFacotry.getB2BInstance(getProperties());
+        return UnionpayClientFacotry.getB2CInstance(getProperties());
     }
 
-    public static class Web extends UnionpayB2BTemplate implements WebTradeClientType {
+    public static class Web extends UnionpayB2CTemplate implements WebTradeClientType {
 
         @Override
         public String getChannelType() {
@@ -51,7 +52,7 @@ public abstract class UnionpayB2BTemplate extends UnionpayTemplate {
         }
     }
 
-    public static class Wap extends UnionpayB2BTemplate implements WapTradeClientType {
+    public static class Wap extends UnionpayB2CTemplate implements WapTradeClientType {
 
         @Override
         public String getChannelType() {
