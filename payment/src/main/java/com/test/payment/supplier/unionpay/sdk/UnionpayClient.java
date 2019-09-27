@@ -221,6 +221,12 @@ public class UnionpayClient {
 
     public boolean verify(Map<String, String> response) throws UnionpayException {
         String sign = response.remove(UnionpayConstants.param_signature);
+
+        // 解决同步回调证书内容莫名其妙有+号的问题
+        String cert = response.get(UnionpayConstants.param_signPubKeyCert);
+        response.put(UnionpayConstants.param_signPubKeyCert, cert.replace("BEGIN+CERTIFICATE", "BEGIN CERTIFICATE")
+                .replace("END+CERTIFICATE", "END CERTIFICATE"));
+
         String source = PaymentUtils.toPairString(response);
 
         if (useCert) {

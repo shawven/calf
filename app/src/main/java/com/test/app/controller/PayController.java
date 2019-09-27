@@ -87,7 +87,7 @@ public class PayController {
         tradeRequest.setSubject("测试商品 iphonexs 256G 黑色");
         tradeRequest.setBody("测试商品 iphonexs 256G 黑色仅售6666元，快速抢购");
         tradeRequest.setOutTradeNo(orderId);
-        tradeRequest.setAmount("1.01");
+        tradeRequest.setAmount("0.01");
         tradeRequest.setIp("127.0.0.1");
 
         PaymentTradeResponse rsp = paymentManager.pay(tradeRequest);

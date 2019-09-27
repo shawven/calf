@@ -1,6 +1,7 @@
 package com.test.payment.supplier.unionpay.sdk;
 
 import com.test.payment.support.CertUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +63,7 @@ public class UnionpayCertification {
     private void init() {
         try {
             //向系统添加BC provider
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            Security.addProvider(new BouncyCastleProvider());
 
             //初始化签名私钥证书
             if (isBlankString(signCertPath)) {
