@@ -3,11 +3,17 @@ package com.test.payment.supplier.unionpay.sdk;
 
 public class UnionpayConstants {
 
+
+    public static final String TIME_FORMAT = "yyyyMMddHHmmss";
+
     public static final String B2C = "000201";
     public static final String B2B = "000202";
+    public static final String CANCEL = "000000";
 
     public static final String PC = "07";
     public static final String WAP = "08";
+    public static final String APP = "08";
+    public static final String F2F = "08";
 
     public static final String GATEWAY_URL = "https://gateway.95516.com";
     public static final String SANDBOX_GATEWAY_URL = "https://gateway.test.95516.com";
@@ -68,6 +74,10 @@ public class UnionpayConstants {
      * 交易子类.
      */
     public static final String param_txnSubType = "txnSubType";
+    /**
+     * C2B码.
+     */
+    public static final String param_qrNo = "qrNo";
     /**
      * 业务类型.
      */

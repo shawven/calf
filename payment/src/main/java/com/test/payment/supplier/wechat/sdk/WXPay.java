@@ -719,4 +719,16 @@ public class WXPay {
         params.put("paySign", WXPayUtil.generateSignature(params, this.config.getKey(), signType));
         return params;
     }
+
+    public Map<String, String> prepareAppPay(String prepayId) throws Exception {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("appid", config.getAppID());
+        params.put("partnerid", config.getMchID());
+        params.put("prepayid", prepayId);
+        params.put("package", "Sign=WXPay");
+        params.put("nonceStr", WXPayUtil.generateNonceStr());
+        params.put("timeStamp", String.valueOf(System.currentTimeMillis() / 1000));
+        params.put("sign", WXPayUtil.generateSignature(params, this.config.getKey(), signType));
+        return params;
+    }
 }

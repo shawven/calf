@@ -131,7 +131,7 @@
         var query = ''
         var i = 0
         for(var key in data) {
-            query += i === 0 ? "?" : "&" + key + "=" + res[key]
+            query += i === 0 ? "?" : "&" + key + "=" + data[key]
         }
         url += query;
 

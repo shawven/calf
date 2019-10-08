@@ -35,11 +35,15 @@ public class PaymentRequest implements Serializable {
     }
 
     public PaymentRequest(String paymentSupplier) {
-        this.paymentSupplier = PaymentSupplierEnum.valueOf(paymentSupplier.toUpperCase());
+        Objects.requireNonNull(paymentSupplier, "支付供应商不能为空");
+        String supplierName = paymentSupplier.toUpperCase();
+        this.paymentSupplier = PaymentSupplierEnum.valueOf(supplierName);
         this.paymentClientType = null;
+        Objects.requireNonNull(this.paymentSupplier, () -> "不存在在此供应商" + supplierName);
     }
 
     public PaymentRequest(PaymentSupplierEnum paymentSupplier) {
+        Objects.requireNonNull(paymentSupplier, "支付供应商不能为空");
         this.paymentSupplier = paymentSupplier;
         this.paymentClientType = null;
     }
@@ -47,11 +51,17 @@ public class PaymentRequest implements Serializable {
     public PaymentRequest(String paymentSupplier, String paymentClientType) {
         Objects.requireNonNull(paymentSupplier, "支付供应商不能为空");
         Objects.requireNonNull(paymentClientType, "客户端类型不能为空");
-        this.paymentSupplier = PaymentSupplierEnum.valueOf(paymentSupplier.toUpperCase());
-        this.paymentClientType = PaymentClientTypeEnum.valueOf(paymentClientType.toUpperCase());
+        String supplierName = paymentSupplier.toUpperCase();
+        String clientTypeName = paymentClientType.toUpperCase();
+        this.paymentSupplier = PaymentSupplierEnum.valueOf(supplierName);
+        this.paymentClientType = PaymentClientTypeEnum.valueOf(clientTypeName);
+        Objects.requireNonNull(this.paymentSupplier, () -> "不存在在此供应商" + supplierName);
+        Objects.requireNonNull(this.paymentClientType, () ->  supplierName + "不支持" + clientTypeName + "支付方式");
     }
 
     public PaymentRequest(PaymentSupplierEnum paymentSupplier, PaymentClientTypeEnum paymentClientType) {
+        Objects.requireNonNull(paymentSupplier, "支付供应商不能为空");
+        Objects.requireNonNull(paymentClientType, "客户端类型不能为空");
         this.paymentSupplier = paymentSupplier;
         this.paymentClientType = paymentClientType;
     }
@@ -68,9 +78,8 @@ public class PaymentRequest implements Serializable {
         return principal;
     }
 
-    public PaymentRequest setPrincipal(String principal) {
+    public void setPrincipal(String principal) {
         this.principal = principal;
-        return this;
     }
 
     @Override

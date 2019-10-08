@@ -3,18 +3,19 @@ package com.test.payment.supplier.unionpay.sdk.request;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static com.test.payment.supplier.unionpay.sdk.UnionpayConstants.TIME_FORMAT;
+
 /**
  * @author Shoven
  * @date 2019-09-19
  */
 public class UnionpayTradeRequest {
 
-    private static String timeFormat = "yyyyMMddHHmmss";
 
     /**
      * 系统时间，格式为YYYYMMDDhhmmss，必须取当前时间
      */
-    private String requestTime = new SimpleDateFormat(timeFormat).format(new Date());
+    private String requestTime = new SimpleDateFormat(TIME_FORMAT).format(new Date());
 
     /**
      * 交易币种（境内商户一般是156 人民币）

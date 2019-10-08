@@ -83,6 +83,9 @@ public class PaymentManagerImpl implements PaymentManager {
         if (isBlankString(request.getOutTradeNo())) {
             throw new IllegalArgumentException("查询支付商户交易号不能为空");
         }
+        if (isBlankString(request.getTradeNo())) {
+            throw new IllegalArgumentException("查询支付平台交易号不能为空");
+        }
         PaymentOperations paymentOperations = getProvider(request);
         PaymentTradeQueryResponse response;
         try {
@@ -126,16 +129,19 @@ public class PaymentManagerImpl implements PaymentManager {
     @Override
     public PaymentTradeRefundResponse refund(PaymentTradeRefundRequest request) {
         if (isBlankString(request.getOutRefundNo())) {
-            throw new IllegalArgumentException("商户退款号不能为空");
+            throw new IllegalArgumentException("申请退款商户退款号不能为空");
         }
-        if (isBlankString(request.getOutTradeNo()) && isBlankString(request.getTradeNo())) {
-            throw new IllegalArgumentException("商户交易号和平台交易号不能同时为空");
+        if (isBlankString(request.getOutTradeNo())) {
+            throw new IllegalArgumentException("申请退款商户交易号不能为空");
+        }
+        if (isBlankString(request.getTradeNo())) {
+            throw new IllegalArgumentException("申请退款平台交易号不能为空");
         }
         if (isBlankString(request.getRefundAmount())) {
             throw new IllegalArgumentException("申请退款金额为空");
         }
         if (isBlankString(request.getTotalAmount())) {
-            throw new IllegalArgumentException("订单总金额为空");
+            throw new IllegalArgumentException("申请退款订单总金额为空");
         }
         PaymentOperations paymentOperations = getProvider(request);
         PaymentTradeRefundResponse response;
@@ -152,8 +158,11 @@ public class PaymentManagerImpl implements PaymentManager {
 
     @Override
     public PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
+        if (isBlankString(request.getTradeNo())) {
+            throw new IllegalArgumentException("查询退款原平台交易号不能为空");
+        }
         if (isBlankString(request.getOutRefundNo())) {
-            throw new IllegalArgumentException("商户退款号不能为空");
+            throw new IllegalArgumentException("查询退款商户退款号不能为空");
         }
         PaymentOperations paymentOperations = getProvider(request);
         PaymentTradeRefundQueryResponse response;

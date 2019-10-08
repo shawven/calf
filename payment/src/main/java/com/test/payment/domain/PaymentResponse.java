@@ -10,6 +10,8 @@ public class PaymentResponse<T> implements Serializable {
 
     private boolean success;
 
+    private String state;
+
     private String errorMsg;
 
     private T body;
@@ -21,6 +23,14 @@ public class PaymentResponse<T> implements Serializable {
     public PaymentResponse setSuccess(boolean success) {
         this.success = success;
         return this;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getErrorMsg() {

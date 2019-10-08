@@ -1,23 +1,17 @@
 package com.test.payment.supplier.unionpay;
 
-import com.test.payment.client.WapTradeClientType;
-import com.test.payment.client.WebTradeClientType;
 import com.test.payment.domain.*;
 import com.test.payment.properties.UnionpayProperties;
 import com.test.payment.supplier.AbstractPaymentTemplate;
-import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.unionpay.sdk.UnionpayClient;
-import com.test.payment.supplier.unionpay.sdk.UnionpayConstants;
 import com.test.payment.supplier.unionpay.sdk.UnionpayException;
-import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradePagePayRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradePayRequest;
 import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeQueryRequest;
 import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundQueryRequest;
 import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundRequest;
 import com.test.payment.support.CurrencyTools;
 
 import java.util.Map;
-
-import static com.test.payment.supplier.PaymentSupplierEnum.UNIONPAY;
 
 /**
  * @author Shoven
@@ -27,7 +21,24 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
 
     @Override
     public PaymentTradeResponse pay(PaymentTradeRequest request) {
-        UnionpayTradePagePayRequest unionpayRequest = new UnionpayTradePagePayRequest();
+        UnionpayTradePayRequest unionpayRequest = getPayParams(request);
+        PaymentTradeResponse response = new PaymentTradeResponse();
+        try {
+            logger.info(request, "预支付请求参数：{}", unionpayRequest);
+            //网页支付
+            String form = getUnionpayClient().pageExecute(unionpayRequest);
+            logger.info(request, "预支付响应参数：{}", form);
+            response.setSuccess(true);
+            response.setForm(form);
+        } catch (UnionpayException e) {
+            logger.error(request, "预支付错误：{}", e.getMessage());
+            response.setErrorMsg("预支付失败：" + e.getMessage());
+        }
+        return response;
+    }
+
+    protected UnionpayTradePayRequest getPayParams(PaymentTradeRequest request) {
+        UnionpayTradePayRequest unionpayRequest = new UnionpayTradePayRequest();
         unionpayRequest.setBizType(getBizType());
         unionpayRequest.setChannelType(getChannelType());
 
@@ -36,20 +47,7 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
         unionpayRequest.setSubject(request.getSubject());
         unionpayRequest.setNotifyUrl(getProperties().getNotifyUrl());
         unionpayRequest.setReturnUrl(getProperties().getReturnUrl());
-
-        PaymentTradeResponse response = new PaymentTradeResponse();
-        try {
-            logger.info(request, "预支付请求参数：{}", unionpayRequest);
-            //网页支付
-            String form = getUnionpayClient().pagePay(unionpayRequest);
-            logger.info(request, "预支付响应参数：{}", form);
-            response.setSuccess(true);
-            response.putBody("form", form);
-        } catch (UnionpayException e) {
-            logger.error(request, "预支付错误：{}", e.getMessage());
-            response.setErrorMsg("预支付失败：" + e.getMessage());
-        }
-        return response;
+        return unionpayRequest;
     }
 
     @Override

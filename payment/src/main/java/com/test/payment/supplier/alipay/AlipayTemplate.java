@@ -7,12 +7,8 @@ import com.alipay.api.AlipayResponse;
 import com.alipay.api.domain.*;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.*;
-import com.alipay.api.response.AlipayTradeFastpayRefundQueryResponse;
-import com.alipay.api.response.AlipayTradeQueryResponse;
-import com.alipay.api.response.AlipayTradeRefundResponse;
-import com.test.payment.client.QrcTradeClientType;
-import com.test.payment.client.WapTradeClientType;
-import com.test.payment.client.WebTradeClientType;
+import com.alipay.api.response.*;
+import com.test.payment.client.*;
 import com.test.payment.domain.*;
 import com.test.payment.properties.AlipayProperties;
 import com.test.payment.supplier.AbstractPaymentTemplate;
@@ -20,6 +16,8 @@ import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.support.CurrencyTools;
 import com.test.payment.support.PaymentUtils;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 import static com.test.payment.supplier.PaymentSupplierEnum.ALIPAY;
@@ -40,7 +38,6 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
     @Override
     public PaymentTradeResponse pay(PaymentTradeRequest request) {
         PaymentTradeResponse response = new PaymentTradeResponse();
-
         AlipayRequest<? extends AlipayResponse> alipayRequest = getAlipayRequest(request);
         try {
             logger.info(request, "预支付请求参数：{}", PaymentUtils.toString(alipayRequest));
@@ -50,7 +47,7 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
 
             if (alipayResponse.isSuccess()) {
                 response.setSuccess(true);
-                response.putBody("form", alipayResponse.getBody());
+                response.setForm(alipayResponse.getBody());
             } else {
                 logger.error(request, "预支付请求失败：{}", alipayResponse.getMsg());
                 response.setErrorMsg(alipayResponse.getSubMsg());
@@ -164,6 +161,7 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
                             : "未付款交易超时关闭，或支付完成后全额退款";
                     response.setErrorMsg(tradeStatusDesc);
                 }
+                response.setState(tradeStatus);
                 logger.info(request, "查询支付交易状态[{}]", tradeStatusDesc);
             } else {
                 logger.error(request, "查询支付交易请求失败：{}", alipayResponse.getMsg());
@@ -325,4 +323,155 @@ public abstract class AlipayTemplate  extends AbstractPaymentTemplate {
             return alipayRequest;
         }
     }
+
+    public static class App extends AlipayTemplate implements AppTradeClientType {
+
+        @Override
+        public PaymentTradeResponse pay(PaymentTradeRequest request) {
+            PaymentTradeResponse response = new PaymentTradeResponse();
+            AlipayTradeAppPayRequest alipayRequest = getAlipayRequest(request);
+            try {
+                logger.info(request, "预支付请求参数：{}", PaymentUtils.toString(alipayRequest));
+                AlipayResponse alipayResponse = getAlipayClient().sdkExecute(alipayRequest);
+                logger.info(request, "预支付响应参数：{}", PaymentUtils.toString(response));
+
+                if (alipayResponse.isSuccess()) {
+                    response.setSuccess(true);
+                    response.putBody("orderInfo", alipayResponse.getBody());
+                } else {
+                    logger.error(request, "预支付请求失败：{}", alipayResponse.getMsg());
+                    response.setErrorMsg(alipayResponse.getSubMsg());
+                }
+            } catch (AlipayApiException e) {
+                logger.error(request, "预支付错误：{}", e.getMessage());
+                response.setErrorMsg("预支付失败：" + e.getMessage());
+            }
+            return response;
+        }
+
+        @Override
+        public AlipayTradeAppPayRequest getAlipayRequest(PaymentTradeRequest request) {
+            AlipayTradeAppPayRequest alipayRequest = new AlipayTradeAppPayRequest();
+            AlipayTradeAppPayModel alipayModel = new AlipayTradeAppPayModel();
+            alipayModel.setOutTradeNo(request.getOutTradeNo());
+            alipayModel.setTotalAmount(CurrencyTools.toYuan(request.getAmount()));
+            alipayModel.setSubject(request.getSubject());
+            alipayModel.setBody(request.getBody());
+            alipayModel.setProductCode("QUICK_MSECURITY_PAY");
+            alipayRequest.setBizModel(alipayModel);
+            alipayRequest.setNotifyUrl(properties.getNotifyUrl());
+            return alipayRequest;
+        }
+    }
+
+    public static class F2F extends AlipayTemplate implements F2FTradeClientType {
+
+        @Override
+        public PaymentTradeResponse pay(PaymentTradeRequest request) {
+            PaymentTradeResponse response = new PaymentTradeResponse();
+            AlipayTradePayRequest alipayRequest = getAlipayRequest(request);
+            try {
+                logger.info(request, "支付请求参数：{}", PaymentUtils.toString(alipayRequest));
+                AlipayTradePayResponse alipayResponse = getAlipayClient().execute(alipayRequest);
+                logger.info(request, "支付响应参数：{}", PaymentUtils.toString(response));
+
+                String code = alipayResponse.getCode();
+                if (alipayResponse.isSuccess() && "10000".equals(code)) {
+                    response.setSuccess(true);
+                    response.setTradeNo(alipayResponse.getTradeNo());
+                    response.setOutTradeNo(alipayResponse.getOutTradeNo());
+                } else if ("10003".equals(code)) {
+                    logger.info(request, "等待支付完成正在轮训查询订单");
+                    PaymentTradeQueryResponse queryResponse;
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.SECOND, 60);
+                    Date timeout = calendar.getTime();
+                    boolean retryable;
+                    do {
+                        PaymentTradeQueryRequest queryRequest = new PaymentTradeQueryRequest(request);
+                        queryRequest.setOutTradeNo(request.getOutTradeNo());
+                        queryResponse = query(queryRequest);
+                        retryable = !queryResponse.isSuccess() && queryResponse.getState() != null
+                                 && "WAIT_BUYER_PAY".equals(queryResponse.getState())
+                                && timeout.after(new Date());
+                    } while (retryable);
+
+                    if (queryResponse.isSuccess()) {
+                        response.setSuccess(true);
+                        response.setTradeNo(queryResponse.getTradeNo());
+                        response.setOutTradeNo(queryResponse.getOutTradeNo());
+                    } else {
+                        logger.info(request, "支付未完成正在取消订单");
+                        cancel(request);
+                        response.setErrorMsg("支付未完成已取");
+                    }
+                } else {
+                    logger.error(request, "支付请求失败：{}", alipayResponse.getMsg());
+                    response.setErrorMsg(alipayResponse.getSubMsg());
+                }
+            } catch (AlipayApiException e) {
+                logger.error(request, "支付错误：{}", e.getMessage());
+                response.setErrorMsg("支付失败：" + e.getMessage());
+            }
+            return response;
+        }
+
+        public void cancel(PaymentTradeRequest request) {
+            int i = 0;
+            while (onceCancel(request) && ++i < 3) {
+                logger.info(request, "正在重试取消订单");
+            }
+        }
+
+        public boolean onceCancel(PaymentTradeRequest request) {
+            AlipayTradeCancelRequest cancelRequest = new AlipayTradeCancelRequest();
+            AlipayTradeCancelModel cancelModel = new AlipayTradeCancelModel();
+            cancelModel.setOutTradeNo(request.getOutTradeNo());
+            cancelRequest.setBizModel(cancelModel);
+            try {
+                logger.info(request, "取消订单请求参数：{}", PaymentUtils.toString(cancelRequest));
+                AlipayTradeCancelResponse cancelResponse = getAlipayClient().execute(cancelRequest);
+                logger.info(request, "取消订单响应参数：{}", PaymentUtils.toString(cancelResponse));
+
+                if (!cancelResponse.isSuccess()) {
+                    logger.error(request, "取消订单失败：{}", cancelResponse.getSubMsg());
+                    return true;
+                }
+
+                String retryFlag = cancelResponse.getRetryFlag();
+                if (!"N".equals(retryFlag)) {
+                    logger.error(request, "取消订单失败需要重试请求");
+                    return true;
+                }
+                return false;
+            } catch (AlipayApiException e) {
+                logger.error(request, "取消订单错误：{}", e.getMessage());
+                return true;
+            }
+        }
+
+
+        @Override
+        public AlipayTradePayRequest getAlipayRequest(PaymentTradeRequest request) {
+            String authCode = request.get("authCode");
+            if (PaymentUtils.isBlankString(authCode)) {
+                throw new IllegalArgumentException("支付授权码为空");
+            }
+            AlipayTradePayRequest alipayRequest = new AlipayTradePayRequest();
+            AlipayTradePayModel alipayModel = new AlipayTradePayModel();
+            alipayModel.setOutTradeNo(request.getOutTradeNo());
+            alipayModel.setTotalAmount(CurrencyTools.toYuan(request.getAmount()));
+            alipayModel.setSubject(request.getSubject());
+            alipayModel.setBody(request.getBody());
+            alipayModel.setProductCode("FACE_TO_FACE_PAYMENT");
+            alipayModel.setScene("bar_code");
+            // 一分钟超时
+            alipayModel.setTimeoutExpress("1m");
+            alipayModel.setAuthCode(authCode);
+            alipayRequest.setBizModel(alipayModel);
+            alipayRequest.setNotifyUrl(properties.getNotifyUrl());
+            return alipayRequest;
+        }
+    }
+
 }

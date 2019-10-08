@@ -29,7 +29,7 @@ public enum PaymentClientTypeEnum {
     QRC("二维码"),
 
     /**
-     * 微信浏览器、公众号
+     * 微信支付宝客户端等内置浏览器
      */
     JSAPI("JSAPI"),
 
