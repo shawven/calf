@@ -108,9 +108,8 @@ public class UnionpayClient {
      */
     public Map<String, String> qrCodeExecute(UnionpayTradePayRequest request) throws UnionpayException {
         Map<String, String> params = getPayParams(request);
-        //交易子类型
+        //交易子类型 07 申请消费二维码
         params.put(UnionpayConstants.param_txnSubType, "07");
-        params.put(UnionpayConstants.param_backUrl, "http://www.specialUrl.com");
         return execute(UnionpayConstants.APP_TRANS_URL, params);
     }
 
@@ -123,15 +122,14 @@ public class UnionpayClient {
      */
     public Map<String, String> authCodeExecute(UnionpayTradePayRequest request) throws UnionpayException {
         Map<String, String> params = getPayParams(request);
-        //交易子类型
+        //交易子类型 06：二维码消费
         params.put(UnionpayConstants.param_txnSubType, "06");
         params.put(UnionpayConstants.param_qrNo, request.getAuthCode());
-        params.put(UnionpayConstants.param_backUrl, "http://www.specialUrl.com");
-
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, 30);
         Date timeout = calendar.getTime();
         params.put(UnionpayConstants.param_payTimeoutTime,  new SimpleDateFormat(TIME_FORMAT).format(timeout));
+        params.put(UnionpayConstants.param_termId, "00010001");
         return execute(UnionpayConstants.APP_TRANS_URL, params);
     }
 
@@ -185,10 +183,10 @@ public class UnionpayClient {
      * @return
      * @throws UnionpayException
      */
-    public Map<String, String> cancel(UnionpayTradeCancelRequest request) throws UnionpayException {
+    public Map<String, String> reversal(UnionpayTradeReversalRequest request) throws UnionpayException {
         Map<String, String> params = new HashMap<>();
         params.put(UnionpayConstants.param_txnType, request.getTradeType());
-        params.put(UnionpayConstants.param_txnSubType,"01");
+        params.put(UnionpayConstants.param_txnSubType,request.getTradeSubType());
         params.put(UnionpayConstants.param_bizType, request.getBizType());
         params.put(UnionpayConstants.param_channelType, request.getChannelType());
         params.put(UnionpayConstants.param_orderId, request.getOutTradeNo());
@@ -256,6 +254,9 @@ public class UnionpayClient {
             throw new UnionpayException(e);
         }
         Map<String, String> body = parseResponseBody(rsp);
+        if (body.isEmpty()) {
+            throw new UnionpayException("返回请求体为空");
+        }
         if (!verify(body)) {
             throw new UnionpayException("验签失败");
         }

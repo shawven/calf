@@ -3,6 +3,7 @@ package com.test.payment.supplier.alipay;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.test.payment.properties.AlipayProperties;
+import com.test.payment.supplier.alipay.sdk.AlipayConstants;
 import com.test.payment.support.PaymentUtils;
 
 public class AlipayClientFactory {

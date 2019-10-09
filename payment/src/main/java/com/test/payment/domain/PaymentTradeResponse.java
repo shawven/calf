@@ -10,6 +10,11 @@ import java.util.Map;
 public class PaymentTradeResponse extends PaymentResponse<Map<String, String>> {
 
     /**
+     * 交易完成，真的面对面付款码支付这种会直接完成支付
+     */
+    private boolean tradeSuccess;
+
+    /**
      * 商户交易号
      */
     public String getOutTradeNo() {
@@ -74,6 +79,14 @@ public class PaymentTradeResponse extends PaymentResponse<Map<String, String>> {
 
     public void setPrepayId(String prepayId) {
         putBody("prepayId", prepayId);
+    }
+
+    public boolean isTradeSuccess() {
+        return tradeSuccess;
+    }
+
+    public void setTradeSuccess(boolean tradeSuccess) {
+        this.tradeSuccess = tradeSuccess;
     }
 
     public PaymentResponse putBody(String key, String value) {

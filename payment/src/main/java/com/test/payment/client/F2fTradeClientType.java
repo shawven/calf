@@ -6,9 +6,9 @@ import com.test.payment.PaymentTradeClientType;
  * @author Shoven
  * @date 2019-10-08
  */
-public interface JSAPITradeClientType extends PaymentTradeClientType {
+public interface F2fTradeClientType extends PaymentTradeClientType {
     @Override
     default PaymentClientTypeEnum getClientType() {
-        return PaymentClientTypeEnum.JSAPI;
+        return PaymentClientTypeEnum.F2F;
     }
 }

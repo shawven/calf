@@ -14,6 +14,11 @@ public enum PaymentClientTypeEnum {
     WEB("WEB网站"),
 
     /**
+     * 网站
+     */
+    WEB_QRC("WEB网站扫码"),
+
+    /**
      * 手机WAP
      */
     WAP("WAP网站"),
@@ -24,24 +29,20 @@ public enum PaymentClientTypeEnum {
     APP("APP客户端"),
 
     /**
-     * 二维码
+     * 微信支付宝客户端等内置浏览器
+     */
+    JSAPI("JSAPI"),
+    /**
+     * 二维码 （主扫）当面付扫商家生成的二维码
      */
     QRC("二维码"),
 
     /**
-     * 微信支付宝客户端等内置浏览器
+     * 付款码 （被扫）当面付出示付款码给商家
      */
-    JSAPI("JSAPI"),
+    F2F("付款码"),
 
-    /**
-     * 当面付
-     */
-    F2F("当面付"),
-
-    /**
-     * 统一终端
-     */
-    UNIFIED("统一终端");
+    NONE("");
 
     private String name;
 

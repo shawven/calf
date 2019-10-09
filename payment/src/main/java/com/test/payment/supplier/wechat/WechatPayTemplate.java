@@ -1,9 +1,5 @@
 package com.test.payment.supplier.wechat;
 
-import com.alipay.api.AlipayApiException;
-import com.alipay.api.domain.AlipayTradeCancelModel;
-import com.alipay.api.request.AlipayTradeCancelRequest;
-import com.alipay.api.response.AlipayTradeCancelResponse;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.test.payment.client.*;
@@ -18,13 +14,11 @@ import com.test.payment.support.CurrencyTools;
 import com.test.payment.support.HttpUtil;
 import com.test.payment.support.PaymentContextHolder;
 import com.test.payment.support.PaymentUtils;
-import sun.misc.Cleaner;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.test.payment.supplier.PaymentSupplierEnum.WECHAT;
 
@@ -120,8 +114,8 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                         response.setOutTradeNo(outTradeNo);
                         response.setTradeNo(tradeNo);
                         response.setAmount(CurrencyTools.ofCent(totalAmount));
-                        replay.put("return_code", "SUCCESS");
-                        replay.put("return_msg", "OK");
+                        replay.put("return_code", WXPayConstants.SUCCESS);
+                        replay.put("return_msg", WXPayConstants.OK);
                     } else {
                         response.setErrorMsg(tradeStatusDesc);
                     }
@@ -310,12 +304,12 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
         }
     }
 
-    public static class Qrc extends AbstractPay implements QrcTradeClientType {
+    public static class WebQrc extends AbstractPay implements WebQrcTradeClientType {
 
         @Override
         protected Map<String, String> getPayParams(PaymentTradeRequest request) {
             Map<String, String> params = super.getPayParams(request);
-            params.put("trade_type", "NATIVE");
+            params.put("trade_type", WXPayConstants.TRADE_TYPE_NATIVE);
             return params;
         }
 
@@ -331,7 +325,7 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
         @Override
         protected Map<String, String> getPayParams(PaymentTradeRequest request) {
             Map<String, String> params = super.getPayParams(request);
-            params.put("trade_type", "MWEB");
+            params.put("trade_type", WXPayConstants.TRADE_TYPE_H5);
             // 场景信息
             params.put("scene_info", getSceneInfo());
             return params;
@@ -359,7 +353,7 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
         @Override
         protected Map<String, String> getPayParams(PaymentTradeRequest request) {
             Map<String, String> params = super.getPayParams(request);
-            params.put("trade_type", "APP");
+            params.put("trade_type", WXPayConstants.TRADE_TYPE_APP);
             return params;
         }
 
@@ -370,22 +364,23 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
         }
     }
 
-    public static class F2F extends AbstractPay implements F2FTradeClientType {
+    public static class F2f extends AbstractPay implements F2fTradeClientType {
 
         @Override
         public PaymentTradeResponse pay(PaymentTradeRequest request) {
             Map<String, String> params = getPayParams(request);
             PaymentTradeResponse response = new PaymentTradeResponse();
             try {
-                logger.info(request, "预支付请求参数：{}", params);
+                logger.info(request, "支付请求参数：{}", params);
                 Map<String, String> rsp = getWechatPayClient().microPay(params);
-                logger.info(request, "预支付响应参数：{}", rsp);
+                logger.info(request, "支付响应参数：{}", rsp);
 
                 String returnCode = rsp.get("return_code");
                 if (WXPayConstants.SUCCESS.equals(returnCode)) {
                     String resultCode = rsp.get("result_code");
                     if (WXPayConstants.SUCCESS.equals(resultCode)) {
                         response.setSuccess(true);
+                        response.setTradeSuccess(true);
                         response.setTradeNo(rsp.get("transaction_id"));
                         response.setOutTradeNo(rsp.get("out_trade_no"));
                     } else {
@@ -395,43 +390,50 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                     }
                 } else {
                     logger.info(request, "等待支付完成正在轮训查询订单");
-                    PaymentTradeQueryResponse queryResponse;
-                    boolean retryable;
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.add(Calendar.SECOND, 30);
-                    Date timeout = calendar.getTime();
-                    do {
-                        PaymentTradeQueryRequest queryRequest = new PaymentTradeQueryRequest(request);
-                        queryRequest.setOutTradeNo(request.getOutTradeNo());
-                        queryResponse = query(queryRequest);
-                        retryable = !queryResponse.isSuccess() && queryResponse.getState() != null
-                                && "USERPAYING".equals(queryResponse.getState()) && timeout.after(new Date());
-                    } while (retryable);
-
+                    AtomicReference<PaymentTradeQueryResponse> reference = new AtomicReference<>(new PaymentTradeQueryResponse());
+                    PaymentUtils.schedule(new PaymentUtils.FutureRunnable() {
+                        @Override
+                        public void run() {
+                            PaymentTradeQueryRequest queryRequest = new PaymentTradeQueryRequest(request);
+                            queryRequest.setOutTradeNo(request.getOutTradeNo());
+                            PaymentTradeQueryResponse result = query(queryRequest);
+                            if (result.isSuccess()) {
+                                this.cancel();
+                            }
+                            reference.set(result);
+                        }
+                    }, 5, 30);
+                    PaymentTradeQueryResponse queryResponse = reference.get();
                     if (queryResponse.isSuccess()) {
                         response.setSuccess(true);
+                        response.setTradeSuccess(true);
                         response.setTradeNo(queryResponse.getTradeNo());
                         response.setOutTradeNo(queryResponse.getOutTradeNo());
                     } else {
-                        logger.info(request, "支付未完成正在取消订单");
-                        cancel(request);
-                        response.setErrorMsg("支付未完成已取");
+                        if (cancel(request)) {
+                            response.setErrorMsg("支付未完成已取订单");
+                            logger.info(request, "取消订单失败");
+                        } else {
+                            response.setErrorMsg("支付未完成且取消订单异常");
+                            logger.error(request, "取消订单失败");
+                        }
                     }
                 }
             } catch (Exception e) {
-                response.setErrorMsg("预支付错误：" + e.getMessage());
-                logger.error(request, "预支付错误：{}", e.getMessage());
+                response.setErrorMsg("支付错误：" + e.getMessage());
+                logger.error(request, "支付错误：{}", e.getMessage());
             }
             return response;
         }
 
-        public void cancel(PaymentTradeRequest request) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, 30);
-            Date timeout = calendar.getTime();
-            while (onceCancel(request) && timeout.after(new Date())) {
-                logger.info(request, "正在重试取消订单");
-            }
+        public boolean cancel(PaymentTradeRequest request) {
+            AtomicReference<Boolean> reference = new AtomicReference<>(false);
+            PaymentUtils.schedule(() -> {
+                boolean b = onceCancel(request);
+                reference.set(b);
+                return !b;
+            }, () -> logger.info(request, "正在重试取消订单"), 5);
+            return reference.get();
         }
 
         public boolean onceCancel(PaymentTradeRequest request) {
@@ -447,16 +449,16 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                     String resultCode = rsp.get("result_code");
                     if (!WXPayConstants.SUCCESS.equals(resultCode)) {
                         logger.info(request, "取消订单失败：{}", rsp.get("err_code_des"));
-                        return true;
+                        return false;
                     }
                     if ("Y".equals(rsp.get("recall"))) {
                         logger.error(request, "取消订单失败需要重试请求");
-                        return true;
+                        return false;
                     }
-                    return false;
+                    return true;
                 } else {
                     logger.info(request, "取消订单请求失败：{}", rsp.get("return_msg"));
-                    return true;
+                    return false;
                 }
             } catch (Exception e) {
                 logger.error(request, "取消订单错误：{}", e.getMessage());
@@ -477,12 +479,12 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
 
     }
 
-    public static class JsApi extends AbstractPay implements JSAPITradeClientType {
+    public static class JsApi extends AbstractPay implements JsApiTradeClientType {
 
         @Override
         protected Map<String, String> getPayParams(PaymentTradeRequest request) {
             Map<String, String> params = super.getPayParams(request);
-            params.put("trade_type", "JSAPI");
+            params.put("trade_type", WXPayConstants.TRADE_TYPE_JSAPI);
             params.put("openid", getOpenId(request));
             return params;
         }

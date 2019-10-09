@@ -109,7 +109,7 @@
 
         if (isPc) {
             // 1. 自动构造iframe显示二维码支付
-            $.post("${baseUrl}/payment/pay/alipay/qrc?width=200&orderId=" + orderId, function (result) {
+            $.post("${baseUrl}/payment/pay/alipay/web_qrc?width=200&orderId=" + orderId, function (result) {
                 query(result.data.orderId, "alipay", function(){
                     document.querySelector(".alert-success").innerHTML = "支付宝支付成功"
                 })
@@ -155,7 +155,7 @@
     function getWechatQrCode() {
         var orderId = new Date().getTime();
         if (isPc) {
-            $.post("${baseUrl}/payment/pay/wechat/qrc", {orderId: orderId}, function (result) {
+            $.post("${baseUrl}/payment/pay/wechat/web_qrc", {orderId: orderId}, function (result) {
                 showQrCode(".wechat-qrcode", result.data.codeUrl)
                 query(result.data.orderId, "wechat", function(){
                     document.querySelector(".alert-success").innerHTML = "微信支付成功"

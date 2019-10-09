@@ -1,7 +1,6 @@
 package com.test.payment.config;
 
 import com.test.payment.PaymentOperations;
-import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.wechat.WechatPayTemplate;
 import com.test.payment.properties.WechatPayProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +21,9 @@ public class WechatConfiguration {
 
     @Bean
     public PaymentOperations wechatPayQrcOperations() {
-        WechatPayTemplate.Qrc qrc = new WechatPayTemplate.Qrc();
-        qrc.setProperties(wechatPayProperties);
-        return qrc;
+        WechatPayTemplate.WebQrc webQrc = new WechatPayTemplate.WebQrc();
+        webQrc.setProperties(wechatPayProperties);
+        return webQrc;
     }
 
     @Bean
@@ -39,5 +38,12 @@ public class WechatConfiguration {
         WechatPayTemplate.Wap wap = new WechatPayTemplate.Wap();
         wap.setProperties(wechatPayProperties);
         return wap;
+    }
+
+    @Bean
+    public PaymentOperations wechatPayF2fOperations() {
+        WechatPayTemplate.F2f f2f = new WechatPayTemplate.F2f();
+        f2f.setProperties(wechatPayProperties);
+        return f2f;
     }
 }

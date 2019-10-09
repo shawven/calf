@@ -4,6 +4,7 @@ import com.test.payment.domain.*;
 import com.test.payment.properties.UnionpayProperties;
 import com.test.payment.supplier.AbstractPaymentTemplate;
 import com.test.payment.supplier.unionpay.sdk.UnionpayClient;
+import com.test.payment.supplier.unionpay.sdk.UnionpayConstants;
 import com.test.payment.supplier.unionpay.sdk.UnionpayException;
 import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradePayRequest;
 import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeQueryRequest;
@@ -57,7 +58,7 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
         try {
             logger.info(request, "同步回调接受参数：{}", params);
             if (getUnionpayClient().verify(params)) {
-                if ("00".equals(params.get("respCode"))) {
+                if (UnionpayConstants.SUCCESS_CODE.equals(params.get("respCode"))) {
                     response.setSuccess(true);
                     response.setOutTradeNo(params.get("orderId"));
                     response.setTradeNo(params.get("queryId"));
@@ -84,12 +85,12 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
         try {
             logger.info(request, "异步回调接受参数：{}", params);
             if (getUnionpayClient().verify(params)) {
-                if ("00".equals(params.get("respCode"))) {
+                if (UnionpayConstants.SUCCESS_CODE.equals(params.get("respCode"))) {
                     response.setSuccess(true);
                     response.setOutTradeNo(params.get("orderId"));
                     response.setTradeNo(params.get("queryId"));
                     response.setAmount(CurrencyTools.ofCent(params.get("txnAmt")));
-                    response.setReplayMessage("ok");
+                    response.setReplayMessage(UnionpayConstants.REPLAY_SUCCESS);
                 } else {
                     response.setErrorMsg(params.get("respMsg"));
                 }
@@ -117,12 +118,12 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
             logger.info(request, "查询支付交易响应参数：{}", rsp);
 
             //如果查询交易成功
-            if("00".equals(rsp.get("respCode"))){
+            if(UnionpayConstants.SUCCESS_CODE.equals(rsp.get("respCode"))){
                 //处理被查询交易的应答码逻辑
                 String origRespCode = rsp.get("origRespCode");
                 String respMsg = rsp.get("origRespMsg");
                 // 交易成功
-                if("00".equals(origRespCode)) {
+                if(UnionpayConstants.SUCCESS_CODE.equals(origRespCode)) {
                     response.setSuccess(true);
                     response.setOutTradeNo(request.getOutTradeNo());
                     response.setTradeNo(rsp.get("queryId"));
@@ -167,7 +168,7 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
             String respCode = rsp.get("respCode");
             String respMsg = rsp.get("respMsg");
             //如果查询交易成功
-            if("00".equals(respCode)){
+            if(UnionpayConstants.SUCCESS_CODE.equals(respCode)){
                 // 交易成功
                 response.setSuccess(true);
                 response.setOutTradeNo(request.getOutTradeNo());
@@ -204,12 +205,12 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
             logger.info(request, "查询退款响应参数：{}", rsp);
 
             //如果查询交易成功
-            if("00".equals(rsp.get("respCode"))){
+            if(UnionpayConstants.SUCCESS_CODE.equals(rsp.get("respCode"))){
                 //处理被查询交易的应答码逻辑
                 String origRespCode = rsp.get("origRespCode");
                 String respMsg = rsp.get("origRespMsg");
                 // 交易成功
-                if("00".equals(origRespCode)) {
+                if(UnionpayConstants.SUCCESS_CODE.equals(origRespCode)) {
                     response.setSuccess(true);
                     response.setOutRefundNo(request.getOutRefundNo());
                     response.setOutTradeNo(request.getOutTradeNo());

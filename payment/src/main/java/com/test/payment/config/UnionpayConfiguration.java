@@ -56,4 +56,18 @@ public class UnionpayConfiguration {
         wap.setProperties(unionpayB2BProperties);
         return wap;
     }
+
+    @Bean
+    public PaymentOperations unionpayF2fB2CPaymentProvider() {
+        UnionpayB2CTemplate.F2f f2f = new UnionpayB2CTemplate.F2f();
+        f2f.setProperties(unionpayB2CProperties);
+        return f2f;
+    }
+
+    @Bean
+    public PaymentOperations unionpayQrcB2CPaymentProvider() {
+        UnionpayB2CTemplate.Qrc qrc = new UnionpayB2CTemplate.Qrc();
+        qrc.setProperties(unionpayB2CProperties);
+        return qrc;
+    }
 }

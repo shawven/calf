@@ -4,11 +4,12 @@ import com.test.payment.PaymentTradeClientType;
 
 /**
  * @author Shoven
- * @date 2019-09-03
+ * @date 2019-10-09
  */
-public interface UnifiedTradeClientType extends PaymentTradeClientType {
+public interface WebQrcTradeClientType extends PaymentTradeClientType {
+
     @Override
     default PaymentClientTypeEnum getClientType() {
-        return PaymentClientTypeEnum.UNIFIED;
+        return PaymentClientTypeEnum.WEB_QRC;
     }
 }

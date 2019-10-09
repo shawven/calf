@@ -4,7 +4,7 @@ package com.test.payment.supplier.unionpay.sdk.request;
  * @author Shoven
  * @date 2019-10-08
  */
-public class UnionpayTradeCancelRequest extends UnionpayTradeRequest  {
+public class UnionpayTradeReversalRequest extends UnionpayTradeRequest  {
     /**
      * 订单号
      */
@@ -28,7 +28,12 @@ public class UnionpayTradeCancelRequest extends UnionpayTradeRequest  {
     /**
      * 交易类型 31-消费撤销
      */
-    private String tradeType = "31";
+    private String tradeType = "99";
+
+    /**
+     * 交易子类型
+     */
+    private String tradeSubType = "01";
 
     public String getOutTradeNo() {
         return outTradeNo;
@@ -70,6 +75,14 @@ public class UnionpayTradeCancelRequest extends UnionpayTradeRequest  {
         this.tradeType = tradeType;
     }
 
+    public String getTradeSubType() {
+        return tradeSubType;
+    }
+
+    public void setTradeSubType(String tradeSubType) {
+        this.tradeSubType = tradeSubType;
+    }
+
     @Override
     public String toString() {
         return "UnionpayTradeCancelRequest{" +
@@ -78,6 +91,7 @@ public class UnionpayTradeCancelRequest extends UnionpayTradeRequest  {
                 ", subject='" + subject + '\'' +
                 ", returnUrl='" + returnUrl + '\'' +
                 ", tradeType='" + tradeType + '\'' +
+                ", tradeSubType='" + tradeSubType + '\'' +
                 '}';
     }
 }

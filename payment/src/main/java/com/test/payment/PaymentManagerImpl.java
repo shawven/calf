@@ -58,10 +58,10 @@ public class PaymentManagerImpl implements PaymentManager {
     @Override
     public PaymentTradeResponse pay(PaymentTradeRequest request) {
         if (isBlankString(request.getOutTradeNo())) {
-            throw new IllegalArgumentException("预支付商户交易号不能为空");
+            throw new IllegalArgumentException("支付商户交易号不能为空");
         }
         if (isBlankString(request.getSubject())) {
-            throw new IllegalArgumentException("预支付商品主题不能为空");
+            throw new IllegalArgumentException("支付商品主题不能为空");
         }
         if (isBlankString(request.getAmount())) {
             throw new IllegalArgumentException("订单金额为空");
@@ -70,7 +70,7 @@ public class PaymentManagerImpl implements PaymentManager {
         PaymentTradeResponse response;
         try {
             response = paymentOperations.pay(request);
-            logger.debug(request, "预支付结果：[{}]", response);
+            logger.debug(request, "支付结果：[{}]", response);
         } catch (UnsupportedOperationException e) {
             response = new PaymentTradeResponse();
             logger.warn(request, "尚未支持");
@@ -191,8 +191,8 @@ public class PaymentManagerImpl implements PaymentManager {
             throw new PaymentException("未配置[" + supplier.getName() + "]供应商");
         }
 
-        // 未指定客户端类型或者为空返回任意一个即可
-        if (clientType == PaymentClientTypeEnum.UNIFIED || clientType == null) {
+        // 未指定客户端类型或者为空返回第一个即可
+        if (clientType == PaymentClientTypeEnum.NONE || clientType == null) {
             return clientTypes.values().iterator().next();
         } else {
             PaymentOperations paymentOperations = clientTypes.get(clientType);

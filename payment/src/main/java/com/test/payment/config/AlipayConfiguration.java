@@ -1,16 +1,12 @@
 package com.test.payment.config;
 
 import com.test.payment.PaymentOperations;
-import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.alipay.AlipayTemplate;
 import com.test.payment.properties.AlipayProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 /**
  * @author Shoven
@@ -35,6 +31,20 @@ public class AlipayConfiguration {
         AlipayTemplate.Wap wap = new AlipayTemplate.Wap();
         wap.setProperties(alipayProperties);
         return wap;
+    }
+
+    @Bean
+    public PaymentOperations alipayWebQrcPaymentProvider() {
+        AlipayTemplate.WebQrc webQrc = new AlipayTemplate.WebQrc();
+        webQrc.setProperties(alipayProperties);
+        return webQrc;
+    }
+
+    @Bean
+    public PaymentOperations alipayF2fPaymentProvider() {
+        AlipayTemplate.F2f f2f = new AlipayTemplate.F2f();
+        f2f.setProperties(alipayProperties);
+        return f2f;
     }
 
     @Bean

@@ -1,6 +1,7 @@
 package com.test.payment.support;
 
 import com.alipay.api.internal.util.file.StringBuilderWriter;
+import sun.security.jca.GetInstance;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -14,6 +15,8 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 import static java.util.Collections.emptyMap;
 
@@ -22,6 +25,7 @@ import static java.util.Collections.emptyMap;
  * @date 2019-09-03
  */
 public class PaymentUtils {
+
 
     public static Map<String, String> parseParameterMap(Map<String, ?> parameterMap) {
         if (parameterMap == null || parameterMap.isEmpty()) {
@@ -190,6 +194,96 @@ public class PaymentUtils {
             return true;
         } else {
             return true;
+        }
+    }
+
+    public abstract static class FutureRunnable implements Runnable {
+
+        private Future<?> future;
+
+        private long timeout;
+
+        /**
+         * 取消任务
+         *
+         * @return
+         */
+        protected boolean cancel() {
+            return future.isCancelled() || future.cancel(false);
+        }
+
+        /**
+         * 等待任务执行完毕
+         */
+        public void await() {
+            if (future.isCancelled()) {
+                return;
+            }
+            try {
+                long milliseconds = this.timeout - System.currentTimeMillis();
+                TimeUnit.MILLISECONDS.sleep(milliseconds);
+            } catch (Exception ignored) {
+            } finally {
+                if (!future.isCancelled()) {
+                    future.cancel(false);
+                }
+            }
+        }
+
+        private void setFuture(Future<?> future) {
+            this.future = future;
+        }
+
+        private void setTimeout(int timeout) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.SECOND, timeout);
+            this.timeout = calendar.getTime().getTime();
+        }
+    }
+
+    /**
+     * 超时时间内周期性执行任务
+     *
+     * @param command 执行命令
+     * @param period 周期性时间
+     * @param timeout 超时时间
+     */
+    public static void schedule(FutureRunnable command, int period, int timeout) {
+        ScheduledExecutorService executor = ScheduledExecutor.getInstance();
+        ScheduledFuture future = executor.scheduleWithFixedDelay(command, 0, period, TimeUnit.SECONDS);
+        command.setTimeout(timeout);
+        command.setFuture(future);
+    }
+
+    /**
+     * 执行可重试的任务
+     *
+     * @param command 执行命令 command返回true 停止重试
+     * @param retryTask 重试时触发
+     * @param count 重试次数
+     */
+    public static void schedule(Callable<Boolean> command, Runnable retryTask, int count)  {
+        int i = 0;
+        boolean stop;
+        do {
+            if (i > 0) {
+                retryTask.run();
+            }
+            try {
+                stop = command.call();
+            } catch (Exception e) {
+                stop = false;
+            }
+        } while (!stop && ++i < count);
+    }
+
+    public static class ScheduledExecutor {
+
+        private static ScheduledExecutorService instance =
+                Executors.newScheduledThreadPool(1, Executors.defaultThreadFactory());
+
+        public static ScheduledExecutorService getInstance() {
+            return instance;
         }
     }
 }

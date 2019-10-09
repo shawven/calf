@@ -58,17 +58,22 @@ public class PayController {
         return "payment/index2";
     }
 
-    @GetMapping("qrcode")
+    @GetMapping("index3")
+    public String index3() {
+        return "payment/index3";
+    }
+
+    @GetMapping("unifiedQRC")
     public ResponseEntity getQrCode() {
         String s = RandomStringUtils.randomNumeric(32);
         return Response.ok(ImmutableMap.of("qrcode", "http://shoven.nat123.net:10010/payment/payer/" + s));
     }
 
-    @GetMapping("payer/{orderId}")
+    @GetMapping("unifiedQRC/{orderId}")
     public String unifiedPay(@PathVariable String orderId, Model model) {
         model.addAttribute("orderId", orderId);
         model.addAttribute("title", "购买商品");
-        return "payment/payer";
+        return "unifiedQRC";
     }
 
     /**
@@ -92,11 +97,16 @@ public class PayController {
 
         PaymentTradeResponse rsp = paymentManager.pay(tradeRequest);
 
-        if (!rsp.isSuccess()) {
-            return Response.error(rsp.getErrorMsg());
+        if (rsp.isSuccess()) {
+            // 面对面付款码支付这种会立即交易完成
+            if (rsp.isTradeSuccess()) {
+                processOrder(rsp.getOutTradeNo(), rsp.getTradeNo());
+                return Response.ok("交易完成");
+            }
+            rsp.putBody("orderId", orderId);
+            return Response.ok(rsp.getBody());
         }
-        rsp.putBody("orderId", orderId);
-        return Response.ok(rsp.getBody());
+        return Response.error(rsp.getErrorMsg());
     }
 
     @PostMapping("notify/{supplier}")

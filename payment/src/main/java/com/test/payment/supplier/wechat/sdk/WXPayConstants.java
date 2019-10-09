@@ -11,6 +11,11 @@ public class WXPayConstants {
         MD5, HMACSHA256
     }
 
+    public static final String TRADE_TYPE_NATIVE = "NATIVE";
+    public static final String TRADE_TYPE_JSAPI = "JSAPI";
+    public static final String TRADE_TYPE_APP = "APP";
+    public static final String TRADE_TYPE_H5 = "MWEB";
+
     public static final String DOMAIN_API = "api.mch.weixin.qq.com";
     public static final String DOMAIN_API2 = "api2.mch.weixin.qq.com";
     public static final String DOMAIN_APIHK = "apihk.mch.weixin.qq.com";
@@ -19,6 +24,7 @@ public class WXPayConstants {
 
     public static final String FAIL     = "FAIL";
     public static final String SUCCESS  = "SUCCESS";
+    public static final String OK  = "OK";
     public static final String REFUND  = "REFUND";
     public static final String NOTPAY  = "NOTPAY";
     public static final String CLOSED  = "CLOSED";
