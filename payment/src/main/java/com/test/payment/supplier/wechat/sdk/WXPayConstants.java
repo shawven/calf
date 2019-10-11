@@ -29,8 +29,14 @@ public class WXPayConstants {
     public static final String NOTPAY  = "NOTPAY";
     public static final String CLOSED  = "CLOSED";
     public static final String REVOKED  = "REVOKED";
-    public static final String USERPAYING  = "USERPAYING";
-    public static final String PAYERROR  = "PAYERROR";
+    public static final String USER_PAYING  = "USERPAYING";
+    public static final String PAY_ERROR  = "PAYERROR";
+    public static final String SYSTEM_ERROR  = "SYSTEMERROR";
+    public static final String ORDER_NOT_EXIST = "ORDERNOTEXIST";
+    public static final String REFUND_NOT_EXIST = "REFUNDNOTEXIST";
+    public static final String REFUND_CLOSE = "REFUNDCLOSE";
+    public static final String PROCESSING = "PROCESSING";
+    public static final String CHANGE = "CHANGE";
 
     public static final String HMACSHA256 = "HMAC-SHA256";
     public static final String MD5 = "MD5";
@@ -68,5 +74,7 @@ public class WXPayConstants {
     public static final String SANDBOX_SHORTURL_URL_SUFFIX     = "/sandboxnew/tools/shorturl";
     public static final String SANDBOX_AUTHCODETOOPENID_URL_SUFFIX = "/sandboxnew/tools/authcodetoopenid";
     public static final String SANDBOX_SIGN_KEY_SUFFIX         = "/sandboxnew/pay/getsignkey";
+
+    public static final String FAILED_RESPONSE = "<html>\r\n<head><title>302 Found</title></head>\r\n<body bgcolor=\"white\">\r\n<center><h1>302 Found</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n";
 }
 

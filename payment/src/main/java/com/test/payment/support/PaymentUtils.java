@@ -241,41 +241,48 @@ public class PaymentUtils {
         }
     }
 
+
     /**
      * 超时时间内周期性执行任务
      *
      * @param command 执行命令
      * @param period 周期性时间
      * @param timeout 超时时间
+     * @return 执行命令
      */
-    public static void schedule(FutureRunnable command, int period, int timeout) {
+    public static FutureRunnable runningUntilSuccess(FutureRunnable command, int period, int timeout) {
         ScheduledExecutorService executor = ScheduledExecutor.getInstance();
         ScheduledFuture future = executor.scheduleWithFixedDelay(command, 0, period, TimeUnit.SECONDS);
         command.setTimeout(timeout);
         command.setFuture(future);
+        return command;
     }
 
     /**
-     * 执行可重试的任务
+     * 执行可重试的任务，直到成功或者最大重试次数
      *
      * @param command 执行命令 command返回true 停止重试
-     * @param retryTask 重试时触发
-     * @param count 重试次数
+     * @param retryConsumer 重试消费者
+     * @param retryTimes 重试次数 -1 无限次
+     * @return 成功与否
      */
-    public static void schedule(Callable<Boolean> command, Runnable retryTask, int count)  {
+    public static boolean runningUntilSuccess(Callable<Boolean> command, Consumer<Integer> retryConsumer, int retryTimes) {
+        boolean infinite = retryTimes < 0;
         int i = 0;
-        boolean stop;
+        boolean success;
         do {
             if (i > 0) {
-                retryTask.run();
+                retryConsumer.accept(i);
             }
             try {
-                stop = command.call();
+                success = command.call();
             } catch (Exception e) {
-                stop = false;
+                success = false;
             }
-        } while (!stop && ++i < count);
+        } while (!success && (infinite || ++i < retryTimes));
+        return success;
     }
+
 
     public static class ScheduledExecutor {
 

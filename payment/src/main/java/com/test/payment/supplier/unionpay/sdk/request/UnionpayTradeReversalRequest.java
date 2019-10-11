@@ -26,14 +26,19 @@ public class UnionpayTradeReversalRequest extends UnionpayTradeRequest  {
     private String returnUrl;
 
     /**
-     * 交易类型 31-消费撤销
+     * 交易类型
      */
-    private String tradeType = "99";
+    private String tradeType ;
 
     /**
      * 交易子类型
      */
-    private String tradeSubType = "01";
+    private String tradeSubType;
+
+    /**
+     *  渠道类型
+     */
+    private String channelType;
 
     public String getOutTradeNo() {
         return outTradeNo;
@@ -67,31 +72,47 @@ public class UnionpayTradeReversalRequest extends UnionpayTradeRequest  {
         this.returnUrl = returnUrl;
     }
 
+    @Override
     public String getTradeType() {
         return tradeType;
     }
 
+    @Override
     public void setTradeType(String tradeType) {
         this.tradeType = tradeType;
     }
 
+    @Override
     public String getTradeSubType() {
         return tradeSubType;
     }
 
+    @Override
     public void setTradeSubType(String tradeSubType) {
         this.tradeSubType = tradeSubType;
     }
 
+    public String getChannelType() {
+        return channelType;
+    }
+
+    public void setChannelType(String channelType) {
+        this.channelType = channelType;
+    }
+
     @Override
     public String toString() {
-        return "UnionpayTradeCancelRequest{" +
+        return "UnionpayTradeReversalRequest{" +
                 "outTradeNo='" + outTradeNo + '\'' +
                 ", amount='" + amount + '\'' +
                 ", subject='" + subject + '\'' +
                 ", returnUrl='" + returnUrl + '\'' +
                 ", tradeType='" + tradeType + '\'' +
                 ", tradeSubType='" + tradeSubType + '\'' +
-                '}';
+                ", channelType='" + channelType + '\'' +
+                ", currencyCode='" + currencyCode + '\'' +
+                ", accessType='" + accessType + '\'' +
+                ", bizType='" + bizType + '\'' +
+                "} " + super.toString();
     }
 }

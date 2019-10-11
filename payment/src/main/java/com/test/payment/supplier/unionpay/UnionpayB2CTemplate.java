@@ -1,20 +1,18 @@
 package com.test.payment.supplier.unionpay;
 
 import com.test.payment.client.*;
-import com.test.payment.domain.PaymentTradeQueryRequest;
-import com.test.payment.domain.PaymentTradeQueryResponse;
-import com.test.payment.domain.PaymentTradeRequest;
-import com.test.payment.domain.PaymentTradeResponse;
+import com.test.payment.domain.*;
 import com.test.payment.properties.UnionpayProperties;
 import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.unionpay.sdk.UnionpayClient;
 import com.test.payment.supplier.unionpay.sdk.UnionpayConstants;
 import com.test.payment.supplier.unionpay.sdk.UnionpayException;
-import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeReversalRequest;
-import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradePayRequest;
+import com.test.payment.supplier.unionpay.sdk.request.*;
 import com.test.payment.supplier.wechat.sdk.WXPayConstants;
+import com.test.payment.support.PaymentConstants;
 import com.test.payment.support.PaymentUtils;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -35,7 +33,7 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
 
     @Override
     public String getBizType() {
-        return UnionpayConstants.B2C;
+        return UnionpayConstants.BIZ_TYPE_B2C;
     }
 
     @Override
@@ -53,51 +51,132 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
         return UnionpayClientFacotry.getB2CInstance(getProperties());
     }
 
+
     public static class Web extends UnionpayB2CTemplate implements WebTradeClientType {
 
         @Override
-        public String getChannelType() {
-            return UnionpayConstants.PC;
+        protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
+            return getUnionpayClient().pagePay(request);
+        }
+
+        @Override
+        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
+            response.setSuccess(true);
+            response.setForm(rsp.get("form"));
+        }
+
+        @Override
+        protected UnionpayTradePayRequest getPayRequest(PaymentTradeRequest request) {
+            UnionpayTradePayRequest payRequest = super.getPayRequest(request);
+            payRequest.setReturnUrl(getProperties().getReturnUrl());
+            payRequest.setTradeSubType("01");
+            payRequest.setChannelType("07");
+            return payRequest;
+        }
+
+        @Override
+        protected UnionpayTradeRefundRequest getRefundRequest(PaymentTradeRefundRequest request) {
+            UnionpayTradeRefundRequest refundRequest = super.getRefundRequest(request);
+            refundRequest.setTradeSubType("00");
+            refundRequest.setChannelType("07");
+            return refundRequest;
         }
     }
 
     public static class Wap extends UnionpayB2CTemplate implements WapTradeClientType {
 
         @Override
-        public String getChannelType() {
-            return UnionpayConstants.WAP;
+        protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
+            return getUnionpayClient().pagePay(request);
+        }
+
+        @Override
+        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
+            response.setSuccess(true);
+            response.setForm(rsp.get("form"));
+        }
+
+        @Override
+        protected UnionpayTradePayRequest getPayRequest(PaymentTradeRequest request) {
+            UnionpayTradePayRequest payRequest = super.getPayRequest(request);
+            payRequest.setReturnUrl(getProperties().getReturnUrl());
+            payRequest.setTradeSubType("01");
+            payRequest.setChannelType("08");
+            return payRequest;
+        }
+
+        @Override
+        protected UnionpayTradeRefundRequest getRefundRequest(PaymentTradeRefundRequest request) {
+            UnionpayTradeRefundRequest refundRequest = super.getRefundRequest(request);
+            refundRequest.setTradeSubType("00");
+            refundRequest.setChannelType("08");
+            return refundRequest;
         }
     }
 
     public static class App extends UnionpayB2CTemplate implements AppTradeClientType {
 
         @Override
-        public PaymentTradeResponse pay(PaymentTradeRequest request) {
-            UnionpayTradePayRequest unionpayRequest = getPayParams(request);
-            PaymentTradeResponse response = new PaymentTradeResponse();
-            try {
-                logger.info(request, "预支付请求参数：{}", unionpayRequest);
-                //网页支付
-                Map<String, String> rsp = getUnionpayClient().appExecute(unionpayRequest);
-                logger.info(request, "预支付响应参数：{}", rsp);
-                if(UnionpayConstants.SUCCESS_CODE.equals(rsp.get("respCode"))) {
-                    response.setSuccess(true);
-                    response.setPrepayId(rsp.get("tn"));
-                } else {
-                    String respMsg = rsp.get("respMsg");
-                    response.setErrorMsg(respMsg);
-                    logger.info(request, "预支付请求失败：{}", respMsg);
-                }
-            } catch (UnionpayException e) {
-                logger.error(request, "预支付错误：{}", e.getMessage());
-                response.setErrorMsg("预支付失败：" + e.getMessage());
-            }
-            return response;
+        protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
+            return getUnionpayClient().appPay(request);
         }
 
         @Override
-        public String getChannelType() {
-            return UnionpayConstants.APP;
+        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
+            response.setSuccess(true);
+            response.setPrepayId(rsp.get("tn"));
+        }
+
+        @Override
+        protected UnionpayTradePayRequest getPayRequest(PaymentTradeRequest request) {
+            UnionpayTradePayRequest payRequest = super.getPayRequest(request);
+            payRequest.setTradeSubType("01");
+            payRequest.setChannelType("08");
+            return payRequest;
+        }
+
+        @Override
+        protected UnionpayTradeRefundRequest getRefundRequest(PaymentTradeRefundRequest request) {
+            UnionpayTradeRefundRequest refundRequest = super.getRefundRequest(request);
+            refundRequest.setTradeSubType("00");
+            refundRequest.setChannelType("08");
+            return refundRequest;
+        }
+    }
+
+
+    public static class Qrc extends UnionpayB2CTemplate implements QrcTradeClientType {
+
+        @Override
+        protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
+            return getUnionpayClient().execute(request);
+        }
+
+        @Override
+        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
+            response.setSuccess(true);
+            response.setCodeUrl(rsp.get("qrCode"));
+        }
+
+        @Override
+        protected UnionpayTradePayRequest getPayRequest(PaymentTradeRequest request) {
+            UnionpayTradePayRequest payRequest = super.getPayRequest(request);
+            payRequest.setTradeSubType("07");
+            payRequest.setChannelType("08");
+            return payRequest;
+        }
+
+        @Override
+        protected UnionpayTradeRefundRequest getRefundRequest(PaymentTradeRefundRequest request) {
+            UnionpayTradeRefundRequest refundRequest = super.getRefundRequest(request);
+            refundRequest.setTradeSubType("00");
+            refundRequest.setChannelType("08");
+            return refundRequest;
+        }
+
+        @Override
+        public String getBizType() {
+            return UnionpayConstants.BIZ_TYPE_F2F;
         }
     }
 
@@ -105,78 +184,96 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
 
         @Override
         public PaymentTradeResponse pay(PaymentTradeRequest request) {
-            UnionpayTradePayRequest unionpayRequest = getPayParams(request);
+            UnionpayTradePayRequest unionpayRequest = getPayRequest(request);
             PaymentTradeResponse response = new PaymentTradeResponse();
+            boolean needQuery = false;
+
             try {
                 logger.info(request, "支付请求参数：{}", unionpayRequest);
-                //网页支付
-                Map<String, String> rsp = getUnionpayClient().authCodeExecute(unionpayRequest);
-                logger.info(request, "支付响应参数：{}", rsp);
+                Map<String, String> rsp = getUnionpayClient().authCodePay(unionpayRequest);
+                logger.info(request, "支付响应参数：{}", getPrettyMapForPrinter(rsp));
+
                 String respCode = rsp.get("respCode");
-                if(UnionpayConstants.SUCCESS_CODE.equals(respCode)) {
+                if (UnionpayConstants.SUCCESS_CODE.equals(respCode)) {
                     response.setSuccess(true);
                     response.setTradeNo(rsp.get("queryId"));
-                } else if ("03".equals(respCode) || "04".equals(respCode) || "05".equals(respCode))  {
-                    logger.info(request, "等待支付完成正在轮训查询订单");
-                    AtomicReference<PaymentTradeQueryResponse> reference = new AtomicReference<>(new PaymentTradeQueryResponse());
-                    PaymentUtils.schedule(new PaymentUtils.FutureRunnable() {
-                        @Override
-                        public void run() {
-                            PaymentTradeQueryRequest queryRequest = new PaymentTradeQueryRequest(request);
-                            queryRequest.setOutTradeNo(request.getOutTradeNo());
-                            PaymentTradeQueryResponse result = query(queryRequest);
-                            if (result.isSuccess()) {
-                                this.cancel();
-                            }
-                            reference.set(result);
-                        }
-                    }, 5, 30);
-                    PaymentTradeQueryResponse queryResponse = reference.get();
-
-                    if (queryResponse.isSuccess()) {
-                        response.setSuccess(true);
-                        response.setTradeNo(queryResponse.getTradeNo());
-                        response.setOutTradeNo(queryResponse.getOutTradeNo());
-                    } else {
-                        logger.info(request, "支付未完成正在取消订单");
-                        if (cancel(request)) {
-                            response.setErrorMsg("支付未完成已取订单");
-                            logger.info(request, "取消订单失败");
-                        } else {
-                            response.setErrorMsg("支付未完成且取消订单异常");
-                            logger.error(request, "取消订单失败");
-                        }
-                    }
+                } else if ("01".equals(respCode) || "03".equals(respCode)
+                        || "05".equals(respCode) || "12".equals(respCode)) {
+                    needQuery = true;
+                    response.setErrorMsg(rsp.get("respMsg"));
                 } else {
-                    String respMsg = rsp.get("respMsg");
-                    logger.info(request, "支付错误：{}", respMsg);
-                    response.setErrorMsg(respMsg);
+                    response.setErrorMsg("支付失败：" + rsp.get("respMsg"));
                 }
             } catch (UnionpayException e) {
-                logger.error(request, "支付错误：{}", e.getMessage());
-                response.setErrorMsg("支付失败：" + e.getMessage());
+                if (e.getCause() instanceof IOException) {
+                    needQuery = true;
+                }
+                response.setErrorMsg("支付错误：" + e.getMessage());
+            }
+            if (!response.isSuccess()) {
+                if (needQuery) {
+                    logger.info(request, "支付未完成[{}]，正在查询订单", response.getErrorMsg());
+                    queryTradeIfFailed(request, response);
+                } else {
+                    logger.error(request, response.getErrorMsg());
+                }
             }
             return response;
         }
 
+        private void queryTradeIfFailed(PaymentTradeRequest request, PaymentTradeResponse response) {
+            AtomicReference<PaymentTradeQueryResponse> reference = new AtomicReference<>(new PaymentTradeQueryResponse());
+            PaymentUtils.runningUntilSuccess(new PaymentUtils.FutureRunnable() {
+                @Override
+                public void run() {
+                    PaymentTradeQueryRequest queryRequest = new PaymentTradeQueryRequest(request);
+                    queryRequest.setOutTradeNo(request.getOutTradeNo());
+                    PaymentTradeQueryResponse result;
+                    try {
+                        result = query(queryRequest);
+                    } catch (Exception e) {
+                        return;
+                    }
+                    // 成功或者不存在的交易直接取消循环
+                    if (result.isSuccess() || result.isNotExist()) {
+                        this.cancel();
+                    }
+                    reference.set(result);
+                }
+            }, 3, 30).await();
+            PaymentTradeQueryResponse queryResponse = reference.get();
 
-        public boolean cancel(PaymentTradeRequest request) {
-            AtomicReference<Boolean> reference = new AtomicReference<>(false);
-            PaymentUtils.schedule(() -> {
-                boolean b = onceCancel(request);
-                reference.set(b);
-                return !b;
-            }, () -> logger.info(request, "正在重试取消订单"), 5);
-            return reference.get();
+            if (queryResponse.isSuccess()) {
+                response.setSuccess(true);
+                response.setTradeNo(queryResponse.getTradeNo());
+                response.setOutTradeNo(queryResponse.getOutTradeNo());
+            } else {
+                logger.info(request, "支付未完成正在取消订单");
+                if (cancel(request)) {
+                    response.setErrorMsg("支付未完成已取消订单");
+                    logger.info(request, response.getErrorMsg());
+                } else {
+                    response.setErrorMsg("支付未完成且取消订单异常");
+                    logger.error(request, response.getErrorMsg());
+                }
+            }
         }
 
+        public boolean cancel(PaymentTradeRequest request) {
+            return PaymentUtils.runningUntilSuccess(() -> onceCancel(request),
+                    i -> logger.info(request, "正在第" + i +"次重试取消订单"), 3);
+        }
+
+        /**
+         * @param request
+         * @return 成功与否
+         */
         public boolean onceCancel(PaymentTradeRequest request) {
-            UnionpayTradeReversalRequest cancelRequest = new UnionpayTradeReversalRequest();
-            cancelRequest.setOutTradeNo(request.getOutTradeNo());
+            UnionpayTradeReversalRequest reversalRequest = getReversalRequest(request);
             try {
-                logger.info(request, "取消订单请求参数：{}", cancelRequest);
-                Map<String, String> rsp = getUnionpayClient().reversal(cancelRequest);
-                logger.info(request, "取消订单响应参数：{}", rsp);
+                logger.info(request, "取消订单请求参数：{}", reversalRequest);
+                Map<String, String> rsp = getUnionpayClient().reversal(reversalRequest);
+                logger.info(request, "取消订单响应参数：{}", getPrettyMapForPrinter(rsp));
 
                 String returnCode = rsp.get("return_code");
                 if (WXPayConstants.SUCCESS.equals(returnCode)) {
@@ -187,7 +284,7 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
                     }
                     return true;
                 } else {
-                    logger.info(request, "取消订单请求失败：{}", rsp.get("return_msg"));
+                    logger.info(request, "取消订单失败：{}", rsp.get("return_msg"));
                     return false;
                 }
             } catch (Exception e) {
@@ -197,57 +294,46 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
         }
 
         @Override
-        protected UnionpayTradePayRequest getPayParams(PaymentTradeRequest request) {
-            String authCode = request.get("authCode");
+        protected UnionpayTradePayRequest getPayRequest(PaymentTradeRequest request) {
+            String authCode = request.get(PaymentConstants.AUTH_CODE);
             if (PaymentUtils.isBlankString(authCode)) {
-                throw new IllegalArgumentException("支付授权码为空");
+                throw new IllegalArgumentException("支付授权码不能为空");
             }
-            UnionpayTradePayRequest unionpayRequest = super.getPayParams(request);
-            unionpayRequest.setAuthCode(authCode);
-            return unionpayRequest;
+            String storeId = request.get(PaymentConstants.STORE_ID);
+            if (PaymentUtils.isBlankString(storeId)) {
+                throw new IllegalArgumentException("门店编号不能为空");
+            }
+            UnionpayTradePayRequest payRequest = super.getPayRequest(request);
+            payRequest.setTradeSubType("06");
+            payRequest.setChannelType("08");
+            payRequest.setAuthCode(authCode);
+            payRequest.setTermId(storeId);
+            return payRequest;
+        }
+
+        @Override
+        protected UnionpayTradeRefundRequest getRefundRequest(PaymentTradeRefundRequest request) {
+            UnionpayTradeRefundRequest refundRequest = super.getRefundRequest(request);
+            refundRequest.setTradeSubType("00");
+            refundRequest.setChannelType("08");
+            return refundRequest;
+        }
+
+        private UnionpayTradeReversalRequest getReversalRequest(PaymentTradeRequest request) {
+            UnionpayTradeReversalRequest reversalRequest = new UnionpayTradeReversalRequest();
+            reversalRequest.setBizType(getBizType());
+            reversalRequest.setTradeType("99");
+            reversalRequest.setTradeSubType("01");
+            reversalRequest.setChannelType("08");
+            reversalRequest.setOutTradeNo(request.getOutTradeNo());
+            return reversalRequest;
         }
 
         @Override
         public String getBizType() {
-            return UnionpayConstants.CANCEL;
-        }
-
-        @Override
-        public String getChannelType() {
-            return UnionpayConstants.F2F;
+            return UnionpayConstants.BIZ_TYPE_F2F;
         }
     }
 
-    public static class Qrc extends UnionpayB2CTemplate implements QrcTradeClientType {
-
-        @Override
-        public PaymentTradeResponse pay(PaymentTradeRequest request) {
-            UnionpayTradePayRequest unionpayRequest = getPayParams(request);
-            PaymentTradeResponse response = new PaymentTradeResponse();
-            try {
-                logger.info(request, "预支付请求参数：{}", unionpayRequest);
-                //网页支付
-                Map<String, String> rsp = getUnionpayClient().qrCodeExecute(unionpayRequest);
-                logger.info(request, "预支付响应参数：{}", rsp);
-                if(UnionpayConstants.SUCCESS_CODE.equals(rsp.get("respCode"))) {
-                    response.setSuccess(true);
-                    response.setCodeUrl(rsp.get("qrCode"));
-                } else {
-                    String respMsg = rsp.get("respMsg");
-                    response.setErrorMsg(respMsg);
-                    logger.info(request, "预支付请求失败：{}", respMsg);
-                }
-            } catch (UnionpayException e) {
-                logger.error(request, "预支付错误：{}", e.getMessage());
-                response.setErrorMsg("预支付失败：" + e.getMessage());
-            }
-            return response;
-        }
-
-        @Override
-        public String getChannelType() {
-            return UnionpayConstants.F2F;
-        }
-    }
 }
 

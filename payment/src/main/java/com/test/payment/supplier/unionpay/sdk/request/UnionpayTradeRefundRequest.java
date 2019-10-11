@@ -29,12 +29,17 @@ public class UnionpayTradeRefundRequest extends UnionpayTradeRequest {
     /**
      * 交易类型
      */
-    private String tradeType = "04";
+    private String tradeType;
 
     /**
      * 交易子类型
      */
-    private String tradeSubType = "00";
+    private String tradeSubType;
+
+    /**
+     *  渠道类型
+     */
+    private String channelType;
 
     public String getOutRefundNo() {
         return outRefundNo;
@@ -68,20 +73,32 @@ public class UnionpayTradeRefundRequest extends UnionpayTradeRequest {
         this.notifyUrl = notifyUrl;
     }
 
+    @Override
     public String getTradeType() {
         return tradeType;
     }
 
+    @Override
     public void setTradeType(String tradeType) {
         this.tradeType = tradeType;
     }
 
+    @Override
     public String getTradeSubType() {
         return tradeSubType;
     }
 
+    @Override
     public void setTradeSubType(String tradeSubType) {
         this.tradeSubType = tradeSubType;
+    }
+
+    public String getChannelType() {
+        return channelType;
+    }
+
+    public void setChannelType(String channelType) {
+        this.channelType = channelType;
     }
 
     @Override
@@ -93,6 +110,10 @@ public class UnionpayTradeRefundRequest extends UnionpayTradeRequest {
                 ", notifyUrl='" + notifyUrl + '\'' +
                 ", tradeType='" + tradeType + '\'' +
                 ", tradeSubType='" + tradeSubType + '\'' +
-                '}';
+                ", channelType='" + channelType + '\'' +
+                ", currencyCode='" + currencyCode + '\'' +
+                ", accessType='" + accessType + '\'' +
+                ", bizType='" + bizType + '\'' +
+                "} " + super.toString();
     }
 }

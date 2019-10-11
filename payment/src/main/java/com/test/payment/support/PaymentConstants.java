@@ -18,9 +18,11 @@ public class PaymentConstants {
 
     public static final String SIGN_SHA256RSA_ALGORITHMS = "SHA256WithRSA";
 
-    public static final String FORMAT_JSON = "json";
+    public static final String QR_CODE_SIZE = "size";
 
-    public static final String FORMAT_XML = "xml";
+    public static final String AUTH_CODE = "authCode";
 
-    public static final String VERSION = "version";
+    public static final String CODE = "code";
+
+    public static final String STORE_ID = "storeId";
 }

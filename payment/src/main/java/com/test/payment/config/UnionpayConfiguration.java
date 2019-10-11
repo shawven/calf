@@ -70,4 +70,11 @@ public class UnionpayConfiguration {
         qrc.setProperties(unionpayB2CProperties);
         return qrc;
     }
+
+    @Bean
+    public PaymentOperations unionpayAppB2CPaymentProvider() {
+        UnionpayB2CTemplate.App app = new UnionpayB2CTemplate.App();
+        app.setProperties(unionpayB2CProperties);
+        return app;
+    }
 }

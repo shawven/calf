@@ -8,10 +8,7 @@ import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static com.test.payment.supplier.unionpay.sdk.UnionpayConstants.TIME_FORMAT;
 
 /**
  * @author Shoven
@@ -78,11 +75,18 @@ public class UnionpayClient {
      * @return
      * @throws UnionpayException
      */
-    public String pageExecute(UnionpayTradePayRequest request) throws UnionpayException {
-        Map<String, String> params = getPayParams(request);
-        //交易子类型
+    public Map<String, String> pagePay(UnionpayTradePayRequest request) throws UnionpayException {
+        Map<String, String> params = getTradePayParams(request);
+        // 交易子类型  01：消费
         params.put(UnionpayConstants.param_txnSubType, "01");
-        return pageExecute(UnionpayConstants.FRONT_TRANS_URL, params);
+        // 前台跳转地址
+        params.put(UnionpayConstants.param_frontUrl, request.getReturnUrl());
+        String form = pageExecute(UnionpayConstants.FRONT_TRANS_URL, params);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("respCode", "00");
+        response.put("form", form);
+        return response;
     }
 
     /**
@@ -92,26 +96,15 @@ public class UnionpayClient {
      * @return
      * @throws UnionpayException
      */
-    public Map<String, String> appExecute(UnionpayTradePayRequest request) throws UnionpayException {
-        Map<String, String> params = getPayParams(request);
-        //交易子类型
-        params.put(UnionpayConstants.param_txnSubType,"01");
+    public Map<String, String> appPay(UnionpayTradePayRequest request) throws UnionpayException {
+        Map<String, String> params = getTradePayParams(request);
+
+        // 风控信息域 商品名称之类的
+        params.put(UnionpayConstants.param_riskRateInfo, "{commodityName=" + request.getSubject() + "}");
         return execute(UnionpayConstants.APP_TRANS_URL, params);
     }
 
-    /**
-     * 二维码支付（主扫）
-     *
-     * @param request
-     * @return
-     * @throws UnionpayException
-     */
-    public Map<String, String> qrCodeExecute(UnionpayTradePayRequest request) throws UnionpayException {
-        Map<String, String> params = getPayParams(request);
-        //交易子类型 07 申请消费二维码
-        params.put(UnionpayConstants.param_txnSubType, "07");
-        return execute(UnionpayConstants.APP_TRANS_URL, params);
-    }
+
 
     /**
      * 二维码（授权码）支付（被扫）
@@ -120,40 +113,38 @@ public class UnionpayClient {
      * @return
      * @throws UnionpayException
      */
-    public Map<String, String> authCodeExecute(UnionpayTradePayRequest request) throws UnionpayException {
-        Map<String, String> params = getPayParams(request);
-        //交易子类型 06：二维码消费
-        params.put(UnionpayConstants.param_txnSubType, "06");
+    public Map<String, String> authCodePay(UnionpayTradePayRequest request) throws UnionpayException {
+        Map<String, String> params = getTradePayParams(request);
+        // 交易子类型 06：二维码消费
         params.put(UnionpayConstants.param_qrNo, request.getAuthCode());
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, 30);
-        Date timeout = calendar.getTime();
-        params.put(UnionpayConstants.param_payTimeoutTime,  new SimpleDateFormat(TIME_FORMAT).format(timeout));
-        params.put(UnionpayConstants.param_termId, "00010001");
-        return execute(UnionpayConstants.APP_TRANS_URL, params);
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.add(Calendar.SECOND, 30);
+//        Date timeout = calendar.getTime();
+//        params.put(UnionpayConstants.param_payTimeoutTime,  new SimpleDateFormat(TIME_FORMAT).format(timeout));
+        params.put(UnionpayConstants.param_termId, request.getTermId());
+        return execute(UnionpayConstants.BACK_TRANS_URL, params);
     }
 
-    private Map<String, String> getPayParams(UnionpayTradePayRequest request) {
+    private Map<String, String> getTradePayParams(UnionpayTradePayRequest request) {
         Map<String, String> params = new HashMap<>();
-        //交易类型
+        // 交易类型
         params.put(UnionpayConstants.param_txnType, request.getTradeType());
-
-        //业务类型，B2C网关支付，手机wap支付
+        // 交易子类型  01：消费
+        params.put(UnionpayConstants.param_txnSubType, request.getTradeSubType());
+        // 业务类型，B2C网关支付，手机wap支付
         params.put(UnionpayConstants.param_bizType, request.getBizType());
-        //渠道类型，这个字段区分B2C网关支付和手机wap支付
+        // 渠道类型，这个字段区分B2C网关支付和手机wap支付
         params.put(UnionpayConstants.param_channelType, request.getChannelType());
         // 商户订单号
         params.put(UnionpayConstants.param_orderId, request.getOutTradeNo());
         // 订单发送时间，每次发交易测试需修改为被查询的交易的订单发送时间
         params.put(UnionpayConstants.param_txnTime, request.getRequestTime());
-        //交易币种（境内商户一般是156 人民币）
+        // 交易币种（境内商户一般是156 人民币）
         params.put(UnionpayConstants.param_currencyCode, request.getCurrencyCode());
-        //交易金额，单位分，不要带小数点
+        // 交易金额，单位分，不要带小数点
         params.put(UnionpayConstants.param_txnAmt, request.getAmount());
         // 风控信息域 商品名称之类的
         params.put(UnionpayConstants.param_riskRateInfo, "{commodityName=" + request.getSubject() + "}");
-        // 前台跳转地址
-        params.put(UnionpayConstants.param_frontUrl, request.getReturnUrl());
         // 后台通知地址
         params.put(UnionpayConstants.param_backUrl, request.getNotifyUrl());
         return params;
@@ -177,7 +168,7 @@ public class UnionpayClient {
     }
 
     /**
-     * 撤销订单
+     * 冲正订单
      *
      * @param request
      * @return
@@ -237,6 +228,17 @@ public class UnionpayClient {
         return execute(UnionpayConstants.SINGLE_QUERY_URL, params);
     }
 
+    /**
+     *
+     * @param request
+     * @return
+     * @throws UnionpayException
+     */
+    public Map<String, String> execute(UnionpayTradePayRequest request) throws UnionpayException {
+        Map<String, String> params = getTradePayParams(request);
+        return execute(UnionpayConstants.BACK_TRANS_URL, params);
+    }
+
     private String pageExecute(String relativeUrl, Map<String, String> params) throws UnionpayException {
         putCommonParams(params);
         sign(params);
@@ -255,7 +257,10 @@ public class UnionpayClient {
         }
         Map<String, String> body = parseResponseBody(rsp);
         if (body.isEmpty()) {
-            throw new UnionpayException("返回请求体为空");
+            if (PaymentUtils.isBlankString(rsp)) {
+                throw new UnionpayException("响应内容为空");
+            }
+            throw new UnionpayException("解析响应内容失败：" + rsp);
         }
         if (!verify(body)) {
             throw new UnionpayException("验签失败");

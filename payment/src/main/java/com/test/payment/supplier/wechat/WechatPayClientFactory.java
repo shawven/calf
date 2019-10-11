@@ -20,8 +20,14 @@ public class WechatPayClientFactory {
 
     public static WXPay getInstance(WechatPayProperties prop) {
         if (prop.getUseSandbox() || client == null) {
-            client = new WXPay(new WxConfig(prop, true), prop.getNotifyUrl(),
-                    prop.getAutoReport(), prop.getUseSandbox());
+            WxConfig wxConfig = new WxConfig(prop);
+            if (client != null) {
+                WXPayConfig oldConfig = client.getConfig();
+                if (oldConfig.isExistSandboxKey()) {
+                    wxConfig.setSandBoxKey(oldConfig.getKey());
+                }
+            }
+            client = new WXPay(wxConfig, prop.getNotifyUrl(), prop.getAutoReport(), prop.getUseSandbox());
         }
         return client;
     }
@@ -30,13 +36,12 @@ public class WechatPayClientFactory {
 
         private WechatPayProperties properties;
 
-        private String key;
+        private boolean existSandboxKey;
 
-        private boolean slaveModel;
+        private String sandboxKey;
 
-        public WxConfig(WechatPayProperties properties, boolean slaveModel) {
+        public WxConfig(WechatPayProperties properties) {
             this.properties = properties;
-            this.slaveModel = slaveModel;
         }
 
         @Override
@@ -51,17 +56,16 @@ public class WechatPayClientFactory {
 
         @Override
         public String getKey() {
-            if (key == null) {
-                key = properties.getApiKey();
+            if (properties.getUseSandbox() && existSandboxKey) {
+                return sandboxKey;
             }
-            return key;
+            return properties.getApiKey();
         }
 
         @Override
-        public void setKey(String key) {
-            if (properties.getUseSandbox()) {
-                this.key = key;
-            }
+        public void setSandBoxKey(String sandBoxKey) {
+            this.sandboxKey = sandBoxKey;
+            this.existSandboxKey = true;
         }
 
         @Override
@@ -79,6 +83,15 @@ public class WechatPayClientFactory {
             return properties.getAutoReport();
         }
 
+        @Override
+        public int getReportWorkerNum() {
+            return properties.getReportWorkNum();
+        }
+
+        @Override
+        public boolean isExistSandboxKey() {
+            return existSandboxKey;
+        }
     }
 
     static class DomainHolder {

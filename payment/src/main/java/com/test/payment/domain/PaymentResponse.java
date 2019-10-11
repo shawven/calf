@@ -10,8 +10,6 @@ public class PaymentResponse<T> implements Serializable {
 
     private boolean success;
 
-    private boolean closed;
-
     private String state;
 
     private String errorMsg;

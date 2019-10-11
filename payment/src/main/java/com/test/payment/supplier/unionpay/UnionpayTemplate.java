@@ -1,17 +1,17 @@
 package com.test.payment.supplier.unionpay;
 
+import com.test.payment.client.WapTradeClientType;
+import com.test.payment.client.WebTradeClientType;
 import com.test.payment.domain.*;
 import com.test.payment.properties.UnionpayProperties;
 import com.test.payment.supplier.AbstractPaymentTemplate;
 import com.test.payment.supplier.unionpay.sdk.UnionpayClient;
 import com.test.payment.supplier.unionpay.sdk.UnionpayConstants;
 import com.test.payment.supplier.unionpay.sdk.UnionpayException;
-import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradePayRequest;
-import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeQueryRequest;
-import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundQueryRequest;
-import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundRequest;
+import com.test.payment.supplier.unionpay.sdk.request.*;
 import com.test.payment.support.CurrencyTools;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,33 +22,23 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
 
     @Override
     public PaymentTradeResponse pay(PaymentTradeRequest request) {
-        UnionpayTradePayRequest unionpayRequest = getPayParams(request);
+        UnionpayTradePayRequest payRequest = getPayRequest(request);
         PaymentTradeResponse response = new PaymentTradeResponse();
         try {
-            logger.info(request, "预支付请求参数：{}", unionpayRequest);
-            //网页支付
-            String form = getUnionpayClient().pageExecute(unionpayRequest);
-            logger.info(request, "预支付响应参数：{}", form);
-            response.setSuccess(true);
-            response.setForm(form);
+            logger.info(request, "预支付请求参数：{}", payRequest);
+            Map<String, String> rsp = doPay(payRequest);
+            logger.info(request, "预支付响应参数：{}", rsp);
+            if (UnionpayConstants.SUCCESS_CODE.equals(rsp.get("respCode"))) {
+                setPaySuccessResponse(response, rsp);
+            } else {
+                response.setErrorMsg(rsp.get("respMsg"));
+                logger.info(request, "预支付失败：{}", response.getErrorMsg());
+            }
         } catch (UnionpayException e) {
-            logger.error(request, "预支付错误：{}", e.getMessage());
-            response.setErrorMsg("预支付失败：" + e.getMessage());
+            response.setErrorMsg("预支付错误：" + e.getMessage());
+            logger.error(request, response.getErrorMsg());
         }
         return response;
-    }
-
-    protected UnionpayTradePayRequest getPayParams(PaymentTradeRequest request) {
-        UnionpayTradePayRequest unionpayRequest = new UnionpayTradePayRequest();
-        unionpayRequest.setBizType(getBizType());
-        unionpayRequest.setChannelType(getChannelType());
-
-        unionpayRequest.setOutTradeNo(request.getOutTradeNo());
-        unionpayRequest.setAmount(CurrencyTools.toCent(request.getAmount()));
-        unionpayRequest.setSubject(request.getSubject());
-        unionpayRequest.setNotifyUrl(getProperties().getNotifyUrl());
-        unionpayRequest.setReturnUrl(getProperties().getReturnUrl());
-        return unionpayRequest;
     }
 
     @Override
@@ -56,7 +46,7 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
         PaymentTradeCallbackResponse response = new PaymentTradeCallbackResponse();
         Map<String, String> params = request.getParams();
         try {
-            logger.info(request, "同步回调接受参数：{}", params);
+            logger.info(request, "同步回调接受参数：{}", getPrettyMapForPrinter(params));
             if (getUnionpayClient().verify(params)) {
                 if (UnionpayConstants.SUCCESS_CODE.equals(params.get("respCode"))) {
                     response.setSuccess(true);
@@ -69,11 +59,11 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
                 logger.info(request, "同步跳转交易状态[{}]", params.get("respMsg"));
             } else {
                 response.setErrorMsg("同步跳转验签失败");
-                logger.error(request, "同步跳转验签失败");
+                logger.error(request, response.getErrorMsg());
             }
         } catch (UnionpayException e) {
             response.setErrorMsg("同步跳转错误：" + e.getMessage());
-            logger.error(request, "同步跳转错误：{}", e.getMessage());
+            logger.error(request, response.getErrorMsg());
         }
         return response;
     }
@@ -83,7 +73,7 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
         PaymentTradeCallbackResponse response = new PaymentTradeCallbackResponse();
         Map<String, String> params = request.getParams();
         try {
-            logger.info(request, "异步回调接受参数：{}", params);
+            logger.info(request, "异步回调接受参数：{}", getPrettyMapForPrinter(params));
             if (getUnionpayClient().verify(params)) {
                 if (UnionpayConstants.SUCCESS_CODE.equals(params.get("respCode"))) {
                     response.setSuccess(true);
@@ -97,11 +87,11 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
                 logger.info(request, "异步回调交易状态[{}]", params.get("respMsg"));
             } else {
                 response.setErrorMsg("异步回调验签失败");
-                logger.error(request, "异步回调验签失败");
+                logger.error(request, response.getErrorMsg());
             }
         } catch (UnionpayException e) {
             response.setErrorMsg("异步回调错误：" + e.getMessage());
-            logger.error(request, "异步回调错误：{}", e.getMessage());
+            logger.error(request, response.getErrorMsg());
         }
         return response;
     }
@@ -109,16 +99,15 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
     @Override
     public PaymentTradeQueryResponse query(PaymentTradeQueryRequest request) {
         PaymentTradeQueryResponse response = new PaymentTradeQueryResponse();
-        UnionpayTradeQueryRequest unionpayRequest = new UnionpayTradeQueryRequest();
-        unionpayRequest.setBizType(getBizType());
-        unionpayRequest.setOutTradeNo(request.getOutTradeNo());
+        UnionpayTradeQueryRequest queryRequest = getQueryRequest(request);
         try {
-            logger.info(request, "查询支付交易请求参数：{}", unionpayRequest);
-            Map<String, String> rsp = getUnionpayClient().query(unionpayRequest);
-            logger.info(request, "查询支付交易响应参数：{}", rsp);
+            logger.info(request, "查询支付交易请求参数：{}", queryRequest);
+            Map<String, String> rsp = getUnionpayClient().query(queryRequest);
+            logger.info(request, "查询支付交易响应参数：{}", getPrettyMapForPrinter(rsp));
 
             //如果查询交易成功
-            if(UnionpayConstants.SUCCESS_CODE.equals(rsp.get("respCode"))){
+            String respCode = rsp.get("respCode");
+            if(UnionpayConstants.SUCCESS_CODE.equals(respCode)){
                 //处理被查询交易的应答码逻辑
                 String origRespCode = rsp.get("origRespCode");
                 String respMsg = rsp.get("origRespMsg");
@@ -129,41 +118,38 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
                     response.setTradeNo(rsp.get("queryId"));
                     response.setAmount(CurrencyTools.ofCent(rsp.get("txnAmt")));
                     respMsg = "成功";
-                } else if ("03".equals(origRespCode) || "04".equals(origRespCode) || "05".equals(origRespCode)){
+                } else if ("03".equals(origRespCode) || "04".equals(origRespCode) || "05".equals(origRespCode) ){
                     response.setOutTradeNo(request.getOutTradeNo());
                     response.setTradeNo(rsp.get("queryId"));
                     response.setAmount(CurrencyTools.ofCent(rsp.get("txnAmt")));
-                    response.setErrorMsg("等待支付完成");
+                    response.setErrorMsg("等待支付完成，请稍后再试");
                 } else {
                     response.setErrorMsg(respMsg);
                 }
                 logger.info(request, "查询支付交易状态[{}]", respMsg);
             } else {
                 // 查询交易本身失败，或者未查到原交易，检查查询交易报文要素
-                String errorMsg = rsp.get("respMsg");
-                logger.info(request, "查询支付交易请求失败：{}",errorMsg);
-                response.setErrorMsg(errorMsg);
+                if ("34".equals(respCode)) {
+                    response.setNotExist(true);
+                }
+                response.setErrorMsg(rsp.get("respMsg"));
+                logger.info(request, "查询支付交易失败：{}", response.getErrorMsg());
             }
         } catch (UnionpayException e) {
             response.setErrorMsg("查询支付交易结果错误：" + e.getMessage());
-            logger.error(request, "查询支付交易结果错误：{}", e.getMessage());
+            logger.error(request, response.getErrorMsg());
         }
         return response;
     }
 
     @Override
     public PaymentTradeRefundResponse refund(PaymentTradeRefundRequest request) {
-        UnionpayTradeRefundRequest unionpayRequest = new UnionpayTradeRefundRequest();
-        unionpayRequest.setBizType(getBizType());
-        unionpayRequest.setOutRefundNo(request.getOutRefundNo());
-        unionpayRequest.setTradeNo(request.getTradeNo());
-        unionpayRequest.setRefundAmount(CurrencyTools.toCent(request.getRefundAmount()));
-
+        UnionpayTradeRefundRequest refundRequest = getRefundRequest(request);
         PaymentTradeRefundResponse response = new PaymentTradeRefundResponse();
         try {
-            logger.info(request, "申请退款请求参数：{}", unionpayRequest);
-            Map<String, String> rsp = getUnionpayClient().refund(unionpayRequest);
-            logger.info(request, "申请退款响应参数：{}", rsp);
+            logger.info(request, "申请退款请求参数：{}", refundRequest);
+            Map<String, String> rsp = getUnionpayClient().refund(refundRequest);
+            logger.info(request, "申请退款响应参数：{}", getPrettyMapForPrinter(rsp));
 
             String respCode = rsp.get("respCode");
             String respMsg = rsp.get("respMsg");
@@ -178,34 +164,35 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
                 response.setRefundAmount(CurrencyTools.ofCent(rsp.get("txnAmt")));
                 response.setTotalAmount(request.getTotalAmount());
                 respMsg = "成功";
-            } else if ("03".equals(respCode) || "04".equals(respCode) || "05".equals(respCode)){
-                response.setErrorMsg("等待退款完成");
+            } else if ("01".equals(respCode) || "03".equals(respCode) || "05".equals(respCode) ){
+                response.setErrorMsg("等待退款完成，请稍后再试");
             } else {
                 // 查询交易本身失败，或者未查到原交易，检查查询交易报文要素
+                if ("34".equals(respCode)) {
+                    response.setNotExist(true);
+                }
                 response.setErrorMsg(respMsg);
             }
             logger.info(request, "申请退款状态[{}]", respMsg);
         } catch (UnionpayException e) {
             response.setErrorMsg("申请退款错误：" + e.getMessage());
-            logger.error(request, "申请退款错误：{}", e.getMessage());
+            logger.error(request, response.getErrorMsg());
         }
         return response;
     }
 
     @Override
     public PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
-        UnionpayTradeRefundQueryRequest unionpayRequest = new UnionpayTradeRefundQueryRequest();
-        unionpayRequest.setBizType(getBizType());
-        unionpayRequest.setOutRefundNo(request.getOutRefundNo());
-
+        UnionpayTradeRefundQueryRequest refundQueryRequest = getRefundQueryRequest(request);
         PaymentTradeRefundQueryResponse response = new PaymentTradeRefundQueryResponse();
         try {
-            logger.info(request, "查询退款请求参数：{}", unionpayRequest);
-            Map<String, String> rsp = getUnionpayClient().refundQuery(unionpayRequest);
-            logger.info(request, "查询退款响应参数：{}", rsp);
+            logger.info(request, "查询退款请求参数：{}", refundQueryRequest);
+            Map<String, String> rsp = getUnionpayClient().refundQuery(refundQueryRequest);
+            logger.info(request, "查询退款响应参数：{}", getPrettyMapForPrinter(rsp));
 
             //如果查询交易成功
-            if(UnionpayConstants.SUCCESS_CODE.equals(rsp.get("respCode"))){
+            String respCode = rsp.get("respCode");
+            if(UnionpayConstants.SUCCESS_CODE.equals(respCode)){
                 //处理被查询交易的应答码逻辑
                 String origRespCode = rsp.get("origRespCode");
                 String respMsg = rsp.get("origRespMsg");
@@ -219,22 +206,67 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
                     response.setTotalAmount(CurrencyTools.ofCent(rsp.get("txnAmt")));
                     respMsg = "成功";
                 } else if ("03".equals(origRespCode) || "04".equals(origRespCode) || "05".equals(origRespCode)){
-                    response.setErrorMsg("等待退款完成");
+                    response.setErrorMsg("等待退款完成，请稍后再试");
                 } else {
                     response.setErrorMsg(respMsg);
                 }
                 logger.info(request, "查询退款状态[{}]", respMsg);
             } else {
                 // 查询交易本身失败，或者未查到原交易，检查查询交易报文要素
-                String errorMsg = rsp.get("respMsg");
-                logger.info(request, "查询退款请求失败：{}",errorMsg);
-                response.setErrorMsg(errorMsg);
+                if ("34".equals(respCode)) {
+                    response.setNotExist(true);
+                }
+                response.setErrorMsg(rsp.get("respMsg"));
+                logger.info(request, "查询退款失败：{}", response.getErrorMsg());
             }
         } catch (UnionpayException e) {
             response.setErrorMsg("查询退款错误：" + e.getMessage());
-            logger.error(request, "查询退款错误：{}", e.getMessage());
+            logger.error(request, response.getErrorMsg());
         }
         return response;
+    }
+
+    protected UnionpayTradePayRequest getPayRequest(PaymentTradeRequest request) {
+        UnionpayTradePayRequest payRequest = new UnionpayTradePayRequest();
+        payRequest.setBizType(getBizType());
+        // 交易类型 01:消费
+        payRequest.setTradeType("01");
+        payRequest.setOutTradeNo(request.getOutTradeNo());
+        payRequest.setAmount(CurrencyTools.toCent(request.getAmount()));
+        payRequest.setSubject(request.getSubject());
+        payRequest.setNotifyUrl(getProperties().getNotifyUrl());
+        return payRequest;
+    }
+
+    protected UnionpayTradeQueryRequest getQueryRequest(PaymentTradeQueryRequest request) {
+        UnionpayTradeQueryRequest queryRequest = new UnionpayTradeQueryRequest();
+        queryRequest.setBizType(getBizType());
+        // 交易类型 00 查询
+        queryRequest.setTradeType("00");
+        queryRequest.setTradeSubType("00");
+        queryRequest.setOutTradeNo(request.getOutTradeNo());
+        return queryRequest;
+    }
+
+    protected UnionpayTradeRefundRequest getRefundRequest(PaymentTradeRefundRequest request) {
+        UnionpayTradeRefundRequest refundRequest = new UnionpayTradeRefundRequest();
+        refundRequest.setBizType(getBizType());
+        // 交易类型 04 退货
+        refundRequest.setTradeType("04");
+        refundRequest.setOutRefundNo(request.getOutRefundNo());
+        refundRequest.setTradeNo(request.getTradeNo());
+        refundRequest.setRefundAmount(CurrencyTools.toCent(request.getRefundAmount()));
+        return refundRequest;
+    }
+
+    protected UnionpayTradeRefundQueryRequest getRefundQueryRequest(PaymentTradeRefundQueryRequest request) {
+        UnionpayTradeRefundQueryRequest refundQueryRequest = new UnionpayTradeRefundQueryRequest();
+        refundQueryRequest.setBizType(getBizType());
+        // 交易类型 00 查询
+        refundQueryRequest.setTradeType("00");
+        refundQueryRequest.setTradeSubType("00");
+        refundQueryRequest.setOutRefundNo(request.getOutRefundNo());
+        return refundQueryRequest;
     }
 
     public abstract UnionpayClient getUnionpayClient();
@@ -245,5 +277,17 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
 
     public abstract String getBizType();
 
-    public abstract String getChannelType();
+    protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
+        throw new UnsupportedOperationException();
+    }
+
+    protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp) {
+        response.setSuccess(true);
+    }
+
+    protected Map<String, String> getPrettyMapForPrinter(Map<String, String> input) {
+        Map<String, String> prettyMap = new HashMap<>(input);
+        prettyMap.replace(UnionpayConstants.param_signPubKeyCert, "**已隐藏**");
+        return prettyMap;
+    }
 }

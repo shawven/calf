@@ -42,29 +42,36 @@ public class UnionpayTradeRefundQueryRequest extends UnionpayTradeRequest {
         this.tradeNo = tradeNo;
     }
 
+    @Override
     public String getTradeType() {
         return tradeType;
     }
 
+    @Override
     public void setTradeType(String tradeType) {
         this.tradeType = tradeType;
     }
 
+    @Override
     public String getTradeSubType() {
         return tradeSubType;
     }
 
+    @Override
     public void setTradeSubType(String tradeSubType) {
         this.tradeSubType = tradeSubType;
     }
 
     @Override
     public String toString() {
-        return "UnionpayTradeQueryRequest{" +
-                "outTradeNo='" + outRefundNo + '\'' +
+        return "UnionpayTradeRefundQueryRequest{" +
+                "outRefundNo='" + outRefundNo + '\'' +
                 ", tradeNo='" + tradeNo + '\'' +
                 ", tradeType='" + tradeType + '\'' +
                 ", tradeSubType='" + tradeSubType + '\'' +
-                '}';
+                ", currencyCode='" + currencyCode + '\'' +
+                ", accessType='" + accessType + '\'' +
+                ", bizType='" + bizType + '\'' +
+                "} " + super.toString();
     }
 }

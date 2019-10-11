@@ -25,10 +25,6 @@ public class AlipayProperties {
 
     private String returnUrl;
 
-    private String charset = "UTF-8";
-
-    private String format = "json";
-
     private String signType ;
 
     private Boolean useSandbox;
@@ -82,19 +78,7 @@ public class AlipayProperties {
     }
 
     public String getCharset() {
-        return charset;
-    }
-
-    public void setCharset(String charset) {
-        this.charset = charset;
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
-    public void setFormat(String format) {
-        this.format = format;
+        return "UTF-8";
     }
 
     public String getSignType() {

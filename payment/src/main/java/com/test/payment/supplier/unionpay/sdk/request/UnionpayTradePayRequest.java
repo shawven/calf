@@ -31,16 +31,30 @@ public class UnionpayTradePayRequest extends UnionpayTradeRequest {
      */
     private String notifyUrl;
 
-
     /**
-     * 交易类型 01：消费
+     * 交易类型
      */
-    private String tradeType = "01";
+    private String tradeType;
 
     /**
-     * 二维码授权码
+     * 交易子类型
+     */
+    private String tradeSubType;
+
+    /**
+     *  渠道类型
+     */
+    private String channelType;
+
+    /**
+     *  授权码（付款码支付）
      */
     private String authCode;
+
+    /**
+     *  终端ID（付款码支付）
+     */
+    private String termId;
 
     public String getOutTradeNo() {
         return outTradeNo;
@@ -82,12 +96,32 @@ public class UnionpayTradePayRequest extends UnionpayTradeRequest {
         this.notifyUrl = notifyUrl;
     }
 
+    @Override
     public String getTradeType() {
         return tradeType;
     }
 
+    @Override
     public void setTradeType(String tradeType) {
         this.tradeType = tradeType;
+    }
+
+    @Override
+    public String getTradeSubType() {
+        return tradeSubType;
+    }
+
+    @Override
+    public void setTradeSubType(String tradeSubType) {
+        this.tradeSubType = tradeSubType;
+    }
+
+    public String getChannelType() {
+        return channelType;
+    }
+
+    public void setChannelType(String channelType) {
+        this.channelType = channelType;
     }
 
     public String getAuthCode() {
@@ -96,6 +130,14 @@ public class UnionpayTradePayRequest extends UnionpayTradeRequest {
 
     public void setAuthCode(String authCode) {
         this.authCode = authCode;
+    }
+
+    public String getTermId() {
+        return termId;
+    }
+
+    public void setTermId(String termId) {
+        this.termId = termId;
     }
 
     @Override
@@ -107,7 +149,13 @@ public class UnionpayTradePayRequest extends UnionpayTradeRequest {
                 ", returnUrl='" + returnUrl + '\'' +
                 ", notifyUrl='" + notifyUrl + '\'' +
                 ", tradeType='" + tradeType + '\'' +
+                ", tradeSubType='" + tradeSubType + '\'' +
+                ", channelType='" + channelType + '\'' +
                 ", authCode='" + authCode + '\'' +
-                '}';
+                ", termId='" + termId + '\'' +
+                ", currencyCode='" + currencyCode + '\'' +
+                ", accessType='" + accessType + '\'' +
+                ", bizType='" + bizType + '\'' +
+                "} " + super.toString();
     }
 }

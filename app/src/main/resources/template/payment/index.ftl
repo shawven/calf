@@ -32,42 +32,38 @@
                     </div>
                 </div>
             </div>
-            <div role="tabpanel" class="tab-pane" id="wechat">
+            <div role="tabpanel" class="tab-pane p-3" id="wechat">
                 <div class="row my-4">
                     <div class="col-md-6">
                         <button class="btn btn-success">跳转到微信</button>
                     </div>
                     <div class="col-md-6 wechat-qrcode">
-
                     </div>
                 </div>
             </div>
-            <div role="tabpanel" class="tab-pane" id="unionpay">
+            <div role="tabpanel" class="tab-pane p-3" id="unionpay">
                 <div class="row my-4">
                     <div class="col-md-6">
                         <button class="btn btn-dark">跳转到银联</button>
                         <div class="d-none direct"></div>
                     </div>
                     <div class="col-md-6 unionpay-alert">
-
                     </div>
                 </div>
             </div>
-            <div role="tabpanel" class="tab-pane" id="unionpay_b2b">
+            <div role="tabpanel" class="tab-pane p-3" id="unionpay_b2b">
                 <div class="row my-4">
                     <div class="col-md-6">
                         <button class="btn btn-dark">跳转到银联(公账)</button>
                         <div class="d-none direct"></div>
                     </div>
                     <div class="col-md-6 unionpay_b2b-alert">
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="alert-success text-center d-none font-weight-bold ">
-
+    <div class="alert-success text-center font-weight-bold ">
     </div>
 </div>
 <#include '*/footer.ftl'>
@@ -109,9 +105,9 @@
 
         if (isPc) {
             // 1. 自动构造iframe显示二维码支付
-            $.post("${baseUrl}/payment/pay/alipay/web_qrc?width=200&orderId=" + orderId, function (result) {
+            $.post("${baseUrl}/payment/pay/alipay/web_qrc?size=200&orderId=" + orderId, function (result) {
                 query(result.data.orderId, "alipay", function(){
-                    document.querySelector(".alert-success").innerHTML = "支付宝支付成功"
+                    showMsg("支付宝支付成功")
                 })
                 var formHtml = result.data.form;
                 // 构造iframe
@@ -137,7 +133,7 @@
             tabPane.querySelector("button").onclick = function() {
                 $.post("${baseUrl}/payment/pay/alipay/web",{orderId:  orderId}, function (result) {
                     query(result.data.orderId, "alipay", function(){
-                        document.querySelector(".alert-success").innerHTML = "支付宝支付成功"
+                        showMsg("支付宝支付成功")
                     })
                     tabPane.querySelector(".direct").innerHTML = result.data.form
                     tabPane.querySelector("form").target = "_blank"
@@ -158,7 +154,7 @@
             $.post("${baseUrl}/payment/pay/wechat/web_qrc", {orderId: orderId}, function (result) {
                 showQrCode(".wechat-qrcode", result.data.codeUrl)
                 query(result.data.orderId, "wechat", function(){
-                    document.querySelector(".alert-success").innerHTML = "微信支付成功"
+                    showMsg("微信支付成功")
                 })
             }, "json").fail(function (result) {
                 console.log(result.code + ":" + result.message)
@@ -167,7 +163,7 @@
             $.post("${baseUrl}/payment/pay/wechat/wap", {orderId: orderId}, function (result) {
                 window.location.href = result.data.url
                 query(result.data.orderId, "wechat", function(){
-                    document.querySelector(".alert-success").innerHTML = "微信支付成功"
+                    showMsg("微信支付成功")
                 })
             }, "json").fail(function (result) {
                 console.log(result.code + ":" + result.message)
@@ -184,7 +180,7 @@
             tabPane.querySelector("button").onclick = function() {
                 $.post("${baseUrl}/payment/pay/unionpay/web",{orderId: new Date().getTime()}, function (result) {
                     query(result.data.orderId, "unionpay", function(){
-                        document.querySelector(".alert-success").innerHTML = "银联支付成功"
+                        showMsg("银联支付成功")
                     })
                     tabPane.querySelector(".direct").innerHTML = result.data.form
                     tabPane.querySelector("form").target = "_blank"
@@ -200,7 +196,7 @@
             tabPane.querySelector("button").onclick = function() {
                 $.post("${baseUrl}/payment/pay/unionpay/wap",{orderId: new Date().getTime()}, function (result) {
                     query(result.data.orderId, "unionpay", function(){
-                        document.querySelector(".alert-success").innerHTML = "银联支付成功"
+                        showMsg("银联支付成功")
                     })
                     tabPane.querySelector(".direct").innerHTML = result.data.form
                     tabPane.querySelector("form").target = "_blank"
@@ -221,7 +217,7 @@
             tabPane.querySelector("button").onclick = function() {
                 $.post("${baseUrl}/payment/pay/unionpay_b2b/web",{orderId: new Date().getTime()}, function (result) {
                     query(result.data.orderId, "unionpay_b2b", function(){
-                        document.querySelector(".alert-success").innerHTML = "银联支付成功"
+                        showMsg("银联支付成功")
                     })
                     tabPane.querySelector(".direct").innerHTML = result.data.form
                     tabPane.querySelector("form").target = "_blank"
@@ -237,7 +233,7 @@
             tabPane.querySelector("button").onclick = function() {
                 $.post("${baseUrl}/payment/pay/unionpay_b2b/wap",{orderId: new Date().getTime()}, function (result) {
                     query(result.data.orderId, "unionpay_b2b", function(){
-                        document.querySelector(".alert-success").innerHTML = "银联支付成功"
+
                     })
                     tabPane.querySelector(".direct").innerHTML = result.data.form
                     tabPane.querySelector("form").target = "_blank"
@@ -251,19 +247,18 @@
 
     var timer
     function query(orderId, payWay, callback) {
-        document.querySelector(".alert-success").classList.add("d-none")
+        showMsg("")
         window.clearInterval(timer)
         timer = setInterval(function(){
             console.log("轮训查询支付结果")
-            <#--$.get("${baseUrl}/payment/query/" + payWay, {orderId: orderId}, function (result) {-->
-            <#--    if (result.data.success) {-->
-            <#--        callback()-->
-            <#--        document.querySelector(".alert-success").classList.remove("d-none")-->
-            <#--        window.clearInterval(timer)-->
-            <#--    }-->
-            <#--}, "json").fail(function (result) {-->
-            <#--    console.log(result)-->
-            <#--})-->
+            $.get("${baseUrl}/payment/query/" + payWay, {orderId: orderId}, function (result) {
+                if (result.data.success) {
+                    callback()
+                    window.clearInterval(timer)
+                }
+            }, "json").fail(function (result) {
+                console.log(result)
+            })
         }, 5000)
     }
 
@@ -273,6 +268,9 @@
         new QRCode(el, url);
     }
 
+    function showMsg(msg) {
+        document.querySelector(".alert-success").innerHTML = msg
+    }
 
 
 </script>

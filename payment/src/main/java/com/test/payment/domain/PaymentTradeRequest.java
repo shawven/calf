@@ -17,12 +17,12 @@ public class PaymentTradeRequest extends PaymentRequest {
     }
 
     /**
-     * 商户交易号（必须）
+     * 商户交易号
      */
     private String outTradeNo;
 
     /**
-     * 商品标题（必须）
+     * 商品标题
      */
     private String subject;
 
@@ -32,19 +32,14 @@ public class PaymentTradeRequest extends PaymentRequest {
     private String body;
 
     /**
-     * 金额（必须）
+     * 金额
      */
     private String amount;
 
     /**
-     * ip地址
+     * ip地址（微信需要）
      */
     private String ip;
-
-    /**
-     * 付款码
-     */
-    private String authCode;
 
     private Map<String, String> params;
 
@@ -94,14 +89,6 @@ public class PaymentTradeRequest extends PaymentRequest {
 
     public String get(String key) {
         return params.get(key);
-    }
-
-    public String getAuthCode() {
-        return authCode;
-    }
-
-    public void setAuthCode(String authCode) {
-        this.authCode = authCode;
     }
 
     @Override

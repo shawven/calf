@@ -4,8 +4,11 @@ import com.test.payment.supplier.wechat.sdk.WXPayConstants.SignType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Collections.emptyMap;
 
 public class WXPay {
 
@@ -44,15 +47,17 @@ public class WXPay {
         this.autoReport = autoReport;
         this.useSandbox = useSandbox;
         this.wxPayRequest = new WXPayRequest(config);
-        if (useSandbox) {
+        if (useSandbox ) {
             this.signType = SignType.MD5; // 沙箱环境
+            if (config.isExistSandboxKey()) {
+                return;
+            }
             try {
                 Map<String, String> result = requestSandboxKey(config.getKey());
-                config.setKey(result.get("sandbox_signkey"));
+                config.setSandBoxKey(result.get("sandbox_signkey"));
             } catch (Exception e) {
                 throw new RuntimeException("获取沙箱密钥失败，无法在沙箱环境中测试" + e.getMessage());
             }
-
         } else {
             this.signType = SignType.HMACSHA256;
         }
@@ -65,7 +70,9 @@ public class WXPay {
         params.put("sign", WXPayUtil.generateSignature(params, key, this.signType));
         String xmlStr = requestWithoutCert(WXPayConstants.SANDBOX_SIGN_KEY_SUFFIX, params,
                 config.getHttpConnectTimeoutMs(), config.getHttpReadTimeoutMs());
-
+        if (WXPayConstants.FAILED_RESPONSE.equals(xmlStr)) {
+            throw new RuntimeException("获取沙箱密钥失败");
+        }
         String returnCode = "return_code";
         Map<String, String> respData = WXPayUtil.xmlToMap(xmlStr);
         if (respData.containsKey(returnCode)) {
@@ -74,7 +81,7 @@ public class WXPay {
                 return respData;
             }
         }
-        throw new RuntimeException("获取沙箱密钥失败：" + xmlStr);
+        throw new RuntimeException("获取沙箱密钥失败：" + respData);
     }
 
     private void checkWXPayConfig() {
@@ -212,6 +219,9 @@ public class WXPay {
     public Map<String, String> processResponseXml(String xmlStr) throws Exception {
         String RETURN_CODE = "return_code";
         String return_code;
+        if (WXPayConstants.FAILED_RESPONSE.equals(xmlStr)) {
+            return emptyMap();
+        }
         Map<String, String> respData = WXPayUtil.xmlToMap(xmlStr);
         if (respData.containsKey(RETURN_CODE)) {
             return_code = respData.get(RETURN_CODE);
@@ -730,5 +740,9 @@ public class WXPay {
         params.put("timeStamp", String.valueOf(System.currentTimeMillis() / 1000));
         params.put("sign", WXPayUtil.generateSignature(params, this.config.getKey(), signType));
         return params;
+    }
+
+    public WXPayConfig getConfig() {
+        return config;
     }
 }

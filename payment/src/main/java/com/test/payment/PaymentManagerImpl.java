@@ -83,9 +83,6 @@ public class PaymentManagerImpl implements PaymentManager {
         if (isBlankString(request.getOutTradeNo())) {
             throw new IllegalArgumentException("查询支付商户交易号不能为空");
         }
-        if (isBlankString(request.getTradeNo())) {
-            throw new IllegalArgumentException("查询支付平台交易号不能为空");
-        }
         PaymentOperations paymentOperations = getProvider(request);
         PaymentTradeQueryResponse response;
         try {

@@ -46,4 +46,11 @@ public class WechatConfiguration {
         f2f.setProperties(wechatPayProperties);
         return f2f;
     }
+
+    @Bean
+    public PaymentOperations wechatPayAppOperations() {
+        WechatPayTemplate.App app = new WechatPayTemplate.App();
+        app.setProperties(wechatPayProperties);
+        return app;
+    }
 }

@@ -53,4 +53,11 @@ public class AlipayConfiguration {
         qrc.setProperties(alipayProperties);
         return qrc;
     }
+
+    @Bean
+    public PaymentOperations alipayAppPaymentProvider() {
+        AlipayTemplate.App app = new AlipayTemplate.App();
+        app.setProperties(alipayProperties);
+        return app;
+    }
 }

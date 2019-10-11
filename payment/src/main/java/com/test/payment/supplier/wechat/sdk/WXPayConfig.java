@@ -35,7 +35,7 @@ public abstract class WXPayConfig {
      * 设置key（沙箱环境）
      *
      */
-    public abstract void setKey(String key);
+    public abstract void setSandBoxKey(String sandBoxKey);
 
     /**
      * 获取商户证书内容
@@ -106,4 +106,5 @@ public abstract class WXPayConfig {
         return 10;
     }
 
+    public abstract boolean isExistSandboxKey();
 }

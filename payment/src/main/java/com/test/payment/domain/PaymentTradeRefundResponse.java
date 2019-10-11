@@ -36,6 +36,10 @@ public class PaymentTradeRefundResponse extends PaymentResponse {
      */
     private String refundAmount;
 
+    /**
+     * 交易是否存在
+     */
+    private boolean notExist;
 
     public String getOutTradeNo() {
         return outTradeNo;
@@ -85,6 +89,14 @@ public class PaymentTradeRefundResponse extends PaymentResponse {
         this.refundAmount = refundAmount;
     }
 
+    public boolean isNotExist() {
+        return notExist;
+    }
+
+    public void setNotExist(boolean notExist) {
+        this.notExist = notExist;
+    }
+
     @Override
     public String toString() {
         return "PaymentTradeRefundResponse{" +
@@ -94,6 +106,7 @@ public class PaymentTradeRefundResponse extends PaymentResponse {
                 ", refundNo='" + refundNo + '\'' +
                 ", totalAmount='" + totalAmount + '\'' +
                 ", refundAmount='" + refundAmount + '\'' +
-                '}';
+                ", notExist=" + notExist +
+                "} " + super.toString();
     }
 }

@@ -24,9 +24,9 @@ public class AlipayClientFactory {
             // 商户RSA 私钥
             String privateKey = prop.getPrivateKey();
             // 请求方式 json
-            String format = prop.getFormat();
+            String format = "json";
             // 编码格式，目前只支持UTF-8
-            String charset = prop.getCharset();
+            String charset = "UTF-8";
             // 支付宝公钥
             String publicKey = prop.getPublicKey();
             // 签名方式

@@ -10,7 +10,7 @@ import java.util.Map;
 public class PaymentTradeResponse extends PaymentResponse<Map<String, String>> {
 
     /**
-     * 交易完成，真的面对面付款码支付这种会直接完成支付
+     * 交易完成，当面付(付款码)这种会直接完成支付
      */
     private boolean tradeSuccess;
 

@@ -19,4 +19,6 @@ public class AlipayConstants {
     public static final String WAIT_BUYER_PAY = "WAIT_BUYER_PAY";
 
     public static final String REPLAY_SUCCESS = "success";
+
+    public static final String QUERY_TRADE_NOT_EXIST = "ACQ.TRADE_NOT_EXIST";
 }
