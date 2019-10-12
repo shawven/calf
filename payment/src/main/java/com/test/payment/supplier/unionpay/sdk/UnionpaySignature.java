@@ -1,7 +1,6 @@
 package com.test.payment.supplier.unionpay.sdk;
 
 import java.nio.charset.Charset;
-import java.util.Map;
 
 /**
  * @author Shoven

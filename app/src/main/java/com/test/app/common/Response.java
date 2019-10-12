@@ -96,7 +96,16 @@ public class Response {
      * @return    响应体
      */
     public static ResponseEntity<Response> ok(String msg, Object data) {
-        return build(OK, 0, msg, data);
+        return ok(0, msg, data);
+    }
+
+    /**
+     * @param code 状态码
+     * @param msg 消息
+     * @return    响应体
+     */
+    public static ResponseEntity<Response> ok(int code, String msg) {
+        return ok(code, msg, null);
     }
 
     /**
@@ -322,16 +331,6 @@ public class Response {
     /**
      * 500 Internal Server Error - [*]：服务器发生错误，用户将无法判断发出的请求是否成功。
      *
-     * @param code 状态码
-     * @return     响应体
-     */
-    public static ResponseEntity<Response> error(int code) {
-        return error(code, INTERNAL_SERVER_ERROR.getReasonPhrase());
-    }
-
-    /**
-     * 500 Internal Server Error - [*]：服务器发生错误，用户将无法判断发出的请求是否成功。
-     *
      * @param msg 消息
      * @return    响应体
      */
@@ -367,7 +366,7 @@ public class Response {
      * @param msg     消息
      * @return        响应体
      */
-    public static  ResponseEntity<Response> build(HttpStatus status, int code, String msg) {
+    public static ResponseEntity<Response> build(HttpStatus status, int code, String msg) {
         return build(status, code, msg, null);
     }
 
@@ -380,7 +379,7 @@ public class Response {
      * @param data    数据
      * @return        响应体
      */
-    public static  ResponseEntity<Response> build(HttpStatus status, int code, String msg, Object data) {
+    public static ResponseEntity<Response> build(HttpStatus status, int code, String msg, Object data) {
         return build(status, null, code, msg, data);
     }
 

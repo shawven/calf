@@ -10,9 +10,7 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
-
-import static java.util.Collections.emptyMap;
+import java.util.Base64;
 
 /**
  * @author Shoven

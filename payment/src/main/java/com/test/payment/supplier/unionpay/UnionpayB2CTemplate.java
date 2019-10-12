@@ -7,7 +7,9 @@ import com.test.payment.supplier.PaymentSupplierEnum;
 import com.test.payment.supplier.unionpay.sdk.UnionpayClient;
 import com.test.payment.supplier.unionpay.sdk.UnionpayConstants;
 import com.test.payment.supplier.unionpay.sdk.UnionpayException;
-import com.test.payment.supplier.unionpay.sdk.request.*;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradePayRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeReversalRequest;
 import com.test.payment.supplier.wechat.sdk.WXPayConstants;
 import com.test.payment.support.PaymentConstants;
 import com.test.payment.support.PaymentUtils;
@@ -51,12 +53,11 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
         return UnionpayClientFacotry.getB2CInstance(getProperties());
     }
 
-
-    public static class Web extends UnionpayB2CTemplate implements WebTradeClientType {
+    private abstract static class PagePaySupport extends UnionpayB2CTemplate {
 
         @Override
         protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
-            return getUnionpayClient().pagePay(request);
+            return getUnionpayClient().pageExecute(request);
         }
 
         @Override
@@ -70,7 +71,7 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
             UnionpayTradePayRequest payRequest = super.getPayRequest(request);
             payRequest.setReturnUrl(getProperties().getReturnUrl());
             payRequest.setTradeSubType("01");
-            payRequest.setChannelType("07");
+            payRequest.setChannelType(getChannelType());
             return payRequest;
         }
 
@@ -78,39 +79,26 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
         protected UnionpayTradeRefundRequest getRefundRequest(PaymentTradeRefundRequest request) {
             UnionpayTradeRefundRequest refundRequest = super.getRefundRequest(request);
             refundRequest.setTradeSubType("00");
-            refundRequest.setChannelType("07");
+            refundRequest.setChannelType(getChannelType());
             return refundRequest;
+        }
+
+        protected abstract String getChannelType();
+    }
+
+    public static class Web extends PagePaySupport implements WebTradeClientType {
+
+        @Override
+        protected String getChannelType() {
+            return "07";
         }
     }
 
-    public static class Wap extends UnionpayB2CTemplate implements WapTradeClientType {
+    public static class Wap extends PagePaySupport implements WapTradeClientType {
 
         @Override
-        protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
-            return getUnionpayClient().pagePay(request);
-        }
-
-        @Override
-        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
-            response.setSuccess(true);
-            response.setForm(rsp.get("form"));
-        }
-
-        @Override
-        protected UnionpayTradePayRequest getPayRequest(PaymentTradeRequest request) {
-            UnionpayTradePayRequest payRequest = super.getPayRequest(request);
-            payRequest.setReturnUrl(getProperties().getReturnUrl());
-            payRequest.setTradeSubType("01");
-            payRequest.setChannelType("08");
-            return payRequest;
-        }
-
-        @Override
-        protected UnionpayTradeRefundRequest getRefundRequest(PaymentTradeRefundRequest request) {
-            UnionpayTradeRefundRequest refundRequest = super.getRefundRequest(request);
-            refundRequest.setTradeSubType("00");
-            refundRequest.setChannelType("08");
-            return refundRequest;
+        protected String getChannelType() {
+            return "08";
         }
     }
 
@@ -118,7 +106,7 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
 
         @Override
         protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
-            return getUnionpayClient().appPay(request);
+            return getUnionpayClient().appExecute(request);
         }
 
         @Override
@@ -190,7 +178,7 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
 
             try {
                 logger.info(request, "支付请求参数：{}", unionpayRequest);
-                Map<String, String> rsp = getUnionpayClient().authCodePay(unionpayRequest);
+                Map<String, String> rsp = getUnionpayClient().execute(unionpayRequest);
                 logger.info(request, "支付响应参数：{}", getPrettyMapForPrinter(rsp));
 
                 String respCode = rsp.get("respCode");

@@ -1,7 +1,6 @@
 package com.test.payment.supplier.wechat.sdk;
 
 import com.test.payment.supplier.wechat.sdk.WXPayConstants.SignType;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -17,7 +16,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.SecureRandom;

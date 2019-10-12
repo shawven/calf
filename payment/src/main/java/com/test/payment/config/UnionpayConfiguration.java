@@ -3,17 +3,12 @@ package com.test.payment.config;
 import com.test.payment.PaymentOperations;
 import com.test.payment.properties.UnionpayB2BProperties;
 import com.test.payment.properties.UnionpayB2CProperties;
-import com.test.payment.properties.UnionpayProperties;
 import com.test.payment.supplier.unionpay.UnionpayB2BTemplate;
 import com.test.payment.supplier.unionpay.UnionpayB2CTemplate;
-import com.test.payment.supplier.unionpay.UnionpayTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.annotation.Resource;
 
 /**
  * @author Shoven

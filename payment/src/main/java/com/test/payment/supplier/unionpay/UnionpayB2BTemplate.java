@@ -2,6 +2,7 @@ package com.test.payment.supplier.unionpay;
 
 import com.test.payment.client.WapTradeClientType;
 import com.test.payment.client.WebTradeClientType;
+import com.test.payment.domain.PaymentTradeRefundRequest;
 import com.test.payment.domain.PaymentTradeRequest;
 import com.test.payment.domain.PaymentTradeResponse;
 import com.test.payment.properties.UnionpayProperties;
@@ -10,6 +11,7 @@ import com.test.payment.supplier.unionpay.sdk.UnionpayClient;
 import com.test.payment.supplier.unionpay.sdk.UnionpayConstants;
 import com.test.payment.supplier.unionpay.sdk.UnionpayException;
 import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradePayRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundRequest;
 
 import java.util.Map;
 
@@ -48,11 +50,11 @@ public abstract class UnionpayB2BTemplate extends UnionpayTemplate {
         return UnionpayClientFacotry.getB2BInstance(getProperties());
     }
 
-    public static class Web extends UnionpayB2BTemplate implements WebTradeClientType {
+    private abstract static class PagePaySupport extends UnionpayB2CTemplate {
 
         @Override
         protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
-            return getUnionpayClient().pagePay(request);
+            return getUnionpayClient().pageExecute(request);
         }
 
         @Override
@@ -64,33 +66,36 @@ public abstract class UnionpayB2BTemplate extends UnionpayTemplate {
         @Override
         protected UnionpayTradePayRequest getPayRequest(PaymentTradeRequest request) {
             UnionpayTradePayRequest payRequest = super.getPayRequest(request);
-            payRequest.setTradeType("01");
+            payRequest.setReturnUrl(getProperties().getReturnUrl());
             payRequest.setTradeSubType("01");
-            payRequest.setChannelType("07");
+            payRequest.setChannelType(getChannelType());
             return payRequest;
+        }
+
+        @Override
+        protected UnionpayTradeRefundRequest getRefundRequest(PaymentTradeRefundRequest request) {
+            UnionpayTradeRefundRequest refundRequest = super.getRefundRequest(request);
+            refundRequest.setTradeSubType("00");
+            refundRequest.setChannelType(getChannelType());
+            return refundRequest;
+        }
+
+        protected abstract String getChannelType();
+    }
+
+    public static class Web extends PagePaySupport implements WebTradeClientType {
+
+        @Override
+        protected String getChannelType() {
+            return "07";
         }
     }
 
-    public static class Wap extends UnionpayB2BTemplate implements WapTradeClientType {
+    public static class Wap extends PagePaySupport implements WapTradeClientType {
 
         @Override
-        protected Map<String, String> doPay(UnionpayTradePayRequest request) throws UnionpayException {
-            return getUnionpayClient().pagePay(request);
-        }
-
-        @Override
-        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
-            response.setSuccess(true);
-            response.setForm(rsp.get("form"));
-        }
-
-        @Override
-        protected UnionpayTradePayRequest getPayRequest(PaymentTradeRequest request) {
-            UnionpayTradePayRequest payRequest = super.getPayRequest(request);
-            payRequest.setTradeType("01");
-            payRequest.setTradeSubType("01");
-            payRequest.setChannelType("07");
-            return payRequest;
+        protected String getChannelType() {
+            return "08";
         }
     }
 }

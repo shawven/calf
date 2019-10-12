@@ -1,14 +1,15 @@
 package com.test.payment.supplier.unionpay;
 
-import com.test.payment.client.WapTradeClientType;
-import com.test.payment.client.WebTradeClientType;
 import com.test.payment.domain.*;
 import com.test.payment.properties.UnionpayProperties;
 import com.test.payment.supplier.AbstractPaymentTemplate;
 import com.test.payment.supplier.unionpay.sdk.UnionpayClient;
 import com.test.payment.supplier.unionpay.sdk.UnionpayConstants;
 import com.test.payment.supplier.unionpay.sdk.UnionpayException;
-import com.test.payment.supplier.unionpay.sdk.request.*;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradePayRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeQueryRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundQueryRequest;
+import com.test.payment.supplier.unionpay.sdk.request.UnionpayTradeRefundRequest;
 import com.test.payment.support.CurrencyTools;
 
 import java.util.HashMap;

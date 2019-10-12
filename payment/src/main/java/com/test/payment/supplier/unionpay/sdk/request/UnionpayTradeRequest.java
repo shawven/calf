@@ -11,7 +11,6 @@ import static com.test.payment.supplier.unionpay.sdk.UnionpayConstants.TIME_FORM
  */
 public abstract class UnionpayTradeRequest {
 
-
     /**
      * 系统时间，格式为YYYYMMDDhhmmss，必须取当前时间
      */
