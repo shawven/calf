@@ -152,7 +152,6 @@ public class UnionpayCertification {
         return encryptCert.getPublicKey();
     }
 
-
     /**
      * 获取验签公钥使用的中级证书
      *

@@ -15,7 +15,6 @@ import java.util.Iterator;
 
 import static com.test.payment.supplier.wechat.sdk.WXPayConstants.USER_AGENT;
 
-
 public class WXPayRequest {
     private Logger logger = LoggerFactory.getLogger(WXPayRequest.class);
     private WXPayConfig config;
@@ -193,7 +192,6 @@ public class WXPayRequest {
         }
         throw exception;
     }
-
 
     /**
      * 可重试的，非双向认证的请求

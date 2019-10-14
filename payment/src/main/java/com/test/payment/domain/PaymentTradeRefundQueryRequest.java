@@ -11,7 +11,6 @@ public class PaymentTradeRefundQueryRequest extends PaymentRequest {
      */
     private String outTradeNo;
 
-
     /**
      * 平台交易号
      */
@@ -21,7 +20,6 @@ public class PaymentTradeRefundQueryRequest extends PaymentRequest {
      * 商户退款号
      */
     private String outRefundNo;
-
 
     public PaymentTradeRefundQueryRequest(PaymentRequest request) {
         super(request);

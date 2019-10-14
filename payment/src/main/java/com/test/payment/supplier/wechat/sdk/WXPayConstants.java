@@ -21,7 +21,6 @@ public class WXPayConstants {
     public static final String DOMAIN_APIHK = "apihk.mch.weixin.qq.com";
     public static final String DOMAIN_APIUS = "apius.mch.weixin.qq.com";
 
-
     public static final String FAIL = "FAIL";
     public static final String SUCCESS = "SUCCESS";
     public static final String OK = "OK";

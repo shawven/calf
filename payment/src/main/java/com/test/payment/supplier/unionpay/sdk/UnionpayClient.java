@@ -104,7 +104,6 @@ public class UnionpayClient {
         return execute(UnionpayConstants.APP_TRANS_URL, params);
     }
 
-
     /**
      * @param request
      * @return
@@ -182,7 +181,6 @@ public class UnionpayClient {
         params.put(UnionpayConstants.param_orderId, request.getOutRefundNo());
         return execute(UnionpayConstants.SINGLE_QUERY_URL, params);
     }
-
 
     /**
      * 支付交易参数

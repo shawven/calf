@@ -12,7 +12,6 @@ public class PaymentContextHolder {
 
     private static HttpUtil http;
 
-
     public static GlobalProperties getGlobalProperties() {
         return globalProperties;
     }

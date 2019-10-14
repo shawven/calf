@@ -46,7 +46,6 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                 logger.info(request, "预支付响应参数：{}", rsp);
             }
 
-
             if (WXPayConstants.SUCCESS.equals(rsp.get("return_code"))) {
                 if (WXPayConstants.SUCCESS.equals(rsp.get("result_code"))) {
                     setPaySuccessResponse(response, rsp);
@@ -87,7 +86,6 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
             if (logger.isInfoEnabled()) {
                 logger.info(request, "查询支付交易响应参数：{}", rsp);
             }
-
 
             if (WXPayConstants.SUCCESS.equals(rsp.get("return_code"))) {
                 if (WXPayConstants.SUCCESS.equals(rsp.get("result_code"))) {
@@ -153,7 +151,6 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
             if (logger.isInfoEnabled()) {
                 logger.info(request, "异步回调接受参数：{}", params);
             }
-
 
             if (WXPayConstants.SUCCESS.equals(params.get("result_code"))) {
                 boolean validation = getWechatPayClient().isResponseSignatureValid(params);
@@ -224,7 +221,6 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                 logger.info(request, "申请退款响应参数：{}", rsp);
             }
 
-
             if (WXPayConstants.SUCCESS.equals(rsp.get("return_code"))) {
                 String desc = rsp.get("err_code_des");
                 if (WXPayConstants.SUCCESS.equals(rsp.get("result_code"))) {
@@ -278,7 +274,6 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
             if (logger.isInfoEnabled()) {
                 logger.info(request, "查询退款响应参数：{}", rsp);
             }
-
 
             if (WXPayConstants.SUCCESS.equals(rsp.get("return_code"))) {
                 String refundStatus;
@@ -416,7 +411,6 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
         }
     }
 
-
     public static class JsApi extends WechatPayTemplate implements JsApiTradeClientType {
 
         @Override
@@ -488,7 +482,6 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                 if (logger.isInfoEnabled()) {
                     logger.info(request, "支付响应参数：{}", rsp);
                 }
-
 
                 if (WXPayConstants.SUCCESS.equals(rsp.get("return_code"))) {
                     String errCode = rsp.get("err_code");
@@ -601,7 +594,6 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
                 if (logger.isInfoEnabled()) {
                     logger.info(request, "取消订单响应参数：{}", rsp);
                 }
-
 
                 if (WXPayConstants.SUCCESS.equals(rsp.get("return_code"))) {
                     if (!WXPayConstants.SUCCESS.equals(rsp.get("result_code"))) {

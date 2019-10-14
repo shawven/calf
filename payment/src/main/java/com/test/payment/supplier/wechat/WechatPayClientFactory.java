@@ -102,7 +102,6 @@ public class WechatPayClientFactory {
             return domainList;
         }
 
-
         static class MasterDomain implements IWXPayDomain {
             @Override
             public void report(long elapsedTimeMillis, Exception ex) {

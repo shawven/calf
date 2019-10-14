@@ -27,7 +27,6 @@ public class PaymentRequest implements Serializable {
      */
     private PaymentClientTypeEnum paymentClientType;
 
-
     public PaymentRequest(PaymentRequest request) {
         this.principal = request.getPrincipal();
         this.paymentSupplier = request.getPaymentSupplier();

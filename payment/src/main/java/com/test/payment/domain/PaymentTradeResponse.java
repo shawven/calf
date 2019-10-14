@@ -32,7 +32,6 @@ public class PaymentTradeResponse extends PaymentResponse<Map<String, String>> {
         return getBody().get("tradeNo");
     }
 
-
     public void setTradeNo(String tradeNo) {
         putBody("tradeNo", tradeNo);
     }

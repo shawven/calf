@@ -169,7 +169,6 @@ public class WXPay {
         return WXPayUtil.isSignatureValid(reqData, this.config.getKey(), signType);
     }
 
-
     /**
      * 不需要证书的请求
      *
@@ -187,7 +186,6 @@ public class WXPay {
 
         return this.wxPayRequest.requestWithoutCert(urlSuffix, msgUUID, reqBody, connectTimeoutMs, readTimeoutMs, autoReport);
     }
-
 
     /**
      * 需要证书的请求
@@ -252,7 +250,6 @@ public class WXPay {
     public Map<String, String> microPay(Map<String, String> reqData) throws Exception {
         return this.microPay(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：提交刷卡支付<br>
@@ -351,7 +348,6 @@ public class WXPay {
         }
     }
 
-
     /**
      * 作用：统一下单<br>
      * 场景：公共号支付、扫码支付、APP支付
@@ -363,7 +359,6 @@ public class WXPay {
     public Map<String, String> unifiedOrder(Map<String, String> reqData) throws Exception {
         return this.unifiedOrder(reqData, config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：统一下单<br>
@@ -389,7 +384,6 @@ public class WXPay {
         return this.processResponseXml(respXml);
     }
 
-
     /**
      * 作用：查询订单<br>
      * 场景：刷卡支付、公共号支付、扫码支付、APP支付
@@ -401,7 +395,6 @@ public class WXPay {
     public Map<String, String> orderQuery(Map<String, String> reqData) throws Exception {
         return this.orderQuery(reqData, config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：查询订单<br>
@@ -424,7 +417,6 @@ public class WXPay {
         return this.processResponseXml(respXml);
     }
 
-
     /**
      * 作用：撤销订单<br>
      * 场景：刷卡支付
@@ -436,7 +428,6 @@ public class WXPay {
     public Map<String, String> reverse(Map<String, String> reqData) throws Exception {
         return this.reverse(reqData, config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：撤销订单<br>
@@ -460,7 +451,6 @@ public class WXPay {
         return this.processResponseXml(respXml);
     }
 
-
     /**
      * 作用：关闭订单<br>
      * 场景：公共号支付、扫码支付、APP支付
@@ -472,7 +462,6 @@ public class WXPay {
     public Map<String, String> closeOrder(Map<String, String> reqData) throws Exception {
         return this.closeOrder(reqData, config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：关闭订单<br>
@@ -495,7 +484,6 @@ public class WXPay {
         return this.processResponseXml(respXml);
     }
 
-
     /**
      * 作用：申请退款<br>
      * 场景：刷卡支付、公共号支付、扫码支付、APP支付
@@ -507,7 +495,6 @@ public class WXPay {
     public Map<String, String> refund(Map<String, String> reqData) throws Exception {
         return this.refund(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：申请退款<br>
@@ -531,7 +518,6 @@ public class WXPay {
         return this.processResponseXml(respXml);
     }
 
-
     /**
      * 作用：退款查询<br>
      * 场景：刷卡支付、公共号支付、扫码支付、APP支付
@@ -543,7 +529,6 @@ public class WXPay {
     public Map<String, String> refundQuery(Map<String, String> reqData) throws Exception {
         return this.refundQuery(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：退款查询<br>
@@ -566,7 +551,6 @@ public class WXPay {
         return this.processResponseXml(respXml);
     }
 
-
     /**
      * 作用：对账单下载（成功时返回对账单数据，失败时返回XML格式数据）<br>
      * 场景：刷卡支付、公共号支付、扫码支付、APP支付
@@ -578,7 +562,6 @@ public class WXPay {
     public Map<String, String> downloadBill(Map<String, String> reqData) throws Exception {
         return this.downloadBill(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：对账单下载<br>
@@ -614,7 +597,6 @@ public class WXPay {
         return ret;
     }
 
-
     /**
      * 作用：交易保障<br>
      * 场景：刷卡支付、公共号支付、扫码支付、APP支付
@@ -626,7 +608,6 @@ public class WXPay {
     public Map<String, String> report(Map<String, String> reqData) throws Exception {
         return this.report(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：交易保障<br>
@@ -649,7 +630,6 @@ public class WXPay {
         return WXPayUtil.xmlToMap(respXml);
     }
 
-
     /**
      * 作用：转换短链接<br>
      * 场景：刷卡支付、扫码支付
@@ -661,7 +641,6 @@ public class WXPay {
     public Map<String, String> shortUrl(Map<String, String> reqData) throws Exception {
         return this.shortUrl(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：转换短链接<br>
@@ -682,7 +661,6 @@ public class WXPay {
         return this.processResponseXml(respXml);
     }
 
-
     /**
      * 作用：授权码查询OPENID接口<br>
      * 场景：刷卡支付
@@ -694,7 +672,6 @@ public class WXPay {
     public Map<String, String> authCodeToOpenid(Map<String, String> reqData) throws Exception {
         return this.authCodeToOpenid(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
-
 
     /**
      * 作用：授权码查询OPENID接口<br>
@@ -716,7 +693,6 @@ public class WXPay {
         String respXml = this.requestWithoutCert(url, this.fillRequestData(reqData), connectTimeoutMs, readTimeoutMs);
         return this.processResponseXml(respXml);
     }
-
 
     public Map<String, String> prepareJsApiPay(String prepayId) throws Exception {
         HashMap<String, String> params = new HashMap<>();

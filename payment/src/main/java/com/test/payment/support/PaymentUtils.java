@@ -22,7 +22,6 @@ import static java.util.Collections.emptyMap;
  */
 public class PaymentUtils {
 
-
     public static Map<String, String> parseParameterMap(Map<String, ?> parameterMap) {
         if (parameterMap == null || parameterMap.isEmpty()) {
             return emptyMap();
@@ -239,7 +238,6 @@ public class PaymentUtils {
         }
     }
 
-
     /**
      * 超时时间内周期性执行任务
      *
@@ -280,7 +278,6 @@ public class PaymentUtils {
         } while (!success && (infinite || ++i < retryTimes));
         return success;
     }
-
 
     public static class ScheduledExecutor {
 

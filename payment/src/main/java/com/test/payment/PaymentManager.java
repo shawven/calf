@@ -62,5 +62,4 @@ public interface PaymentManager {
      */
     PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request);
 
-
 }

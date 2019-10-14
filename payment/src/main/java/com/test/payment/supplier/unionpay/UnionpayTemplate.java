@@ -142,7 +142,6 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
                 logger.info(request, "查询支付交易响应参数：{}", getPrettyMapForPrinter(rsp));
             }
 
-
             //如果查询交易成功
             String respCode = rsp.get("respCode");
             if (UnionpayConstants.SUCCESS_CODE.equals(respCode)) {
@@ -202,7 +201,6 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
                 logger.info(request, "申请退款响应参数：{}", getPrettyMapForPrinter(rsp));
             }
 
-
             String respCode = rsp.get("respCode");
             String respMsg = rsp.get("respMsg");
             //如果查询交易成功
@@ -251,7 +249,6 @@ public abstract class UnionpayTemplate extends AbstractPaymentTemplate {
             if (logger.isInfoEnabled()) {
                 logger.info(request, "查询退款响应参数：{}", getPrettyMapForPrinter(rsp));
             }
-
 
             //如果查询交易成功
             String respCode = rsp.get("respCode");

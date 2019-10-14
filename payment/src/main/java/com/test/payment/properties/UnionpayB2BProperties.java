@@ -11,5 +11,4 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "unionpay.b2b")
 public class UnionpayB2BProperties extends UnionpayProperties {
 
-
 }

@@ -216,7 +216,6 @@ public class PaymentManagerImpl implements PaymentManager {
         }
     }
 
-
     /**
      * 索引化提供者
      *

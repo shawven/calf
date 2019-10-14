@@ -132,7 +132,6 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
         }
     }
 
-
     public static class Qrc extends UnionpayB2CTemplate implements QrcTradeClientType {
 
         @Override
@@ -185,7 +184,6 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
                 if (logger.isInfoEnabled()) {
                     logger.info(request, "支付响应参数：{}", getPrettyMapForPrinter(rsp));
                 }
-
 
                 String respCode = rsp.get("respCode");
                 if (UnionpayConstants.SUCCESS_CODE.equals(respCode)) {
@@ -291,7 +289,6 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
                 if (logger.isInfoEnabled()) {
                     logger.info(request, "取消订单响应参数：{}", getPrettyMapForPrinter(rsp));
                 }
-
 
                 String returnCode = rsp.get("return_code");
                 if (WXPayConstants.SUCCESS.equals(returnCode)) {

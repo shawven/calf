@@ -218,7 +218,6 @@ public abstract class AlipayTemplate extends AbstractPaymentTemplate {
         return response;
     }
 
-
     @Override
     public PaymentTradeRefundResponse refund(PaymentTradeRefundRequest request) {
         AlipayTradeRefundModel refundModel = new AlipayTradeRefundModel();

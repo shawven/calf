@@ -5,14 +5,12 @@ import java.util.List;
 
 public abstract class WXPayConfig {
 
-
     /**
      * 获取 App ID
      *
      * @return App ID
      */
     public abstract String getAppID();
-
 
     /**
      * 获取 Mch ID
@@ -21,14 +19,12 @@ public abstract class WXPayConfig {
      */
     public abstract String getMchID();
 
-
     /**
      * 获取 API 密钥
      *
      * @return API密钥
      */
     public abstract String getKey();
-
 
     /**
      * 设置key（沙箱环境）
@@ -85,7 +81,6 @@ public abstract class WXPayConfig {
     public int getReportWorkerNum() {
         return 6;
     }
-
 
     /**
      * 健康上报缓存消息的最大数量。会有线程去独立上报

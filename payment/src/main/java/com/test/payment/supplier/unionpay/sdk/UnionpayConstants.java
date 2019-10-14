@@ -3,7 +3,6 @@ package com.test.payment.supplier.unionpay.sdk;
 
 public class UnionpayConstants {
 
-
     public static final String TIME_FORMAT = "yyyyMMddHHmmss";
     public static final String SUCCESS_CODE = "00";
     public static final String REPLAY_SUCCESS = "ok";

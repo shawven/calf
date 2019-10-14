@@ -99,7 +99,6 @@ public class WXPayUtil {
         return output;
     }
 
-
     /**
      * 生成带有 sign 的 XML 格式字符串
      *
@@ -124,7 +123,6 @@ public class WXPayUtil {
         data.put(WXPayConstants.FIELD_SIGN, sign);
         return mapToXml(data);
     }
-
 
     /**
      * 判断签名是否正确
@@ -216,7 +214,6 @@ public class WXPayUtil {
         }
     }
 
-
     /**
      * 获取随机字符串 Nonce Str
      *
@@ -229,7 +226,6 @@ public class WXPayUtil {
         }
         return new String(nonceChars);
     }
-
 
     /**
      * 生成 MD5
