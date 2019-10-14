@@ -2,7 +2,7 @@ package com.test.payment.config;
 
 import com.test.payment.PaymentOperations;
 import com.test.payment.properties.WechatPayProperties;
-import com.test.payment.supplier.wechat.WechatPayTemplate;
+import com.test.payment.provider.wechat.WechatPayTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

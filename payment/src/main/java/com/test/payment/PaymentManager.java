@@ -2,7 +2,7 @@ package com.test.payment;
 
 import com.test.payment.client.PaymentClientTypeEnum;
 import com.test.payment.domain.*;
-import com.test.payment.supplier.PaymentSupplierEnum;
+import com.test.payment.provider.PaymentProviderEnum;
 
 import java.util.Set;
 
@@ -13,12 +13,12 @@ import java.util.Set;
 public interface PaymentManager {
 
     /**
-     * 根据支付方式列举可以的支付供应商
+     * 根据支付方式列举可以的支付提供商
      *
      * @param paymentClient
      * @return
      */
-    Set<PaymentSupplierEnum> listAvailableSuppliers(PaymentClientTypeEnum paymentClient);
+    Set<PaymentProviderEnum> listAvailableProviders(PaymentClientTypeEnum paymentClient);
 
     /**
      * 支付

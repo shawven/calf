@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.test.app.common.Response;
 import com.test.payment.PaymentManager;
 import com.test.payment.domain.*;
-import com.test.payment.supplier.PaymentSupplierEnum;
+import com.test.payment.provider.PaymentProviderEnum;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
@@ -228,7 +228,7 @@ public class PayController {
 
     @GetMapping("redirect")
     public String redirect(String supplier, String form, Model model) {
-        PaymentSupplierEnum paymentSupplier = PaymentSupplierEnum.valueOf(supplier.toUpperCase());
+        PaymentProviderEnum paymentSupplier = PaymentProviderEnum.valueOf(supplier.toUpperCase());
         model.addAttribute("supplier", paymentSupplier);
         model.addAttribute("form", form);
         return "payment/redirect";

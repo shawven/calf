@@ -20,8 +20,8 @@ public class PaymentTradeQueryRequest extends PaymentRequest {
         super(request);
     }
 
-    public PaymentTradeQueryRequest(String paymentSupplier) {
-        super(paymentSupplier);
+    public PaymentTradeQueryRequest(String paymentProvider) {
+        super(paymentProvider);
     }
 
     public String getOutTradeNo() {

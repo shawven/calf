@@ -50,17 +50,5 @@ public interface PaymentOperations extends PaymentWayType {
      *
      * @return
      */
-    default PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * 退款异步通知
-     *
-     * @return
-     */
-    default PaymentTradeCallbackResponse refundNotify(PaymentTradeCallbackRequest request) {
-        throw new UnsupportedOperationException();
-    }
-
+    PaymentTradeRefundQueryResponse refundQuery(PaymentTradeRefundQueryRequest request);
 }

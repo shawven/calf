@@ -22,8 +22,8 @@ public class PaymentTradeCallbackRequest extends PaymentRequest {
      */
     private String rowBody;
 
-    public PaymentTradeCallbackRequest(String paymentSupplier, Map<String, ?> params, InputStream inputStream) {
-        super(paymentSupplier);
+    public PaymentTradeCallbackRequest(String paymentProvider, Map<String, ?> params, InputStream inputStream) {
+        super(paymentProvider);
         this.rowBody = PaymentUtils.read(inputStream);
         this.params = getParams(params, rowBody);
     }

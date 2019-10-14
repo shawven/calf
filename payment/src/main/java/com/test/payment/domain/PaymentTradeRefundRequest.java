@@ -36,8 +36,8 @@ public class PaymentTradeRefundRequest extends PaymentRequest {
      */
     private String refundReason;
 
-    public PaymentTradeRefundRequest(String paymentSupplier) {
-        super(paymentSupplier);
+    public PaymentTradeRefundRequest(String paymentProvider) {
+        super(paymentProvider);
     }
 
     public String getOutTradeNo() {

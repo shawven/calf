@@ -28,7 +28,7 @@ public class GlobalProperties {
     private Long currencyCents;
 
     /**
-     * 是否使用沙箱环境（仅仅是起到placeholder的作用，实际具体要看配置文件每个供应商具体的值）
+     * 是否使用沙箱环境（仅仅是起到placeholder的作用，实际具体要看配置文件每个提供商具体的值）
      */
     @Value("${useSandbox:true}")
     private Boolean useSandbox;

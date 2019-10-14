@@ -2,7 +2,7 @@ package com.test.payment.support;
 
 import com.test.payment.client.PaymentClientTypeEnum;
 import com.test.payment.domain.PaymentRequest;
-import com.test.payment.supplier.PaymentSupplierEnum;
+import com.test.payment.provider.PaymentProviderEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,9 +111,9 @@ public class PaymentLogger {
         if (principal != null) {
             builder.append("[").append(principal).append("]");
         }
-        PaymentSupplierEnum paymentSupplier = request.getPaymentSupplier();
-        if (paymentSupplier != null) {
-            builder.append(paymentSupplier.getName());
+        PaymentProviderEnum paymentProvider = request.getPaymentProvider();
+        if (paymentProvider != null) {
+            builder.append(paymentProvider.getName());
         }
         PaymentClientTypeEnum paymentClientType = request.getPaymentClientType();
         if (paymentClientType != null) {

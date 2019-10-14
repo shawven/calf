@@ -3,7 +3,7 @@ package com.test.payment;
 import com.test.payment.client.PaymentClientTypeEnum;
 import com.test.payment.domain.*;
 import com.test.payment.properties.GlobalProperties;
-import com.test.payment.supplier.PaymentSupplierEnum;
+import com.test.payment.provider.PaymentProviderEnum;
 import com.test.payment.support.CurrencyTools;
 import com.test.payment.support.HttpUtil;
 import com.test.payment.support.PaymentContextHolder;
@@ -28,10 +28,10 @@ public class PaymentManagerImpl implements PaymentManager {
 
     private PaymentLogger logger = PaymentLogger.getLogger(PaymentManagerImpl.class);
 
-    private Map<PaymentSupplierEnum, Map<PaymentClientTypeEnum, PaymentOperations>> suppliers;
+    private Map<PaymentProviderEnum, Map<PaymentClientTypeEnum, PaymentOperations>> providers;
 
-    public PaymentManagerImpl(List<PaymentOperations> suppliers, GlobalProperties globalProperties) {
-        this.suppliers = index(suppliers);
+    public PaymentManagerImpl(List<PaymentOperations> providers, GlobalProperties globalProperties) {
+        this.providers = index(providers);
         init(globalProperties);
     }
 
@@ -51,8 +51,8 @@ public class PaymentManagerImpl implements PaymentManager {
     }
 
     @Override
-    public Set<PaymentSupplierEnum> listAvailableSuppliers(PaymentClientTypeEnum paymentClient) {
-        return suppliers.entrySet().stream()
+    public Set<PaymentProviderEnum> listAvailableProviders(PaymentClientTypeEnum paymentClient) {
+        return providers.entrySet().stream()
                 .filter(entry -> entry.getValue().containsKey(paymentClient))
                 .flatMap(entry -> Stream.of(entry.getKey()))
                 .collect(toSet());
@@ -190,18 +190,18 @@ public class PaymentManagerImpl implements PaymentManager {
     }
 
     /**
-     * 获取支付提供者
+     * 获取支付提供商
      *
      * @param paymentRequest
      * @return
      */
     private PaymentOperations getProvider(PaymentRequest paymentRequest) {
-        PaymentSupplierEnum supplier = paymentRequest.getPaymentSupplier();
+        PaymentProviderEnum provider = paymentRequest.getPaymentProvider();
         PaymentClientTypeEnum clientType = paymentRequest.getPaymentClientType();
-        Map<PaymentClientTypeEnum, PaymentOperations> clientTypes = this.suppliers.get(supplier);
+        Map<PaymentClientTypeEnum, PaymentOperations> clientTypes = this.providers.get(provider);
 
-        if (suppliers == null || suppliers.isEmpty()) {
-            throw new PaymentException("未配置[" + supplier.getName() + "]供应商");
+        if (providers == null || providers.isEmpty()) {
+            throw new PaymentException("未配置[" + provider.getName() + "]提供商");
         }
 
         // 未指定客户端类型或者为空返回第一个即可
@@ -217,25 +217,25 @@ public class PaymentManagerImpl implements PaymentManager {
     }
 
     /**
-     * 索引化提供者
+     * 索引化提供商
      *
      * @param operationsList
      * @return
      */
-    private Map<PaymentSupplierEnum, Map<PaymentClientTypeEnum, PaymentOperations>>
+    private Map<PaymentProviderEnum, Map<PaymentClientTypeEnum, PaymentOperations>>
     index(List<PaymentOperations> operationsList) {
         if (operationsList == null) {
             return emptyMap();
         }
 
-        Map<PaymentSupplierEnum, Map<PaymentClientTypeEnum, PaymentOperations>> suppliers = new HashMap<>();
+        Map<PaymentProviderEnum, Map<PaymentClientTypeEnum, PaymentOperations>> providers = new HashMap<>();
         operationsList.stream()
                 .filter(operations -> {
-                    PaymentSupplierEnum supplier = operations.getSupplier();
+                    PaymentProviderEnum provider = operations.getProvider();
                     PaymentClientTypeEnum client = operations.getClientType();
                     String className = operations.getClass().getName();
-                    if (supplier == null) {
-                        logger.rawWarn("加载{}失败，支付供应商未配置", className);
+                    if (provider == null) {
+                        logger.rawWarn("加载{}失败，支付提供商未配置", className);
                         return false;
                     }
                     if (client == null) {
@@ -244,17 +244,17 @@ public class PaymentManagerImpl implements PaymentManager {
                     }
                     return true;
                 })
-                .collect(groupingBy(PaymentOperations::getSupplier, toSet()))
-                .forEach((supplier, operationsSet) -> {
+                .collect(groupingBy(PaymentOperations::getProvider, toSet()))
+                .forEach((provider, operationsSet) -> {
                     StringBuilder loaded = new StringBuilder();
                     for (PaymentOperations operations : operationsSet) {
                         PaymentClientTypeEnum client = operations.getClientType();
-                        Map<PaymentClientTypeEnum, PaymentOperations> clientTypes = suppliers.get(supplier);
+                        Map<PaymentClientTypeEnum, PaymentOperations> clientTypes = providers.get(provider);
 
                         if (clientTypes == null) {
                             clientTypes = new HashMap<>(8);
                             clientTypes.put(client, operations);
-                            suppliers.put(supplier, clientTypes);
+                            providers.put(provider, clientTypes);
                         } else {
                             clientTypes.put(client, operations);
                         }
@@ -262,9 +262,9 @@ public class PaymentManagerImpl implements PaymentManager {
                     }
                     if (loaded.length() > 0) {
                         loaded.deleteCharAt(loaded.length() - 1);
-                        logger.rawInfo("加载{}[{}]支付方式成功", supplier.getName(), loaded);
+                        logger.rawInfo("加载{}[{}]支付方式成功", provider.getName(), loaded);
                     }
                 });
-        return suppliers;
+        return providers;
     }
 }

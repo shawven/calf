@@ -1,7 +1,7 @@
 package com.test.payment.domain;
 
 import com.test.payment.client.PaymentClientTypeEnum;
-import com.test.payment.supplier.PaymentSupplierEnum;
+import com.test.payment.provider.PaymentProviderEnum;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -18,9 +18,9 @@ public class PaymentRequest implements Serializable {
     private String principal;
 
     /**
-     * 平台供应商
+     * 平台提供商
      */
-    private PaymentSupplierEnum paymentSupplier;
+    private PaymentProviderEnum paymentProvider;
 
     /**
      * 客户端类型
@@ -29,44 +29,44 @@ public class PaymentRequest implements Serializable {
 
     public PaymentRequest(PaymentRequest request) {
         this.principal = request.getPrincipal();
-        this.paymentSupplier = request.getPaymentSupplier();
+        this.paymentProvider = request.getPaymentProvider();
         this.paymentClientType = request.getPaymentClientType();
     }
 
-    public PaymentRequest(String paymentSupplier) {
-        Objects.requireNonNull(paymentSupplier, "支付供应商不能为空");
-        String supplierName = paymentSupplier.toUpperCase();
-        this.paymentSupplier = PaymentSupplierEnum.valueOf(supplierName);
+    public PaymentRequest(String paymentProvider) {
+        Objects.requireNonNull(paymentProvider, "支付提供商不能为空");
+        String providerName = paymentProvider.toUpperCase();
+        this.paymentProvider = PaymentProviderEnum.valueOf(providerName);
         this.paymentClientType = null;
-        Objects.requireNonNull(this.paymentSupplier, () -> "不存在在此供应商" + supplierName);
+        Objects.requireNonNull(this.paymentProvider, () -> "不存在在此提供商" + providerName);
     }
 
-    public PaymentRequest(PaymentSupplierEnum paymentSupplier) {
-        Objects.requireNonNull(paymentSupplier, "支付供应商不能为空");
-        this.paymentSupplier = paymentSupplier;
+    public PaymentRequest(PaymentProviderEnum paymentProvider) {
+        Objects.requireNonNull(paymentProvider, "支付提供商不能为空");
+        this.paymentProvider = paymentProvider;
         this.paymentClientType = null;
     }
 
-    public PaymentRequest(String paymentSupplier, String paymentClientType) {
-        Objects.requireNonNull(paymentSupplier, "支付供应商不能为空");
+    public PaymentRequest(String paymentProvider, String paymentClientType) {
+        Objects.requireNonNull(paymentProvider, "支付提供商不能为空");
         Objects.requireNonNull(paymentClientType, "客户端类型不能为空");
-        String supplierName = paymentSupplier.toUpperCase();
+        String providerName = paymentProvider.toUpperCase();
         String clientTypeName = paymentClientType.toUpperCase();
-        this.paymentSupplier = PaymentSupplierEnum.valueOf(supplierName);
+        this.paymentProvider = PaymentProviderEnum.valueOf(providerName);
         this.paymentClientType = PaymentClientTypeEnum.valueOf(clientTypeName);
-        Objects.requireNonNull(this.paymentSupplier, () -> "不存在在此供应商" + supplierName);
-        Objects.requireNonNull(this.paymentClientType, () -> supplierName + "不支持" + clientTypeName + "支付方式");
+        Objects.requireNonNull(this.paymentProvider, () -> "不存在在此提供商" + providerName);
+        Objects.requireNonNull(this.paymentClientType, () -> providerName + "不支持" + clientTypeName + "支付方式");
     }
 
-    public PaymentRequest(PaymentSupplierEnum paymentSupplier, PaymentClientTypeEnum paymentClientType) {
-        Objects.requireNonNull(paymentSupplier, "支付供应商不能为空");
+    public PaymentRequest(PaymentProviderEnum paymentProvider, PaymentClientTypeEnum paymentClientType) {
+        Objects.requireNonNull(paymentProvider, "支付提供商不能为空");
         Objects.requireNonNull(paymentClientType, "客户端类型不能为空");
-        this.paymentSupplier = paymentSupplier;
+        this.paymentProvider = paymentProvider;
         this.paymentClientType = paymentClientType;
     }
 
-    public PaymentSupplierEnum getPaymentSupplier() {
-        return paymentSupplier;
+    public PaymentProviderEnum getPaymentProvider() {
+        return paymentProvider;
     }
 
     public PaymentClientTypeEnum getPaymentClientType() {
@@ -85,7 +85,7 @@ public class PaymentRequest implements Serializable {
     public String toString() {
         return "PaymentRequest{" +
                 "principal='" + principal + '\'' +
-                ", paymentSupplier=" + paymentSupplier +
+                ", paymentProvider=" + paymentProvider +
                 ", paymentClientType=" + paymentClientType +
                 '}';
     }

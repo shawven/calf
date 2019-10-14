@@ -11,8 +11,8 @@ import java.util.Map;
  */
 public class PaymentTradeRequest extends PaymentRequest {
 
-    public PaymentTradeRequest(String paymentSupplier, String paymentClient, Map<String, ?> formParams) {
-        super(paymentSupplier, paymentClient);
+    public PaymentTradeRequest(String paymentProvider, String paymentClient, Map<String, ?> formParams) {
+        super(paymentProvider, paymentClient);
         params = PaymentUtils.parseParameterMap(formParams);
     }
 

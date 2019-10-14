@@ -2,7 +2,7 @@ package com.test.payment.config;
 
 import com.test.payment.PaymentOperations;
 import com.test.payment.properties.AlipayProperties;
-import com.test.payment.supplier.alipay.AlipayTemplate;
+import com.test.payment.provider.alipay.AlipayTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

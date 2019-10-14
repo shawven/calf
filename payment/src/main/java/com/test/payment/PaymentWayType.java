@@ -1,6 +1,6 @@
 package com.test.payment;
 
-import com.test.payment.supplier.PaymentSupplierEnum;
+import com.test.payment.provider.PaymentProviderEnum;
 
 /**
  * @author Shoven
@@ -13,5 +13,5 @@ public interface PaymentWayType extends PaymentTradeClientType {
      *
      * @return
      */
-    PaymentSupplierEnum getSupplier();
+    PaymentProviderEnum getProvider();
 }
