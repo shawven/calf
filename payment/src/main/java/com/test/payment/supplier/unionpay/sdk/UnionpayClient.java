@@ -67,7 +67,7 @@ public class UnionpayClient {
         this.signMethod = UnionpayConstants.SIGNMETHOD_RSA;
         this.httpUtil = PaymentContextHolder.getHttp();
         this.certification = new UnionpayCertification(signCertPath, encryptCertPath, rootCertPath, middleCertPath,
-               signCertPassword, validateCNName);
+                signCertPassword, validateCNName);
     }
 
     /**
@@ -106,7 +106,6 @@ public class UnionpayClient {
 
 
     /**
-     *
      * @param request
      * @return
      * @throws UnionpayException

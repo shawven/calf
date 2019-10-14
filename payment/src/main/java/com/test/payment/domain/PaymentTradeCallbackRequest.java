@@ -51,7 +51,7 @@ public class PaymentTradeCallbackRequest extends PaymentRequest {
     @Override
     public String toString() {
         return "PaymentTradeCallbackRequest{" +
-                "params=" +  getParams().toString() +
+                "params=" + getParams().toString() +
                 '}';
     }
 }

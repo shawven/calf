@@ -6,7 +6,6 @@ import java.util.List;
 public abstract class WXPayConfig {
 
 
-
     /**
      * 获取 App ID
      *
@@ -33,7 +32,6 @@ public abstract class WXPayConfig {
 
     /**
      * 设置key（沙箱环境）
-     *
      */
     public abstract void setSandBoxKey(String sandBoxKey);
 
@@ -64,9 +62,10 @@ public abstract class WXPayConfig {
 
     /**
      * 获取WXPayDomain, 用于多域名容灾自动切换
+     *
      * @return
      */
-    public abstract List<IWXPayDomain>  getDomainList();
+    public abstract List<IWXPayDomain> getDomainList();
 
     /**
      * 是否自动上报。
@@ -77,6 +76,7 @@ public abstract class WXPayConfig {
     public boolean shouldAutoReport() {
         return true;
     }
+
     /**
      * 进行健康上报的线程的数量
      *

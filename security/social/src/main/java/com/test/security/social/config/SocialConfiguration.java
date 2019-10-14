@@ -121,7 +121,7 @@ public class SocialConfiguration extends SocialConfigurerAdapter {
 
 		// 不同环境下的社交配置不一样
 		if (socialConfigurerProcessor != null) {
-            socialConfigurerProcessor.process(configurer);
+            socialConfigurerProcessor.proceed(configurer);
         }
 		return configurer;
 	}

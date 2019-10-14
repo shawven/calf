@@ -5,27 +5,33 @@
     <title>Title</title>
 </head>
 <body>
-<button onclick="get()">Get</button>
-<button onclick="post()">Post</button>
+
 </body>
-<script>
-    function get() {
-        let request = new XMLHttpRequest();
-        request.open("get", "http://localhost:8888", true)
-        request.withCredentials = true;
-        request.send()
-        request.onreadystatechange = function (state) {
-            console.log(state)
-        }
+<script src="/statics/js/jquery.min.js"></script>
+<script src="/statics/js/socket/sockjs.min.js"></script>
+<script src="/statics/js/socket/stomp.min.js"></script>
+<script type="text/javascript">
+    function connect() {
+        stompClient = Stomp.over(new SockJS("${ctx}/websocket"));
+        stompClient.connect({}, function (frame) {
+            console.log(frame);
+                console.log(res);
+            });
+
+            stompClient.subscribe('/user/abc/answer', function (res) {
+                stompClient.send("/app/question", {}, JSON.stringify({
+                    command: "close",
+                    formUser: 10000,
+                    toUser: 1,
+                    body: {
+                        id: 1
+                    }
+                }));
+        }, function() {
+            console.error("'连接服务器失败，正在重新连接...");
+            // setTimeout(1000, connect())
+        })
     }
-    function post() {
-        let request = new XMLHttpRequest();
-        request.open("post", "http://localhost:8888", true)
-        request.withCredentials = true;
-        request.send()
-        request.onreadystatechange = function (state) {
-            console.log(state)
-        }
-    }
+    connect();
 </script>
 </html>

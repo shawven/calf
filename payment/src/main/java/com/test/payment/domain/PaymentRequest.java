@@ -56,7 +56,7 @@ public class PaymentRequest implements Serializable {
         this.paymentSupplier = PaymentSupplierEnum.valueOf(supplierName);
         this.paymentClientType = PaymentClientTypeEnum.valueOf(clientTypeName);
         Objects.requireNonNull(this.paymentSupplier, () -> "不存在在此供应商" + supplierName);
-        Objects.requireNonNull(this.paymentClientType, () ->  supplierName + "不支持" + clientTypeName + "支付方式");
+        Objects.requireNonNull(this.paymentClientType, () -> supplierName + "不支持" + clientTypeName + "支付方式");
     }
 
     public PaymentRequest(PaymentSupplierEnum paymentSupplier, PaymentClientTypeEnum paymentClientType) {

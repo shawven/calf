@@ -58,7 +58,7 @@ public abstract class UnionpayB2BTemplate extends UnionpayTemplate {
         }
 
         @Override
-        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
+        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp) {
             response.setSuccess(true);
             response.setForm(rsp.get("form"));
         }

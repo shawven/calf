@@ -29,7 +29,7 @@ public class RsaUtils {
     }
 
     public static String rsaSign(String content, PrivateKey privateKey, Charset charset) throws RuntimeException {
-        return sign(content, privateKey,  "SHA1WithRSA", charset);
+        return sign(content, privateKey, "SHA1WithRSA", charset);
     }
 
     public static String rsa2Sign(String content, String privateKey, Charset charset) throws RuntimeException {
@@ -43,7 +43,7 @@ public class RsaUtils {
     }
 
     public static String rsa2Sign(String content, PrivateKey privateKey, Charset charset) throws RuntimeException {
-        return sign(content, privateKey,  "SHA256WithRSA", charset);
+        return sign(content, privateKey, "SHA256WithRSA", charset);
     }
 
     public static String sign(String content, String privateKey, String algorithm, Charset charset) throws RuntimeException {
@@ -53,7 +53,7 @@ public class RsaUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return sign(content,priKey, algorithm, charset);
+        return sign(content, priKey, algorithm, charset);
     }
 
     public static String sign(String content, PrivateKey privateKey, String algorithm, Charset charset) throws RuntimeException {
@@ -208,7 +208,7 @@ public class RsaUtils {
             int inputLen = encryptedData.length;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             int offSet = 0;
-            for(int i = 0; inputLen - offSet > 0; offSet = i * 128) {
+            for (int i = 0; inputLen - offSet > 0; offSet = i * 128) {
                 byte[] cache;
                 if (inputLen - offSet > 128) {
                     cache = cipher.doFinal(encryptedData, offSet, 128);

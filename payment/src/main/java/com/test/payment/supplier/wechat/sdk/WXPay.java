@@ -46,7 +46,7 @@ public class WXPay {
         this.autoReport = autoReport;
         this.useSandbox = useSandbox;
         this.wxPayRequest = new WXPayRequest(config);
-        if (useSandbox ) {
+        if (useSandbox) {
             this.signType = SignType.MD5; // 沙箱环境
             if (config.isExistSandboxKey()) {
                 return;

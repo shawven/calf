@@ -42,17 +42,17 @@ public class UnionpayTradePayRequest extends UnionpayTradeRequest {
     private String tradeSubType;
 
     /**
-     *  渠道类型
+     * 渠道类型
      */
     private String channelType;
 
     /**
-     *  授权码（付款码支付）
+     * 授权码（付款码支付）
      */
     private String authCode;
 
     /**
-     *  终端ID（付款码支付）
+     * 终端ID（付款码支付）
      */
     private String termId;
 

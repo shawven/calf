@@ -61,7 +61,7 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
         }
 
         @Override
-        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
+        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp) {
             response.setSuccess(true);
             response.setForm(rsp.get("form"));
         }
@@ -110,7 +110,7 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
         }
 
         @Override
-        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
+        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp) {
             response.setSuccess(true);
             response.setPrepayId(rsp.get("tn"));
         }
@@ -141,7 +141,7 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
         }
 
         @Override
-        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp)  {
+        protected void setPaySuccessResponse(PaymentTradeResponse response, Map<String, String> rsp) {
             response.setSuccess(true);
             response.setCodeUrl(rsp.get("qrCode"));
         }
@@ -177,9 +177,15 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
             boolean needQuery = false;
 
             try {
-                logger.info(request, "支付请求参数：{}", unionpayRequest);
+                if (logger.isInfoEnabled()) {
+                    logger.info(request, "支付请求参数：{}", unionpayRequest);
+                }
+
                 Map<String, String> rsp = getUnionpayClient().execute(unionpayRequest);
-                logger.info(request, "支付响应参数：{}", getPrettyMapForPrinter(rsp));
+                if (logger.isInfoEnabled()) {
+                    logger.info(request, "支付响应参数：{}", getPrettyMapForPrinter(rsp));
+                }
+
 
                 String respCode = rsp.get("respCode");
                 if (UnionpayConstants.SUCCESS_CODE.equals(respCode)) {
@@ -200,10 +206,15 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
             }
             if (!response.isSuccess()) {
                 if (needQuery) {
-                    logger.info(request, "支付未完成[{}]，正在查询订单", response.getErrorMsg());
+                    if (logger.isInfoEnabled()) {
+                        logger.info(request, "支付未完成[{}]，正在查询订单", response.getErrorMsg());
+                    }
+
                     queryTradeIfFailed(request, response);
                 } else {
-                    logger.error(request, response.getErrorMsg());
+                    if (logger.isErrorEnabled()) {
+                        logger.error(request, response.getErrorMsg());
+                    }
                 }
             }
             return response;
@@ -236,20 +247,33 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
                 response.setTradeNo(queryResponse.getTradeNo());
                 response.setOutTradeNo(queryResponse.getOutTradeNo());
             } else {
-                logger.info(request, "支付未完成正在取消订单");
+                if (logger.isInfoEnabled()) {
+                    logger.info(request, "支付未完成正在取消订单");
+                }
+
                 if (cancel(request)) {
                     response.setErrorMsg("支付未完成已取消订单");
-                    logger.info(request, response.getErrorMsg());
+                    if (logger.isInfoEnabled()) {
+                        logger.info(request, response.getErrorMsg());
+                    }
+
                 } else {
                     response.setErrorMsg("支付未完成且取消订单异常");
-                    logger.error(request, response.getErrorMsg());
+                    if (logger.isErrorEnabled()) {
+                        logger.error(request, response.getErrorMsg());
+                    }
                 }
             }
         }
 
         public boolean cancel(PaymentTradeRequest request) {
             return PaymentUtils.runningUntilSuccess(() -> onceCancel(request),
-                    i -> logger.info(request, "正在第" + i +"次重试取消订单"), 3);
+                    i -> {
+                        if (logger.isInfoEnabled()) {
+                            logger.info(request, "正在第" + i + "次重试取消订单");
+                        }
+                    }, 3);
+
         }
 
         /**
@@ -259,24 +283,38 @@ public abstract class UnionpayB2CTemplate extends UnionpayTemplate {
         public boolean onceCancel(PaymentTradeRequest request) {
             UnionpayTradeReversalRequest reversalRequest = getReversalRequest(request);
             try {
-                logger.info(request, "取消订单请求参数：{}", reversalRequest);
+                if (logger.isInfoEnabled()) {
+                    logger.info(request, "取消订单请求参数：{}", reversalRequest);
+                }
+
                 Map<String, String> rsp = getUnionpayClient().reversal(reversalRequest);
-                logger.info(request, "取消订单响应参数：{}", getPrettyMapForPrinter(rsp));
+                if (logger.isInfoEnabled()) {
+                    logger.info(request, "取消订单响应参数：{}", getPrettyMapForPrinter(rsp));
+                }
+
 
                 String returnCode = rsp.get("return_code");
                 if (WXPayConstants.SUCCESS.equals(returnCode)) {
                     String resultCode = rsp.get("result_code");
                     if (!WXPayConstants.SUCCESS.equals(resultCode)) {
-                        logger.info(request, "取消订单失败：{}", rsp.get("err_code_des"));
+                        if (logger.isInfoEnabled()) {
+                            logger.info(request, "取消订单失败：{}", rsp.get("err_code_des"));
+                        }
+
                         return false;
                     }
                     return true;
                 } else {
-                    logger.info(request, "取消订单失败：{}", rsp.get("return_msg"));
+                    if (logger.isInfoEnabled()) {
+                        logger.info(request, "取消订单失败：{}", rsp.get("return_msg"));
+                    }
+
                     return false;
                 }
             } catch (Exception e) {
-                logger.error(request, "取消订单错误：{}", e.getMessage());
+                if (logger.isErrorEnabled()) {
+                    logger.error(request, "取消订单错误：{}", e.getMessage());
+                }
                 return false;
             }
         }

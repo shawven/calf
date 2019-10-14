@@ -13,5 +13,5 @@ public interface SocialConfigurerProcessor {
      *
      * @param configurer
      */
-    void process(SocialConfigurer configurer);
+    void proceed(SocialConfigurer configurer);
 }

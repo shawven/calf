@@ -37,7 +37,7 @@ public class UnionpayTradeRefundRequest extends UnionpayTradeRequest {
     private String tradeSubType;
 
     /**
-     *  渠道类型
+     * 渠道类型
      */
     private String channelType;
 

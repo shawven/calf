@@ -44,7 +44,7 @@ public class PaymentUtils {
         return params;
     }
 
-    public static String read(InputStream inputStream){
+    public static String read(InputStream inputStream) {
         StringBuilderWriter writer = new StringBuilderWriter();
         InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         char[] buf = new char[4096];
@@ -94,7 +94,8 @@ public class PaymentUtils {
                 element = element.replaceAll("\\+", "%2B");
                 String decode = URLDecoder.decode(element, "UTF-8");
                 newPairs.put(elements[0], decode);
-            } catch (UnsupportedEncodingException ignored) {}
+            } catch (UnsupportedEncodingException ignored) {
+            }
         }
         return newPairs;
     }
@@ -131,12 +132,12 @@ public class PaymentUtils {
             StringBuilder hiddenInput = new StringBuilder();
             Set<String> keys = parameters.keySet();
             for (String key : keys) {
-                String value =  parameters.get(key);
+                String value = parameters.get(key);
                 if (key != null && value != null) {
                     hiddenInput.append("<input type=\"hidden\" name=\"");
                     hiddenInput.append(key);
                     hiddenInput.append("\" value=\"");
-                    hiddenInput.append( value.replace("\"", "&quot;")).append("\">\n");
+                    hiddenInput.append(value.replace("\"", "&quot;")).append("\">\n");
                 }
             }
             return hiddenInput.toString();
@@ -173,7 +174,8 @@ public class PaymentUtils {
                 }
             }
             builder.deleteCharAt(builder.length() - 1);
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
 
         builder.append("}");
         return builder.toString();
@@ -242,7 +244,7 @@ public class PaymentUtils {
      * 超时时间内周期性执行任务
      *
      * @param command 执行命令
-     * @param period 周期性时间
+     * @param period  周期性时间
      * @param timeout 超时时间
      * @return 执行命令
      */
@@ -257,9 +259,9 @@ public class PaymentUtils {
     /**
      * 执行可重试的任务，直到成功或者最大重试次数
      *
-     * @param command 执行命令 command返回true 停止重试
+     * @param command       执行命令 command返回true 停止重试
      * @param retryConsumer 重试消费者
-     * @param retryTimes 重试次数 -1 无限次
+     * @param retryTimes    重试次数 -1 无限次
      * @return 成功与否
      */
     public static boolean runningUntilSuccess(Callable<Boolean> command, Consumer<Integer> retryConsumer, int retryTimes) {

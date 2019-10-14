@@ -41,7 +41,7 @@ public class WXPayUtil {
             Map<String, String> data = new HashMap<String, String>();
 
             DocumentBuilder documentBuilder = WXPayXmlUtil.newDocumentBuilder();
-            Document doc = documentBuilder.parse( new ByteArrayInputStream(strXML.getBytes(UTF_8)));
+            Document doc = documentBuilder.parse(new ByteArrayInputStream(strXML.getBytes(UTF_8)));
 
             Element rootElement = doc.getDocumentElement();
             rootElement.normalize();
@@ -76,7 +76,7 @@ public class WXPayUtil {
         for (String key : data.keySet()) {
             String value = data.get(key);
             if (value == null) {
-               continue;
+                continue;
             }
             value = value.trim();
             org.w3c.dom.Element filed = document.createElement(key);

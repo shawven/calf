@@ -73,7 +73,9 @@ public class PaymentManagerImpl implements PaymentManager {
         PaymentTradeResponse response;
         try {
             response = paymentOperations.pay(request);
-            logger.debug(request, "支付结果：[{}]", response);
+            if (logger.isDebugEnabled()) {
+                logger.debug(request, "支付结果：[{}]", response);
+            }
         } catch (UnsupportedOperationException e) {
             response = new PaymentTradeResponse();
             logger.warn(request, "尚未支持");
@@ -90,7 +92,9 @@ public class PaymentManagerImpl implements PaymentManager {
         PaymentTradeQueryResponse response;
         try {
             response = paymentOperations.query(request);
-            logger.debug(request, "查询支付交易结果：[{}]", response);
+            if (logger.isDebugEnabled()) {
+                logger.debug(request, "查询支付交易结果：[{}]", response);
+            }
         } catch (UnsupportedOperationException e) {
             response = new PaymentTradeQueryResponse();
             logger.warn(request, "尚未支持");
@@ -104,7 +108,9 @@ public class PaymentManagerImpl implements PaymentManager {
         PaymentTradeCallbackResponse response;
         try {
             response = paymentOperations.syncReturn(request);
-            logger.debug(request, "同步跳转结果：[{}]", response);
+            if (logger.isDebugEnabled()) {
+                logger.debug(request, "同步跳转结果：[{}]", response);
+            }
         } catch (UnsupportedOperationException e) {
             response = new PaymentTradeCallbackResponse();
             logger.warn(request, "尚未支持");
@@ -118,7 +124,9 @@ public class PaymentManagerImpl implements PaymentManager {
         PaymentTradeCallbackResponse response;
         try {
             response = paymentOperations.asyncNotify(request);
-            logger.debug(request, "异步回调结果：[{}]", response);
+            if (logger.isDebugEnabled()) {
+                logger.debug(request, "异步回调结果：[{}]", response);
+            }
         } catch (UnsupportedOperationException e) {
             response = new PaymentTradeCallbackResponse();
             logger.warn(request, "尚未支持");
@@ -147,7 +155,9 @@ public class PaymentManagerImpl implements PaymentManager {
         PaymentTradeRefundResponse response;
         try {
             response = paymentOperations.refund(request);
-            logger.debug(request, "申请退款结果：[{}]", response);
+            if (logger.isDebugEnabled()) {
+                logger.debug(request, "申请退款结果：[{}]", response);
+            }
         } catch (UnsupportedOperationException e) {
             response = new PaymentTradeRefundResponse();
             logger.warn(request, "尚未支持");
@@ -168,11 +178,14 @@ public class PaymentManagerImpl implements PaymentManager {
         PaymentTradeRefundQueryResponse response;
         try {
             response = paymentOperations.refundQuery(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug(request, "查询退款结果：[{}]", response);
+            }
         } catch (UnsupportedOperationException e) {
             response = new PaymentTradeRefundQueryResponse();
             logger.warn(request, "尚未支持");
         }
-        logger.debug(request, "查询退款结果：[{}]", response);
+
         return response;
     }
 

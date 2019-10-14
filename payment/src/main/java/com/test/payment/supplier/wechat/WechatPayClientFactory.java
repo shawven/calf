@@ -112,7 +112,9 @@ public class WechatPayClientFactory {
             public IWXPayDomain.DomainInfo getDomain() {
                 return new IWXPayDomain.DomainInfo(WXPayConstants.DOMAIN_API, true);
             }
-        };
+        }
+
+        ;
 
         static class SlaveDomain implements IWXPayDomain {
             @Override
@@ -123,6 +125,8 @@ public class WechatPayClientFactory {
             public IWXPayDomain.DomainInfo getDomain() {
                 return new IWXPayDomain.DomainInfo(WXPayConstants.DOMAIN_API2, false);
             }
-        };
+        }
+
+        ;
     }
 }

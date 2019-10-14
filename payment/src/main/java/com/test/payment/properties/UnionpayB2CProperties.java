@@ -9,6 +9,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConfigurationProperties(prefix = "unionpay")
-public class UnionpayB2CProperties extends UnionpayProperties{
+public class UnionpayB2CProperties extends UnionpayProperties {
 
 }

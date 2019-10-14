@@ -22,7 +22,7 @@ public class AppSocialConfigurerProcessor implements SocialConfigurerProcessor {
      * @param configurer
      */
     @Override
-    public void process(SocialConfigurer configurer) {
+    public void proceed(SocialConfigurer configurer) {
         configurer.signupUrl(SocialConstants.DEFAULT_CURRENT_SOCIAL_USER_INFO_URL);
     }
 }

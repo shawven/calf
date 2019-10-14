@@ -26,7 +26,7 @@ public class AppSocialAuthenticationFilterPostProcessImpl implements SocialAuthe
      * @param socialAuthenticationFilter
      */
     @Override
-    public void process(SocialAuthenticationFilter socialAuthenticationFilter) {
+    public void proceed(SocialAuthenticationFilter socialAuthenticationFilter) {
         socialAuthenticationFilter.setAuthenticationSuccessHandler(appAuthenticationSuccessHandler);
         socialAuthenticationFilter.setAuthenticationFailureHandler(new AppSocailAuthenticationFailureHandler());
     }

@@ -81,17 +81,17 @@ public class HttpUtil {
      * 非连接池请求超时
      *
      * @param connectTimeout 连接超时
-     * @param readTimeout 读取超时
+     * @param readTimeout    读取超时
      */
     public HttpUtil(int connectTimeout, int readTimeout) {
-       this(null, connectTimeout, readTimeout);
+        this(null, connectTimeout, readTimeout);
     }
 
     /**
      * 连接池请求无超时
      *
-     * @param maxTotal 连接池的最大连接数
-     * @param maxPerRoute 连接池每个路由最大连接数
+     * @param maxTotal             连接池的最大连接数
+     * @param maxPerRoute          连接池每个路由最大连接数
      * @param connectionTimeToLive 连接池连接存活时间
      */
     public HttpUtil(int maxTotal, int maxPerRoute, int connectionTimeToLive) {
@@ -101,10 +101,10 @@ public class HttpUtil {
     /**
      * 连接池请求超时
      *
-     * @param connectTimeout 连接超时
-     * @param readTimeout 读取超时
-     * @param maxTotal 连接池的最大连接数
-     * @param maxPerRoute 连接池每个路由最大连接数
+     * @param connectTimeout       连接超时
+     * @param readTimeout          读取超时
+     * @param maxTotal             连接池的最大连接数
+     * @param maxPerRoute          连接池每个路由最大连接数
      * @param connectionTimeToLive 连接池连接存活时间
      */
     public HttpUtil(int connectTimeout, int readTimeout, int maxTotal, int maxPerRoute, int connectionTimeToLive) {
@@ -117,15 +117,15 @@ public class HttpUtil {
      * @param sslContext SSL上下文
      */
     public HttpUtil(SSLContext sslContext) {
-       this(sslContext, 0, 0);
+        this(sslContext, 0, 0);
     }
 
     /**
      * 非连接池SSL请求超时
      *
-     * @param sslContext SSL上下文
+     * @param sslContext     SSL上下文
      * @param connectTimeout 连接超时
-     * @param readTimeout 读取超时
+     * @param readTimeout    读取超时
      */
     public HttpUtil(SSLContext sslContext, int connectTimeout, int readTimeout) {
         AbstractHttpClientFactory clientFactory = new BasicHttpClientFactory(sslContext);
@@ -135,9 +135,9 @@ public class HttpUtil {
     /**
      * 连接池SSL请求无超时
      *
-     * @param sslContext SSL上下文
-     * @param maxTotal 连接池的最大连接数
-     * @param maxPerRoute 连接池每个路由最大连接数
+     * @param sslContext           SSL上下文
+     * @param maxTotal             连接池的最大连接数
+     * @param maxPerRoute          连接池每个路由最大连接数
      * @param connectionTimeToLive 连接池连接存活时间
      */
     public HttpUtil(SSLContext sslContext, int maxTotal, int maxPerRoute, int connectionTimeToLive) {
@@ -147,11 +147,11 @@ public class HttpUtil {
     /**
      * 连接池SSL请求无超时
      *
-     * @param sslContext SSL上下文
-     * @param connectTimeout 连接超时
-     * @param readTimeout 读取超时
-     * @param maxTotal 连接池的最大连接数
-     * @param maxPerRoute 连接池每个路由最大连接数
+     * @param sslContext           SSL上下文
+     * @param connectTimeout       连接超时
+     * @param readTimeout          读取超时
+     * @param maxTotal             连接池的最大连接数
+     * @param maxPerRoute          连接池每个路由最大连接数
      * @param connectionTimeToLive 连接池连接存活时间
      */
     public HttpUtil(SSLContext sslContext, int connectTimeout, int readTimeout, int maxTotal, int maxPerRoute,
@@ -164,7 +164,7 @@ public class HttpUtil {
     /**
      * 普通GET请求
      *
-     * @param url 请求地址
+     * @param url   请求地址
      * @param query 查询参数
      * @return
      * @throws IOException
@@ -177,10 +177,10 @@ public class HttpUtil {
     /**
      * 普通GET请求
      *
-     * @param url 请求地址
-     * @param query 查询参数
+     * @param url            请求地址
+     * @param query          查询参数
      * @param connectTimeOut 连接超时
-     * @param readTimeout 读取超时
+     * @param readTimeout    读取超时
      * @return
      * @throws IOException
      */
@@ -192,7 +192,7 @@ public class HttpUtil {
     /**
      * 普通表单提交POST请求
      *
-     * @param url 请求地址
+     * @param url     请求地址
      * @param payload 载荷body
      * @return
      * @throws IOException
@@ -206,10 +206,10 @@ public class HttpUtil {
     /**
      * 普通表单提交POST请求
      *
-     * @param url 请求地址
-     * @param payload 载荷body
+     * @param url            请求地址
+     * @param payload        载荷body
      * @param connectTimeOut 连接超时
-     * @param readTimeout 读取超时
+     * @param readTimeout    读取超时
      * @return
      * @throws IOException
      */
@@ -222,9 +222,9 @@ public class HttpUtil {
     /**
      * 执行超时请求
      *
-     * @param request 请求
+     * @param request        请求
      * @param connectTimeOut 连接超时
-     * @param readTimeout 读取超时
+     * @param readTimeout    读取超时
      * @return
      * @throws IOException
      */
@@ -543,7 +543,7 @@ public class HttpUtil {
         public static boolean isNotBlank(CharSequence cs) {
             int strLen;
             if (cs != null && (strLen = cs.length()) != 0) {
-                for(int i = 0; i < strLen; ++i) {
+                for (int i = 0; i < strLen; ++i) {
                     if (!Character.isWhitespace(cs.charAt(i))) {
                         return true;
                     }

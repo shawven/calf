@@ -27,7 +27,7 @@ public class WebSocketController {
 
     @GetMapping("ws")
     public String ws() {
-        return "websocket";
+        return "index";
     }
 
     @MessageMapping("/question")

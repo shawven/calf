@@ -170,6 +170,7 @@ public class UnionpayCertification {
     public X509Certificate getRootCert() {
         return rootCert;
     }
+
     /**
      * 检查证书链
      *
@@ -191,7 +192,7 @@ public class UnionpayCertification {
             return false;
         }
         try {
-			cert.verify(middleCert.getPublicKey());
+            cert.verify(middleCert.getPublicKey());
         } catch (Exception e) {
             logger.error("验证证书错误", e);
             return false;

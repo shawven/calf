@@ -22,6 +22,7 @@ public class CurrencyTools {
      * 转成为分
      * 比如 unitOfCents 100， innerAmount = 0.01时 算出来外部金额等于1分
      * innerAmount 分
+     *
      * @return
      */
     public static String toCent(String innerAmount) {
@@ -34,8 +35,9 @@ public class CurrencyTools {
     /**
      * 转成为元
      * 比如 unitOfCents：100， innerAmount = 1时 算出来外部金额等于0.01元
-     *
+     * <p>
      * innerAmount 元
+     *
      * @return
      */
     public static String toYuan(String innerAmount) {
@@ -53,6 +55,7 @@ public class CurrencyTools {
     /**
      * 转自分
      * 比如 unitOfCents：100， outerAmount = 100时 算出来内部等于1分
+     *
      * @param outerAmount 分
      * @return
      */

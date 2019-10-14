@@ -22,7 +22,7 @@ public class PaymentLogger {
         return new PaymentLogger(LoggerFactory.getLogger(clazz));
     }
 
-    public void info(PaymentRequest request,String s, Object var) {
+    public void info(PaymentRequest request, String s, Object var) {
         logger.info(addContextInfo(request, s), var);
     }
 
@@ -50,7 +50,7 @@ public class PaymentLogger {
         logger.warn(s, var);
     }
 
-    public void rawWarn( String s, Object... var) {
+    public void rawWarn(String s, Object... var) {
         logger.warn(s, var);
     }
 
@@ -82,8 +82,24 @@ public class PaymentLogger {
         logger.debug(s, var);
     }
 
-    public void rawDebug( String s, Object... var) {
+    public void rawDebug(String s, Object... var) {
         logger.debug(s, var);
+    }
+
+    public boolean isInfoEnabled() {
+        return logger.isInfoEnabled();
+    }
+
+    public boolean isWarnEnabled() {
+        return logger.isWarnEnabled();
+    }
+
+    public boolean isErrorEnabled() {
+        return logger.isErrorEnabled();
+    }
+
+    public boolean isDebugEnabled() {
+        return logger.isDebugEnabled();
     }
 
     private String addContextInfo(PaymentRequest request, String s) {
@@ -100,7 +116,7 @@ public class PaymentLogger {
             builder.append(paymentSupplier.getName());
         }
         PaymentClientTypeEnum paymentClientType = request.getPaymentClientType();
-        if (paymentClientType!= null) {
+        if (paymentClientType != null) {
             builder.append(paymentClientType.getName());
         }
         return builder.append(s).toString();

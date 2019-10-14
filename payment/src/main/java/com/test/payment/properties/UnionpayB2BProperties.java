@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConfigurationProperties(prefix = "unionpay.b2b")
-public class UnionpayB2BProperties extends UnionpayProperties{
+public class UnionpayB2BProperties extends UnionpayProperties {
 
 
 }

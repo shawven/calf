@@ -27,7 +27,7 @@ public abstract class UnionpayTradeRequest {
     protected String accessType = "0";
 
     /**
-     *  业务类型，B2C、B2B、二维码、APP
+     * 业务类型，B2C、B2B、二维码、APP
      */
     protected String bizType;
 

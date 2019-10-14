@@ -24,7 +24,7 @@ public class SocialConfigurer extends SpringSocialConfigurer {
 		SocialAuthenticationFilter filter = (SocialAuthenticationFilter) super.postProcess(object);
 		filter.setFilterProcessesUrl(filterProcessesUrl);
 		if (socialAuthenticationFilterPostProcessor != null) {
-			socialAuthenticationFilterPostProcessor.process(filter);
+			socialAuthenticationFilterPostProcessor.proceed(filter);
 		}
 		return (T) filter;
 	}

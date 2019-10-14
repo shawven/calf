@@ -25,7 +25,7 @@ public class AlipayProperties {
 
     private String returnUrl;
 
-    private String signType ;
+    private String signType;
 
     private Boolean useSandbox;
 

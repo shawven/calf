@@ -1,5 +1,7 @@
 package com.test.app;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,5 +65,6 @@ public class BaseTests {
     private Class<ApplicationTests> class3() {
         return ApplicationTests.class;
     }
+
 
 }

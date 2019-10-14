@@ -99,8 +99,8 @@ public class GlobalProperties {
 
     public void setAppName(String appName) {
         this.appName = appName != null
-            ? new String(appName.getBytes(ISO_8859_1), UTF_8)
-            : "";
+                ? new String(appName.getBytes(ISO_8859_1), UTF_8)
+                : "";
     }
 
     public int getConnectTimeout() {

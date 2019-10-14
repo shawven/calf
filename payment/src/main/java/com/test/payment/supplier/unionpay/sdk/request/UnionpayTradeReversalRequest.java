@@ -4,7 +4,7 @@ package com.test.payment.supplier.unionpay.sdk.request;
  * @author Shoven
  * @date 2019-10-08
  */
-public class UnionpayTradeReversalRequest extends UnionpayTradeRequest  {
+public class UnionpayTradeReversalRequest extends UnionpayTradeRequest {
     /**
      * 订单号
      */
@@ -28,7 +28,7 @@ public class UnionpayTradeReversalRequest extends UnionpayTradeRequest  {
     /**
      * 交易类型
      */
-    private String tradeType ;
+    private String tradeType;
 
     /**
      * 交易子类型
@@ -36,7 +36,7 @@ public class UnionpayTradeReversalRequest extends UnionpayTradeRequest  {
     private String tradeSubType;
 
     /**
-     *  渠道类型
+     * 渠道类型
      */
     private String channelType;
 

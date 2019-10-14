@@ -11,6 +11,6 @@ public interface SocialAuthenticationFilterPostProcessor {
 	/**
 	 * @param socialAuthenticationFilter
 	 */
-	void process(SocialAuthenticationFilter socialAuthenticationFilter);
+	void proceed(SocialAuthenticationFilter socialAuthenticationFilter);
 
 }
