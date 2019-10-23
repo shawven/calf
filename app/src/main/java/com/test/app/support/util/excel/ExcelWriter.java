@@ -303,7 +303,7 @@ public class ExcelWriter<T> {
         if (columns.isEmpty()) {
             throw new IllegalArgumentException("未设置列标题");
         }
-        createColumn();
+        createColumnArea();
 
         // 创建数据单元格
         if (data == null) {
@@ -331,16 +331,16 @@ public class ExcelWriter<T> {
     }
 
     /**
-     * 创建单列
+     * 创建列域
      */
-    private void createColumn() {
+    private void createColumnArea() {
         if (maxColumnRowNum(columns) == 1) {
             rowIndex++;
             Row row = sheet.createRow(rowIndex);
             for (int i = 0, columnsSize = columns.size(); i < columnsSize; i++) {
                 Column column = columns.get(i);
                 // 创建单列
-                createSingleColumn(row, column, i);
+                createColumn(row, column, i);
             }
         } else {
             // 创建复合列
@@ -366,7 +366,7 @@ public class ExcelWriter<T> {
                 if (column.isComplex()) {
                     List<Column> childColumns = column.getChildColumns();
                     // 创建父单元格
-                    createSingleColumn(row, column, i);
+                    createColumn(row, column, i);
                     // 创建子单元格集合
                     createComplexColumns(childColumns, columnIndex);
                     // 子列集合大于1列，表格会扩充列此时从新合并父单元格和头部
@@ -382,7 +382,7 @@ public class ExcelWriter<T> {
                     }
                 } else {
                     // 创建列
-                    createSingleColumn(row, column, columnIndex);
+                    createColumn(row, column, columnIndex);
                     sheet.addMergedRegion(new CellRangeAddress(startRowIndex, stopRowIndex,
                             columnIndex, columnIndex));
                 }
@@ -397,7 +397,7 @@ public class ExcelWriter<T> {
      * @param column      列
      * @param columnIndex 列下标
      */
-    private void createSingleColumn(Row row, Column column, int columnIndex) {
+    private void createColumn(Row row, Column column, int columnIndex) {
         Cell columnTitle = row.createCell(columnIndex);
         columnTitle.setCellValue(column.getTitle());
         //设置列宽高
@@ -417,7 +417,7 @@ public class ExcelWriter<T> {
                 Column column = columns.get(i);
                 if (column.isComplex()) {
                     Object childLine = getCellValue(line, column);
-                    createDataAreaOfComplexColumn(childLine, row, column.getChildColumns(), i);
+                    createDataCellsOfComplexColumn(childLine, row, column.getChildColumns(), i);
                 } else {
                     createDataCell(line, row, i, column);
                 }
@@ -426,20 +426,20 @@ public class ExcelWriter<T> {
     }
 
     /**
-     * 创建复合单元格的行数据
+     * 创建复合单元格有关的数据单元格
      *
      * @param line         行数据
      * @param row          Excel行对象
      * @param columns      列集合
      * @param columnOffset 列偏移量 二级列集合从0开始遍历要加上父列列索引为偏移量
      */
-    private void createDataAreaOfComplexColumn(Object line, Row row, List<Column> columns, int columnOffset) {
+    private void createDataCellsOfComplexColumn(Object line, Row row, List<Column> columns, int columnOffset) {
         for (int i = 0, columnsSize = columns.size(); i < columnsSize; i++) {
             Column column = columns.get(i);
             int columnIndex = columnOffset + i;
             if (column.isComplex()) {
                 Object childLine = getCellValue(line, column);
-                createDataAreaOfComplexColumn(childLine, row, column.getChildColumns(), columnIndex);
+                createDataCellsOfComplexColumn(childLine, row, column.getChildColumns(), columnIndex);
             } else {
                 createDataCell(line, row, columnIndex, column);
             }
