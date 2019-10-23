@@ -19,15 +19,15 @@ public class BigDecimals {
     /**
      * BigDecimal的加法运算封装
      *
-     * @param b1
-     * @param bn
-     * @return
+     * @param o1 加数
+     * @param o2 加数
+     * @return 和
      */
-    public static BigDecimal add(BigDecimal b1, BigDecimal... bn) {
-        b1 = of(b1);
-        if (null != bn) {
-            for (BigDecimal b : bn) {
-                b1 = b1.add(of(b));
+    public static BigDecimal add(Object o1, Object... o2) {
+        BigDecimal b1 = of(o1);
+        if (null != o2) {
+            for (Object n : ensureArray(o2)) {
+                b1 = b1.add(of(n));
             }
         }
         return b1;
@@ -38,15 +38,15 @@ public class BigDecimals {
     /**
      * BigDecimal的减法运算封装
      *
-     * @param b1
-     * @param bn
-     * @return
+     * @param o1 被减数
+     * @param o2 减数
+     * @return 差
      */
-    public static BigDecimal subtract(BigDecimal b1, BigDecimal... bn) {
-        b1 = of(b1);
-        if (null != bn) {
-            for (BigDecimal b : bn) {
-                b1 = b1.subtract(of(b));
+    public static BigDecimal subtract(Object o1, Object... o2) {
+        BigDecimal b1 = of(o1);
+        if (null != o2) {
+            for (Object n : ensureArray(o2)) {
+                b1 = b1.subtract(of(n));
             }
         }
         return b1;
@@ -55,77 +55,69 @@ public class BigDecimals {
     /**
      * BigDecimal的除法运算封装
      *
-     * @param b1
-     * @param b2
-     * @return
+     * @param o1 被除数
+     * @param o2 除数
+     * @return 商
      */
-    public static BigDecimal divide(BigDecimal b1, BigDecimal b2) {
-        if (null == b1 || b1.equals(ZERO)) {
+    public static BigDecimal divide(Object o1, Object o2) {
+        if (null == o1 || o1.equals(ZERO)) {
             return ZERO;
         }
-        return b1.divide(of(b2));
+        return of(o1).divide(of(o2));
     }
 
 
     /**
      * BigDecimal的除法运算封装
      *
-     * @param b1
-     * @param b2
-     * @param scale
-     * @param roundingMode
-     * @return
+     * @param o1 被除数
+     * @param o2 除数
+     * @param scale 精度
+     * @param roundingMode 舍入模式
+     * @return 商
      */
-    public static BigDecimal divide(BigDecimal b1, BigDecimal b2, int scale, RoundingMode roundingMode) {
-        if (null == b1 || b1.equals(ZERO)) {
+    public static BigDecimal divide(Object o1, Object o2, int scale, RoundingMode roundingMode) {
+        if (null == o1 || o1.equals(ZERO)) {
             return ZERO;
         }
-        return b1.divide(of(b2), scale, roundingMode);
+        return of(o1).divide(of(o2), scale, roundingMode);
     }
 
 
     /**
      * BigDecimal的乘法运算封装
      *
-     * @param b1
-     * @param b2
-     * @return
+     * @param o1 因数
+     * @param o2 因数
+     * @return 积
      */
-    public static BigDecimal multiply(BigDecimal b1, BigDecimal b2) {
-        if (b1 == null || b1.equals(ZERO) || b2 == null || b2.equals(ZERO)) {
+    public static BigDecimal multiply(Object o1, Object... o2) {
+        if (o1 == null || o1.equals(ZERO) || o2 == null) {
             return ZERO;
         }
-        return b1.multiply(b2);
+        BigDecimal b1 = of(o1);
+        for (Object n : ensureArray(o2)) {
+            b1 = b1.multiply(of(n));
+        }
+        return b1;
     }
 
     /**
-     * 判断是否相等，只判断是否有数值意义 此处 0 == null
+     * 是否所有都相等，此处 0 == null
      *
-     * @param b1
-     * @param b2
-     * @return
+     * @param o1 比较对象1
+     * @param o2 比较对象2
+     * @return 比较结果
      */
-    public static boolean equals(BigDecimal b1, BigDecimal b2) {
-        if (b1 == null && b2 == null) {
+    public static boolean equals(Object o1, Object... o2) {
+        if (o1 == o2) {
             return true;
         }
-        if (b1 == null || b2 == null) {
-            return false;
-        }
-        int scala = Math.max(b1.scale(), b2.scale());
-        return b1.setScale(scala, HALF_UP).equals(b2.setScale(scala, HALF_UP));
-    }
-
-    /**
-     * 是否所有都相等，同上
-     *
-     * @param b1
-     * @param bns
-     * @return
-     */
-    public static boolean equalsAll(BigDecimal b1, BigDecimal... bns) {
-        for (BigDecimal bn : bns) {
-            if (!equals(b1, bn)) {
+        BigDecimal b1 = of(o1);
+        for (Object n : ensureArray(o2)) {
+            BigDecimal b2 = of(n);
+            int scala = Math.max(b1.scale(), b2.scale());
+            if (!b1.setScale(scala, HALF_UP).equals(b2.setScale(scala, HALF_UP))) {
                 return false;
             }
         }
@@ -133,74 +125,75 @@ public class BigDecimals {
     }
 
     /**
-     * @param val
-     * @return
+     * 比较结果，此处 0 == null
+     *
+     * @param o1 比较对象1
+     * @param o2 比较对象2
+     * @return 比较结果
      */
-    public static String toAmount(Float val) {
-        return of(val).setScale(2, HALF_UP).toString();
+    public static int compare(Object o1, Object o2) {
+        if (o1 == o2) {
+            return 0;
+        }
+        return of(o1).compareTo(of(o2));
     }
 
     /**
-     * @param val
-     * @return
+     * @param val 数字或者字符串类型
+     * @return 两位小数的字符串数字
      */
-    public static String toAmount(Double val) {
+    public static String toAmount(Object val) {
         return of(val).setScale(2, HALF_UP).toString();
     }
 
-    /**
-     * @param val
-     * @return
-     */
-    public static String toAmount(String val) {
-        return of(val).setScale(2, HALF_UP).toString();
-    }
 
     /**
-     * @param val
-     * @return
+     * @param val 数字或者字符串类型
+     * @return double
      */
-    public static String toAmount(BigDecimal val) {
-        return of(val).setScale(2, HALF_UP).toString();
-    }
-
-    /**
-     * @param val
-     * @return
-     */
-    public static double toDouble(BigDecimal val) {
+    public static double toDouble(Object val) {
         return of(val).doubleValue();
     }
 
     /**
-     * @param val
-     * @return
+     * @param val 数字或者字符串类型
+     * @return int
      */
-    public static BigDecimal of(Float val) {
-        return val == null ? ZERO : new BigDecimal(val.toString());
+    public static int toIn(Object val) {
+        return of(val).intValue();
     }
 
     /**
-     * @param val
-     * @return
+     * @param val 数字或者字符串类型
+     * @return long
      */
-    public static BigDecimal of(Double val) {
-        return val == null ? ZERO : BigDecimal.valueOf(val);
+    public static long toLong(Object val) {
+        return of(val).longValue();
     }
 
     /**
-     * @param val
-     * @return
+     * 从值得到一个BigDecimal实例
+     *
+     * @param val 数字或者字符串类型
+     * @return BigDecimal实例
      */
-    public static BigDecimal of(String val) {
-        return !NumberUtils.isDigits(val) ? ZERO : new BigDecimal(val);
+    public static BigDecimal of(Object val) {
+        if (val == null) {
+            return ZERO;
+        } else if (val instanceof BigDecimal) {
+            return (BigDecimal)val;
+        } else if (val instanceof Number) {
+            return new BigDecimal(val.toString());
+        } else {
+            String str = val.toString();
+            return !NumberUtils.isDigits(str) ? ZERO : new BigDecimal(str);
+        }
     }
 
-    /**
-     * @param val
-     * @return
-     */
-    public static BigDecimal of(BigDecimal val) {
-        return val == null ? ZERO : val;
+    private static Object[] ensureArray(Object o) {
+        if (o != null && o.getClass().isArray()) {
+            return (Object[])o;
+        }
+        return new Object[]{o};
     }
 }

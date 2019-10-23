@@ -2,6 +2,7 @@ package com.test.app.support.handler;
 
 import com.test.app.common.Response;
 import com.test.app.support.exception.BizException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.MethodNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,7 @@ public class ControllerExceptionHandler {
             sb.append(fielderror.getField()).append(": ").append(fielderror.getDefaultMessage()).append(", ");
         }
         String str = sb.length() > 0 ? sb.deleteCharAt(sb.length() - 1).toString(): "请求的参数有误！";
+        logger.warn(str, e);
         return Response.badRequest(str);
     }
 
@@ -63,6 +65,7 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        logger.warn(e.getMessage(), e);
         return Response.badRequest(e.getMessage());
     }
 
@@ -74,9 +77,9 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(BizException.class)
     @ResponseBody
-    public ResponseEntity handleBusinessException(BizException e) {
-        String errorMsg = getErrorMessage(e);
-        return Response.unprocesable(errorMsg);
+    public ResponseEntity handleBizException(BizException e) {
+        logger.warn(e.getMessage(), e);
+        return Response.unprocesable( getErrorMessage(e));
     }
 
 
@@ -89,6 +92,11 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity handleException(Exception e) {
+        int index;
+        if ((index = ExceptionUtils.indexOfType(e, BizException.class)) != - 1) {
+            Throwable throwable = ExceptionUtils.getThrowableList(e).get(index);
+            return handleBizException((BizException)throwable);
+        }
         logger.error(e.getMessage(), e);
         if (withDetail()) {
             if (e instanceof NullPointerException) {
@@ -110,6 +118,7 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseBody
     public ResponseEntity handleNoHandlerException(NoHandlerFoundException e) {
+        logger.warn(e.getMessage(), e);
         return Response.notFound(e.getRequestURL());
     }
 
@@ -134,6 +143,7 @@ public class ControllerExceptionHandler {
             size = b / 1024 * 1024 + "MB";
         }
         String errorMsg = "上传的文件大小超过 " + size;
+        logger.error(errorMsg, e);
         return Response.error(errorMsg);
     }
 
