@@ -33,9 +33,6 @@ public class SmsAuthenticationSecurityConfig extends SecurityConfigurerAdapter<D
 	@Autowired
 	private MobileUserDetailsService userDetailsService;
 
-	@Autowired(required = false)
-	private PersistentTokenRepository persistentTokenRepository;
-
 	/**
      *  (non-Javadoc)
 	 * @see org.springframework.security.config.annotation.SecurityConfigurerAdapter#configure(org.springframework.security.config.annotation.SecurityBuilder)
@@ -47,12 +44,6 @@ public class SmsAuthenticationSecurityConfig extends SecurityConfigurerAdapter<D
 		smsAuthenticationFilter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
 		smsAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 		smsAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
-
-		if (persistentTokenRepository != null) {
-            String key = UUID.randomUUID().toString();
-            smsAuthenticationFilter.setRememberMeServices(
-                    new PersistentTokenBasedRememberMeServices(key, userDetailsService, persistentTokenRepository));
-        }
 
 		SmsAuthenticationProvider smsAuthenticationProvider = new SmsAuthenticationProvider();
 		smsAuthenticationProvider.setUserDetailsService(userDetailsService);

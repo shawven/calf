@@ -79,7 +79,7 @@ public class CodeGenerator {
 
     public static void main(String[] args) {
         new CodeGenerator()
-                .only(ENTITY)
+                .include(ENTITY)
                 .generate("Goods", "es_goods", IdType.AUTO)
 
                 ;
@@ -181,15 +181,23 @@ public class CodeGenerator {
         return this;
     }
 
-    public CodeGenerator only(WhiteListItem item, WhiteListItem... whiteList) {
-        Collections.addAll(this.whiteList, item);
+    public CodeGenerator include(WhiteListItem... whiteList) {
         if (whiteList != null) {
             Collections.addAll(this.whiteList, whiteList);
         }
         return this;
     }
 
-    public CodeGenerator onlyEntityAndMapper() {
+    public CodeGenerator exclude(WhiteListItem... whiteList) {
+        Collections.addAll(this.whiteList, CONTROLLER, SERVICE, SERVICE_IMPL, ENTITY, MAPPER, XML);
+        if (whiteList != null) {
+            List<WhiteListItem> exclusion = Arrays.asList(whiteList);
+            this.whiteList.removeIf(exclusion::contains);
+        }
+        return this;
+    }
+
+    public CodeGenerator includeEntityAndMapper() {
         Collections.addAll(this.whiteList, ENTITY, MAPPER, XML);
         return this;
     }

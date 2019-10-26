@@ -1,14 +1,14 @@
 
 package com.starter.security.oauth2.config;
 
-import com.starter.security.oauth2.DefaultUserDetailsService;
+import com.starter.security.oauth2.DefaultMobileUserDetailsService;
+import com.starter.security.oauth2.MobileUserDetailsService;
 import com.starter.security.oauth2.properties.OAuth2Properties;
 import com.starter.security.verification.annotation.EnableVerificationSupport;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -39,7 +39,7 @@ public class OAuth2Configuration {
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	public UserDetailsService userDetailsService() {
-		return new DefaultUserDetailsService();
+	public MobileUserDetailsService mobileUserDetailsService() {
+		return new DefaultMobileUserDetailsService();
 	}
 }

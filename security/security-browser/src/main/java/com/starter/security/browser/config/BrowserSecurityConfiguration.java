@@ -6,12 +6,17 @@ import com.starter.security.browser.properties.BrowserProperties;
 import com.starter.security.oauth2.config.SmsAuthenticationSecurityConfig;
 import com.starter.security.verification.config.VerificationSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.session.InvalidSessionStrategy;
 import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 import org.springframework.social.security.SpringSocialConfigurer;
@@ -79,9 +84,6 @@ public class BrowserSecurityConfiguration {
     }
 
 	public void configureHttp(HttpSecurity http) throws Exception {
-
-		loginSecurityConfig.configure(http);
-
 		http
             .exceptionHandling()
                 .authenticationEntryPoint(browserAuthenticationExceptionEntryPoint)
@@ -92,13 +94,7 @@ public class BrowserSecurityConfiguration {
 			.apply(smsAuthenticationSecurityConfig)
 				.and()
 			.apply(springSocialConfigurer)
-				.and()
-			//记住我配置，如果想在'记住我'登录时记录日志，可以注册一个InteractiveAuthenticationSuccessEvent事件的监听器
-//			.rememberMe()
-//				.tokenRepository(persistentTokenRepository())
-//				.tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
-//				.userDetailsService(userDetailsService)
-//				.and()
+		        .and()
 			.sessionManagement()
 //				.invalidSessionStrategy(invalidSessionStrategy)
 				.maximumSessions(browserProperties.getSession().getMaximumSessions())
@@ -113,19 +109,29 @@ public class BrowserSecurityConfiguration {
 				.and()
 			.csrf().disable();
 
+        //记住我配置，如果想在'记住我'登录时记录日志，可以注册一个InteractiveAuthenticationSuccessEvent事件的监听器
+        int rememberMeSeconds = browserProperties.getRememberMeSeconds();
+        if (rememberMeSeconds > 0) {
+            http
+                .rememberMe()
+                .tokenRepository(persistentTokenRepository())
+                .tokenValiditySeconds(browserProperties.getRememberMeSeconds())
+                .userDetailsService(userDetailsService);
+        }
+
+        loginSecurityConfig.configure(http);
         authorizationConfigurerManager.config(http.authorizeRequests());
 	}
-//
-//	/**
-//	 * 记住我功能的token存取器配置
-//	 * @return
-//	 */
-//	@Bean
-//	public PersistentTokenRepository persistentTokenRepository() {
-//		JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
-//		tokenRepository.setDataSource(dataSource);
-////		tokenRepository.setCreateTableOnStartup(true);
-//		return tokenRepository;
-//	}
+
+	/**
+	 * 记住我功能的token存取器配置
+	 * @return
+	 */
+	public PersistentTokenRepository persistentTokenRepository() {
+		JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
+		tokenRepository.setDataSource(dataSource);
+//		tokenRepository.setCreateTableOnStartup(true);
+		return tokenRepository;
+	}
 
 }

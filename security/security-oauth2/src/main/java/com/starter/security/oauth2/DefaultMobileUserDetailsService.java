@@ -13,15 +13,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
  *
  * 不做任何处理，只在控制台打印一句日志，然后抛出异常，提醒业务系统自己配置 UserDetailsService。
  */
-public class DefaultUserDetailsService implements UserDetailsService {
+public class DefaultMobileUserDetailsService implements MobileUserDetailsService {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		logger.warn("请配置 UserDetailsService 接口的实现.");
-		throw new UsernameNotFoundException(username);
-	}
-
+    @Override
+    public UserDetails loadUserByMobileNumber(String mobile) throws UsernameNotFoundException {
+        logger.warn("请配置 MobileUserDetailsService 接口的实现.");
+        throw new UsernameNotFoundException(mobile);
+    }
 }
