@@ -9,7 +9,7 @@ spring:
       ddl-auto: update
       naming:
         # 隐私转换策略，如果实体类上没有@TableName注解，则默认适用于该策略
-        implicit-strategy: com.test.security.rbac.repository.support.AppImplicitNamingStrategy
+        implicit-strategy: com.starter.security.rbac.repository.support.AppImplicitNamingStrategy
     #是否自动生成/修改数据库表
     generate-ddl: true
     properties:
