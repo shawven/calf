@@ -3,6 +3,7 @@ package com.starter.security.app.config.social;
 import com.starter.security.social.support.SocialAuthenticationFilterPostProcessor;
 import com.starter.security.app.authentication.AppSocailAuthenticationFailureHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.social.security.SocialAuthenticationFilter;
 import org.springframework.stereotype.Component;
@@ -13,11 +14,16 @@ import org.springframework.stereotype.Component;
  * @author Shoven
  * @since 2019-04-19 10:15
  */
-@Component
-public class AppSocialAuthenticationFilterPostProcessImpl implements SocialAuthenticationFilterPostProcessor {
+public class AppSocialAuthenticationFilterPostProcessor implements SocialAuthenticationFilterPostProcessor {
 
-    @Autowired
-    private AuthenticationSuccessHandler appAuthenticationSuccessHandler;
+    private AuthenticationSuccessHandler authenticationSuccessHandler;
+    private AuthenticationFailureHandler authenticationFailureHandler;
+
+    public AppSocialAuthenticationFilterPostProcessor(AuthenticationSuccessHandler authenticationSuccessHandler,
+                                                      AuthenticationFailureHandler authenticationFailureHandler) {
+        this.authenticationSuccessHandler = authenticationSuccessHandler;
+        this.authenticationFailureHandler = authenticationFailureHandler;
+    }
 
     /**
      * 修改成功获取openid后的成功处理器，浏览器会发起页面跳转到
@@ -27,7 +33,7 @@ public class AppSocialAuthenticationFilterPostProcessImpl implements SocialAuthe
      */
     @Override
     public void proceed(SocialAuthenticationFilter socialAuthenticationFilter) {
-        socialAuthenticationFilter.setAuthenticationSuccessHandler(appAuthenticationSuccessHandler);
-        socialAuthenticationFilter.setAuthenticationFailureHandler(new AppSocailAuthenticationFailureHandler());
+        socialAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
+        socialAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
     }
 }

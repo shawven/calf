@@ -1,10 +1,9 @@
 package com.starter.security.social;
 
 import com.starter.security.social.config.OAuth2Configuration;
-import com.starter.security.social.config.SocialSupportConfiguration;
 import com.starter.security.social.config.SocialConfiguration;
+import com.starter.security.social.config.SocialSecurityConfigurer;
 import org.springframework.context.annotation.Import;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.lang.annotation.*;
 
@@ -15,6 +14,6 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(value = {SocialSupportConfiguration.class, SocialConfiguration.class, OAuth2Configuration.class})
+@Import(value = {SocialConfiguration.class, SocialSecurityConfigurer.class, OAuth2Configuration.class})
 public @interface EnableOAuth2Support {
 }

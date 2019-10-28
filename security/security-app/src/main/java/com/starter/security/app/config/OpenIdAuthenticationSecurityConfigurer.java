@@ -16,21 +16,21 @@ import org.springframework.social.security.SocialUserDetailsService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OpenIdAuthenticationSecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
+public class OpenIdAuthenticationSecurityConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
-	@Autowired
+    @Autowired
 	private AuthenticationSuccessHandler appAuthenticationSuccessHandler;
 
-	@Autowired
+    @Autowired
 	private AuthenticationFailureHandler appAuthenticationFailureHandler;
 
-	@Autowired
+    @Autowired
 	private SocialUserDetailsService userDetailsService;
 
-	@Autowired
+    @Autowired
 	private UsersConnectionRepository usersConnectionRepository;
 
-	@Override
+    @Override
 	public void configure(HttpSecurity http) throws Exception {
 
 		OpenIdAuthenticationFilter openIdAuthenticationFilter = new OpenIdAuthenticationFilter();

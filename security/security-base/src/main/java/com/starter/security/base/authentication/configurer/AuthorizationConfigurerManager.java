@@ -17,16 +17,19 @@ import java.util.StringTokenizer;
  *
  * 用于收集系统中所有 ConfigProvider 并加载其配置
  */
-@Component
 public class AuthorizationConfigurerManager {
 
-	@Autowired
 	private List<AuthorizationConfigurerProvider> authorizationConfigurerProviders;
 
-	@Autowired
     private SecurityProperties securityProperties;
 
-	public void config(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry config) {
+    public AuthorizationConfigurerManager(List<AuthorizationConfigurerProvider> authorizationConfigurerProviders,
+                                          SecurityProperties securityProperties) {
+        this.authorizationConfigurerProviders = authorizationConfigurerProviders;
+        this.securityProperties = securityProperties;
+    }
+
+    public void config(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry config) {
 		boolean existAnyRequestConfig = false;
 		String existAnyRequestConfigName = null;
 

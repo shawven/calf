@@ -17,7 +17,7 @@ import org.springframework.social.security.SocialUserDetailsService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WxMiniAuthenticationSecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
+public class WxMiniAuthenticationSecurityConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
     @Autowired
     private AuthenticationSuccessHandler appAuthenticationSuccessHandler;
@@ -25,13 +25,13 @@ public class WxMiniAuthenticationSecurityConfig extends SecurityConfigurerAdapte
     @Autowired
     private AuthenticationFailureHandler appAuthenticationFailureHandler;
 
-	@Autowired
+    @Autowired
 	private SocialUserDetailsService userDetailsService;
 
-	@Autowired
+    @Autowired
     private AppSingUpUtils appSingUpUtils;
 
-	@Autowired
+    @Autowired
     private SocialProperties socialProperties;
 
 	@Override

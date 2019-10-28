@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
  * @author Shoven
  * @date 2019-10-28
  */
-@Configuration
 @ConfigurationProperties("app.security")
 public class SecurityProperties {
 

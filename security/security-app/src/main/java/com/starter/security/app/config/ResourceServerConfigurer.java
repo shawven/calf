@@ -19,13 +19,13 @@ import org.springframework.social.security.SpringSocialConfigurer;
  */
 @Configuration
 @EnableResourceServer
-public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+public class ResourceServerConfigurer extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private SmsAuthenticationSecurityConfigurer smsAuthenticationSecurityConfigurer;
 
     @Autowired
-    private OpenIdAuthenticationSecurityConfig openIdAuthenticationSecurityConfig;
+    private OpenIdAuthenticationSecurityConfigurer openIdAuthenticationSecurityConfigurer;
 
     @Autowired
     private VerificationSecurityConfigurer verificationSecurityConfigurer;
@@ -34,7 +34,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     private SpringSocialConfigurer socialSecurityConfig;
 
     @Autowired
-    private WxMiniAuthenticationSecurityConfig wxMiniAuthenticationSecurityConfig;
+    private WxMiniAuthenticationSecurityConfigurer wxMiniAuthenticationSecurityConfigurer;
 
     @Autowired
     private AuthorizationConfigurerManager authorizationConfigurerManager;
@@ -64,11 +64,11 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .and()
                 .apply(smsAuthenticationSecurityConfigurer)
                 .and()
-                .apply(wxMiniAuthenticationSecurityConfig)
+                .apply(wxMiniAuthenticationSecurityConfigurer)
                 .and()
                 .apply(socialSecurityConfig)
                 .and()
-                .apply(openIdAuthenticationSecurityConfig)
+                .apply(openIdAuthenticationSecurityConfigurer)
                 .and()
                 .csrf().disable();
 

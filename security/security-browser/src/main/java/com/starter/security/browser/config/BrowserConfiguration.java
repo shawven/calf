@@ -11,12 +11,14 @@ import com.starter.security.browser.session.SessionVerificationRepository;
 import com.starter.security.social.EnableOAuth2Support;
 import com.starter.security.social.config.SmsAuthenticationSecurityConfigurer;
 import com.starter.security.social.properties.SocialProperties;
+import com.starter.security.social.support.SocialAuthenticationFilterPostProcessor;
 import com.starter.security.verification.VerificationRepository;
 import com.starter.security.verification.config.VerificationSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,6 +43,7 @@ import javax.sql.DataSource;
 @Configuration
 @EnableOAuth2Support
 @EnableConfigurationProperties(BrowserProperties.class)
+@ComponentScan("com.starter.security")
 public class BrowserConfiguration {
 
 	@Autowired
@@ -142,6 +145,15 @@ public class BrowserConfiguration {
     public FormLoginSecurityConfigurer formLoginSecurityConfig(AuthenticationSuccessHandler authenticationSuccessHandler,
                                                                AuthenticationFailureHandler authenticationFailureHandler) {
 	    return new FormLoginSecurityConfigurer(browserProperties, authenticationSuccessHandler, authenticationFailureHandler);
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SocialAuthenticationFilterPostProcessor
+    browserSocialAuthenticationFilterPostProcessor(AuthenticationSuccessHandler authenticationSuccessHandler,
+                                                   AuthenticationFailureHandler authenticationFailureHandler) {
+        return new BrowserSocialAuthenticationFilterPostProcessor(authenticationSuccessHandler, authenticationFailureHandler);
     }
 
     /**

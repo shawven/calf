@@ -17,19 +17,23 @@ import java.util.concurrent.TimeUnit;
 /**
  * app环境下替换providerSignInUtils，避免由于没有session导致读不到社交用户信息的问题
  */
-@Component
 public class AppSingUpUtils {
 
-	@Autowired
 	private RedisTemplate<Object, Object> redisTemplate;
 
-	@Autowired
 	private UsersConnectionRepository usersConnectionRepository;
 
-	@Autowired
 	private ConnectionFactoryLocator connectionFactoryLocator;
 
-	/**
+    public AppSingUpUtils(RedisTemplate<Object, Object> redisTemplate,
+                          UsersConnectionRepository usersConnectionRepository,
+                          ConnectionFactoryLocator connectionFactoryLocator) {
+        this.redisTemplate = redisTemplate;
+        this.usersConnectionRepository = usersConnectionRepository;
+        this.connectionFactoryLocator = connectionFactoryLocator;
+    }
+
+    /**
 	 * 缓存社交网站用户信息到redis
 	 * @param request
 	 * @param connectionData

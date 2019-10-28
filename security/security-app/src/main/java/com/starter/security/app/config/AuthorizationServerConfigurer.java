@@ -32,7 +32,7 @@ import java.util.List;
  */
 @Configuration
 @EnableAuthorizationServer
-public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+public class AuthorizationServerConfigurer extends AuthorizationServerConfigurerAdapter {
 
 	@Autowired
 	private UserDetailsService userDetailsService;

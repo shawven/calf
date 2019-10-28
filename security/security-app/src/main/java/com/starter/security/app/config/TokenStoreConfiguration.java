@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.provider.token.store.redis.RedisToken
 
 
 @Configuration
-public class TokenStoreConfig {
+public class TokenStoreConfiguration {
 
 	/**
 	 * 使用redis存储token的配置，只有在app.security.oauth2.tokenStore配置为redis时生效

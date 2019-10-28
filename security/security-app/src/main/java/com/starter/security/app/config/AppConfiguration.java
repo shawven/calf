@@ -1,19 +1,20 @@
 package com.starter.security.app.config;
 
 import com.starter.security.app.RedisVerificationRepository;
-import com.starter.security.app.authentication.AppAccessDeniedHandler;
-import com.starter.security.app.authentication.AppAuthenticationFailureHandler;
-import com.starter.security.app.authentication.AppAuthenticationSuccessHandler;
-import com.starter.security.app.authentication.AppOAuth2AuthenticationExceptionEntryPoint;
+import com.starter.security.app.authentication.*;
+import com.starter.security.app.config.social.AppSingUpUtils;
+import com.starter.security.app.config.social.AppSocialAuthenticationFilterPostProcessor;
 import com.starter.security.app.config.social.AppSocialConfigurerProcessor;
 import com.starter.security.app.oauth2.ClientAuthenticationFilter;
 import com.starter.security.base.authentication.configurer.AuthorizationConfigurerProvider;
 import com.starter.security.social.properties.SocialProperties;
+import com.starter.security.social.support.SocialAuthenticationFilterPostProcessor;
 import com.starter.security.social.support.SocialConfigurerProcessor;
 import com.starter.security.verification.VerificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.social.connect.ConnectionFactoryLocator;
+import org.springframework.social.connect.UsersConnectionRepository;
 
 import javax.servlet.Filter;
 
@@ -31,6 +34,7 @@ import javax.servlet.Filter;
  * @date 2019-08-20
  */
 @Configuration
+@ComponentScan("com.starter.security")
 public class AppConfiguration {
 
     @Autowired
@@ -73,6 +77,15 @@ public class AppConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public SocialAuthenticationFilterPostProcessor
+    appSocialAuthenticationFilterPostProcessor(AuthenticationSuccessHandler authenticationSuccessHandler,
+                                               AuthenticationFailureHandler authenticationFailureHandler) {
+        return new AppSocialAuthenticationFilterPostProcessor(authenticationSuccessHandler,
+                new AppSocailAuthenticationFailureHandler());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public AccessDeniedHandler appAccessDeniedHandler() {
         return new AppAccessDeniedHandler();
     }
@@ -99,5 +112,12 @@ public class AppConfiguration {
     @ConditionalOnMissingBean
     public SocialConfigurerProcessor appSocialConfigurerProcessor() {
         return new AppSocialConfigurerProcessor();
+    }
+
+    @Bean
+    public AppSingUpUtils appSingUpUtils(RedisTemplate<Object, Object> redisTemplate,
+                                         UsersConnectionRepository usersConnectionRepository,
+                                         ConnectionFactoryLocator connectionFactoryLocator) {
+        return new AppSingUpUtils(redisTemplate, usersConnectionRepository, connectionFactoryLocator);
     }
 }
