@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Configuration
 @EnableConfigurationProperties(SecurityProperties.class)
-public class SecurityConfiguration {
+public class AuthorizationConfiguration {
 
     @Bean
     public AuthorizationConfigurerManager authorizationConfigurerManager(SecurityProperties securityProperties,

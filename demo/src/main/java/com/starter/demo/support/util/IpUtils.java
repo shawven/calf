@@ -86,12 +86,16 @@ public class IpUtils {
                 "HTTP_VIA",
                 "REMOTE_ADDR",
                 "X-Real-IP"};
+        String ip = null;
         for (String header : headers) {
-            String ip = request.getHeader(header);
+            ip = request.getHeader(header);
             if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
-                return ip;
+                break;
             }
         }
-        return request.getRemoteAddr();
+        if (ip == null) {
+            ip = request.getRemoteAddr();
+        }
+        return "0:0:0:0:0:0:0:1".equals(ip) ? "127.0.0.1" : ip;
     }
 }

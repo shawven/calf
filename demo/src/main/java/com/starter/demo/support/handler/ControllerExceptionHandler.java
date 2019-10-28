@@ -48,9 +48,11 @@ public class ControllerExceptionHandler {
         List<FieldError> fieldErrors = e.getFieldErrors();
         StringBuilder sb = new StringBuilder();
         for (FieldError fielderror : fieldErrors) {
-            sb.append(fielderror.getField()).append(": ").append(fielderror.getDefaultMessage()).append(", ");
+            sb.append("[").append(fielderror.getField()).append("]")
+                    .append(fielderror.getDefaultMessage()).append(", ");
         }
-        String str = sb.length() > 0 ? sb.deleteCharAt(sb.length() - 1).toString(): "请求的参数有误！";
+        String str = sb.length() > 0 ? sb.toString(): "请求的参数有误！";
+        str = str.replace(", ", "");
         logger.warn(str, e);
         return Response.badRequest(str);
     }
