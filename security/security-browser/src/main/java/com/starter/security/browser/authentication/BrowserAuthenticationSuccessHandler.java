@@ -31,10 +31,10 @@ public class BrowserAuthenticationSuccessHandler extends SavedRequestAwareAuthen
 
 	private RequestCache requestCache;
 
-    private LoginSuccessHandler loginSuccessHandler;
+    private BrowserLoginSuccessHandler loginSuccessHandler;
 
     public BrowserAuthenticationSuccessHandler(BrowserProperties browserProperties,
-                                               LoginSuccessHandler loginSuccessHandler) {
+                                               BrowserLoginSuccessHandler loginSuccessHandler) {
         this.objectMapper = new ObjectMapper();
         this.requestCache = new HttpSessionRequestCache();
         this.browserProperties = browserProperties;
@@ -48,7 +48,6 @@ public class BrowserAuthenticationSuccessHandler extends SavedRequestAwareAuthen
         if (loginSuccessHandler != null) {
             loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
         }
-
 
 		if (ResponseType.JSON.equals(browserProperties.getResponseType())) {
             ResponseData result = new ResponseData("登录成功");

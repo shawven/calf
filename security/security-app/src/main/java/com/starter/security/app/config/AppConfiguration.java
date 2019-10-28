@@ -5,9 +5,11 @@ import com.starter.security.app.authentication.AppAccessDeniedHandler;
 import com.starter.security.app.authentication.AppAuthenticationFailureHandler;
 import com.starter.security.app.authentication.AppAuthenticationSuccessHandler;
 import com.starter.security.app.authentication.AppOAuth2AuthenticationExceptionEntryPoint;
+import com.starter.security.app.config.social.AppSocialConfigurerProcessor;
 import com.starter.security.app.oauth2.ClientAuthenticationFilter;
 import com.starter.security.base.authentication.configurer.AuthorizationConfigurerProvider;
 import com.starter.security.social.properties.SocialProperties;
+import com.starter.security.social.support.SocialConfigurerProcessor;
 import com.starter.security.verification.VerificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -91,5 +93,11 @@ public class AppConfiguration {
     @ConditionalOnMissingBean
     public Filter clientAuthenticationFilter(ClientDetailsService clientDetailsService) {
         return new ClientAuthenticationFilter(clientDetailsService, passwordEncoder);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SocialConfigurerProcessor appSocialConfigurerProcessor() {
+        return new AppSocialConfigurerProcessor();
     }
 }

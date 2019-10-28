@@ -12,7 +12,7 @@ public class Sms extends Verification {
 
     private static final long serialVersionUID = -4629437541504397425L;
 
-    private String mobile;
+    private String phone;
 
     private String message;
 
@@ -24,12 +24,12 @@ public class Sms extends Verification {
         super(code, expireTime);
     }
 
-    public String getMobile() {
-        return mobile;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getMessage() {

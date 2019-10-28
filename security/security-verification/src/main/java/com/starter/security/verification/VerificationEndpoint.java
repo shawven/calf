@@ -11,7 +11,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.starter.security.verification.VerificationType.IMAGE;
+import static com.starter.security.verification.VerificationType.CAPTCHA;
 import static com.starter.security.verification.VerificationType.SMS;
 
 /**
@@ -29,9 +29,9 @@ public class VerificationEndpoint {
      * @param request
      * @param response
      */
-	@RequestMapping(VerificationConstants.DEFAULT_VERIFICATION_URL_PREFIX + "/image")
+	@RequestMapping(VerificationConstants.DEFAULT_VERIFICATION_URL_PREFIX + "/captcha")
 	public void createImageCode(HttpServletRequest request, HttpServletResponse response){
-        getVerificationProcessor(IMAGE).create(new ServletWebRequest(request, response));
+        getVerificationProcessor(CAPTCHA).create(new ServletWebRequest(request, response));
 	}
 
     /**

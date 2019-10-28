@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
  * @author Shoven
  * @since 2019-04-20 15:37
  */
-@Component
 public class AppSocialConfigurerProcessor implements SocialConfigurerProcessor {
 
     /**

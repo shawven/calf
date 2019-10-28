@@ -43,7 +43,7 @@ public class SmsProcessor extends AbstractVerificationProcessor<Verification> {
 	protected void send(ServletWebRequest webRequest, Verification verification) {
         HttpServletRequest request = webRequest.getRequest();
         Sms sms = (Sms) verification;
-        sms.setMobile(getMobile(request));
+        sms.setPhone(getMobile(request));
 
         String messageTemplate = (String) request.getAttribute(VerificationConstants.DEFAULT_ATTR_NAME_SMS_MESSAGE);
         sms.setMessage(new SmsMessage(messageTemplate, sms).toString());

@@ -14,7 +14,7 @@ public class DefaultSmsSender implements SmsSender {
 	@Override
 	public void send(Sms sms) {
 		logger.warn("请配置真实的短信验证码发送器(SmsCodeSender)");
-		logger.info("向手机[ "+ sms.getMobile() + "]发送短信["+ sms.getMessage()+"]");
+		logger.info("向手机[ "+ sms.getPhone() + "]发送短信["+ sms.getMessage()+"]");
 	}
 
 }

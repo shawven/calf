@@ -2,8 +2,8 @@
 package com.starter.security.app.config;
 
 import com.starter.security.base.authentication.configurer.AuthorizationConfigurerManager;
-import com.starter.security.oauth2.config.SmsAuthenticationSecurityConfig;
-import com.starter.security.verification.config.VerificationSecurityConfig;
+import com.starter.security.social.config.SmsAuthenticationSecurityConfigurer;
+import com.starter.security.verification.config.VerificationSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,13 +22,13 @@ import org.springframework.social.security.SpringSocialConfigurer;
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Autowired
-    private SmsAuthenticationSecurityConfig smsAuthenticationSecurityConfig;
+    private SmsAuthenticationSecurityConfigurer smsAuthenticationSecurityConfigurer;
 
     @Autowired
     private OpenIdAuthenticationSecurityConfig openIdAuthenticationSecurityConfig;
 
     @Autowired
-    private VerificationSecurityConfig verificationSecurityConfig;
+    private VerificationSecurityConfigurer verificationSecurityConfigurer;
 
     @Autowired
     private SpringSocialConfigurer socialSecurityConfig;
@@ -60,9 +60,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .authenticationEntryPoint(appOAuth2AuthenticationExceptionEntryPoint)
                 .accessDeniedHandler(appAccessDeniedHandler)
                 .and()
-                .apply(verificationSecurityConfig)
+                .apply(verificationSecurityConfigurer)
                 .and()
-                .apply(smsAuthenticationSecurityConfig)
+                .apply(smsAuthenticationSecurityConfigurer)
                 .and()
                 .apply(wxMiniAuthenticationSecurityConfig)
                 .and()

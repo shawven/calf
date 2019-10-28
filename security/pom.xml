@@ -47,7 +47,6 @@
     <modules>
         <module>security-app</module>
         <module>security-browser</module>
-        <module>security-social</module>
         <module>security-oauth2</module>
         <module>security-verification</module>
         <module>security-base</module>

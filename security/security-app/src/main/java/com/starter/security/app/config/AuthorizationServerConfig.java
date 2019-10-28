@@ -1,9 +1,9 @@
 
 package com.starter.security.app.config;
 
-import com.starter.security.oauth2.properties.OAuth2ClientProperties;
-import com.starter.security.oauth2.properties.OAuth2Constants;
-import com.starter.security.oauth2.properties.OAuth2Properties;
+import com.starter.security.social.properties.OAuth2ClientProperties;
+import com.starter.security.social.properties.OAuth2Constants;
+import com.starter.security.social.properties.OAuth2Properties;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

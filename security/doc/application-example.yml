@@ -51,11 +51,19 @@ app:
   security:
     #浏览器环境配置项，参见BrowserProperties
     browser:
-      signInPage: /signIn.html
+      # 登录地址
+      signInUrl: /signIn.html
+      # 登录提交地址
+      signInProcessUrl: /login/form
+      # 登录成功地址
       singInSuccessUrl: /index.html
+      # 注册地址
       signUpUrl: /signUp.html
+      # 退出地址
       signOutUrl: /logout.html
+      # 响应类型，REDIRECT页面传统跳转，vue、react api请求方式
       responseType: REDIRECT
+      # 记住我时间
       rememberMeSeconds: 294000
       #session管理相关配置，参见SessionProperties
       session:
@@ -72,7 +80,7 @@ app:
         height: 30
         expireIn: 30
         # 配置需要图形验证码验证的url, 两个验证码如果配的url中相同部分则短信优先级要高
-        url: /code/sms
+        url: /verification/sms
 
       #短信验证码配置项，参见SmsCodeProperties
       sms:

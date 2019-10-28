@@ -18,6 +18,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -101,7 +102,7 @@ public class VerificationSupportConfiguration {
      */
     @Bean
     @ConditionalOnBean(VerificationProcessor.class)
-    public VerificationProcessorHolder verificationProcessorHolder(Map<String, VerificationProcessor> processors) {
+    public VerificationProcessorHolder verificationProcessorHolder(List<VerificationProcessor> processors) {
         return new VerificationProcessorHolder(processors);
     }
 
@@ -118,8 +119,8 @@ public class VerificationSupportConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public VerificationSecurityConfig verificationSecurityConfig(VerificationFilter filter) {
-        return new VerificationSecurityConfig(filter);
+    public VerificationSecurityConfigurer verificationSecurityConfig(VerificationFilter filter) {
+        return new VerificationSecurityConfigurer(filter);
     }
 }
 

@@ -1,21 +1,25 @@
 
 package com.starter.security.browser.config;
 
+import com.starter.security.base.authentication.configurer.AuthorizationConfigurerManager;
 import com.starter.security.base.authentication.configurer.AuthorizationConfigurerProvider;
 import com.starter.security.browser.authentication.*;
 import com.starter.security.browser.session.BrowserExpiredSessionStrategy;
 import com.starter.security.browser.session.BrowserInvalidSessionStrategy;
 import com.starter.security.browser.properties.BrowserProperties;
 import com.starter.security.browser.session.SessionVerificationRepository;
-import com.starter.security.social.annotaion.EnableSocialSupport;
+import com.starter.security.social.EnableOAuth2Support;
+import com.starter.security.social.config.SmsAuthenticationSecurityConfigurer;
 import com.starter.security.social.properties.SocialProperties;
 import com.starter.security.verification.VerificationRepository;
+import com.starter.security.verification.config.VerificationSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -23,6 +27,9 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.session.InvalidSessionStrategy;
 import org.springframework.security.web.session.SessionInformationExpiredStrategy;
+import org.springframework.social.security.SpringSocialConfigurer;
+
+import javax.sql.DataSource;
 
 /**
  * 浏览器环境下扩展点配置，配置在这里的bean，业务系统都可以通过声明同类型或同名的bean来覆盖安全
@@ -32,7 +39,7 @@ import org.springframework.security.web.session.SessionInformationExpiredStrateg
  * @since 2019-05-08 21:53
  */
 @Configuration
-@EnableSocialSupport
+@EnableOAuth2Support
 @EnableConfigurationProperties(BrowserProperties.class)
 public class BrowserConfiguration {
 
@@ -94,8 +101,8 @@ public class BrowserConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AuthenticationSuccessHandler browserAuthenticationSuccessHandler(@Autowired(required = false)
-                                                                                    LoginSuccessHandler loginSuccessHandler) {
+    public AuthenticationSuccessHandler browserAuthenticationSuccessHandler(
+            @Autowired(required = false) BrowserLoginSuccessHandler loginSuccessHandler) {
         return new BrowserAuthenticationSuccessHandler(browserProperties, loginSuccessHandler);
     }
 
@@ -106,8 +113,9 @@ public class BrowserConfiguration {
      */
 	@Bean
     @ConditionalOnMissingBean
-    public AuthenticationFailureHandler browserAuthenticationFailureHandler() {
-	    return new BrowserAuthenticationFailureHandler(browserProperties);
+    public AuthenticationFailureHandler browserAuthenticationFailureHandler(
+            @Autowired(required = false) BrowserLoginFailureHandler browserLoginFailureHandler) {
+	    return new BrowserAuthenticationFailureHandler(browserProperties, browserLoginFailureHandler);
     }
 
     @Bean
@@ -131,9 +139,9 @@ public class BrowserConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public LoginSecurityConfig FormLoginSecurityConfig(AuthenticationSuccessHandler authenticationSuccessHandler,
-                                                       AuthenticationFailureHandler authenticationFailureHandler) {
-	    return new LoginSecurityConfig(browserProperties, authenticationSuccessHandler, authenticationFailureHandler);
+    public FormLoginSecurityConfigurer formLoginSecurityConfig(AuthenticationSuccessHandler authenticationSuccessHandler,
+                                                               AuthenticationFailureHandler authenticationFailureHandler) {
+	    return new FormLoginSecurityConfigurer(browserProperties, authenticationSuccessHandler, authenticationFailureHandler);
     }
 
     /**
@@ -148,4 +156,36 @@ public class BrowserConfiguration {
 	    return new BrowserAuthorizationConfigurerProvider(browserProperties, socialProperties);
     }
 
+    @Bean
+    public BrowserSecurityConfigurer browserSecurityConfigurer(
+            DataSource dataSource,
+            BrowserProperties browserProperties,
+            UserDetailsService userDetailsService,
+            SessionInformationExpiredStrategy sessionInformationExpiredStrategy,
+            InvalidSessionStrategy invalidSessionStrategy,
+            LogoutSuccessHandler logoutSuccessHandler,
+            AuthorizationConfigurerManager authorizationConfigurerManager,
+            AccessDeniedHandler browserAccessDeniedHandler,
+            AuthenticationEntryPoint browserAuthenticationExceptionEntryPoint,
+            FormLoginSecurityConfigurer formLoginSecurityConfigurer,
+            SpringSocialConfigurer springSocialConfigurer,
+            VerificationSecurityConfigurer verificationSecurityConfigurer,
+            SmsAuthenticationSecurityConfigurer smsAuthenticationSecurityConfigurer) {
+        BrowserSecurityConfigurer configurer = new BrowserSecurityConfigurer();
+        configurer.setDataSource(dataSource);
+        configurer.setBrowserProperties(browserProperties);
+        configurer.setUserDetailsService(userDetailsService);
+        configurer.setSessionInformationExpiredStrategy(sessionInformationExpiredStrategy);
+        configurer.setInvalidSessionStrategy(invalidSessionStrategy);
+        configurer.setLogoutSuccessHandler(logoutSuccessHandler);
+        configurer.setBrowserAccessDeniedHandler(browserAccessDeniedHandler);
+        configurer.setBrowserAuthenticationExceptionEntryPoint(browserAuthenticationExceptionEntryPoint);
+
+        configurer.setAuthorizationConfigurerManager(authorizationConfigurerManager);
+        configurer.setFormLoginSecurityConfigurer(formLoginSecurityConfigurer);
+        configurer.setSpringSocialConfigurer(springSocialConfigurer);
+        configurer.setVerificationSecurityConfigurer(verificationSecurityConfigurer);
+        configurer.setSmsAuthenticationSecurityConfigurer(smsAuthenticationSecurityConfigurer);
+        return configurer;
+    }
 }

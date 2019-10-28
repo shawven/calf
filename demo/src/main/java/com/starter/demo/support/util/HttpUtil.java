@@ -1022,7 +1022,7 @@ public class HttpUtil {
                     result = new LinkedHashMap<>(pds.length);
                     for (PropertyDescriptor pd : pds) {
                         String key = pd.getName();
-                        Object value = pd.getReadMethod().invoke(input, result.get(pd.getName()));
+                        Object value = pd.getReadMethod().invoke(input);
                         result.put(key, value);
                     }
                 } catch (Exception e) {

@@ -3,8 +3,11 @@ package com.starter.security.verification;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -15,12 +18,15 @@ public class VerificationProcessorHolder {
 
     private Map<VerificationType, VerificationProcessor> verificationProcessors;
 
-    public VerificationProcessorHolder(Map<String, VerificationProcessor> verificationProcessors) {
-        this.verificationProcessors = verificationProcessors.entrySet().stream()
+    public VerificationProcessorHolder(List<VerificationProcessor> verificationProcessors) {
+        this.verificationProcessors = verificationProcessors.stream()
                 .collect(toMap(
-                        entry -> VerificationType.valueOf(
-                                StringUtils.substringBefore(entry.getKey(), "CodeProcessor").toUpperCase()),
-                        Map.Entry::getValue)
+                        processor -> {
+                            String className = processor.getClass().getSimpleName();
+                            String typeName = StringUtils.substringBefore(className, "Processor").toUpperCase();
+                            return VerificationType.valueOf(typeName);
+                        },
+                        identity())
                 );
     }
 

@@ -18,7 +18,7 @@ public enum VerificationType {
 	/**
 	 * 图片验证码
 	 */
-	IMAGE(VerificationConstants.DEFAULT_PARAMETER_NAME_CAPTCHA, "图形");
+    CAPTCHA(VerificationConstants.DEFAULT_PARAMETER_NAME_CAPTCHA, "图形");
 
 	private String label;
 

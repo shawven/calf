@@ -26,15 +26,23 @@ public class BrowserAuthenticationFailureHandler extends SimpleUrlAuthentication
 
 	private BrowserProperties browserProperties;
 
-    public BrowserAuthenticationFailureHandler(BrowserProperties browserProperties) {
+    private BrowserLoginFailureHandler browserLoginFailureHandler;
+
+    public BrowserAuthenticationFailureHandler(BrowserProperties browserProperties,
+                                               BrowserLoginFailureHandler browserLoginFailureHandler) {
         this.objectMapper = new ObjectMapper();
         this.browserProperties = browserProperties;
+        this.browserLoginFailureHandler = browserLoginFailureHandler;
     }
 
     @Override
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException exception) throws IOException, ServletException {
-		if (ResponseType.JSON.equals(browserProperties.getResponseType())) {
+        if (browserLoginFailureHandler != null) {
+            browserLoginFailureHandler.onAuthenticationFailure(request, response, exception);
+        }
+
+        if (ResponseType.JSON.equals(browserProperties.getResponseType())) {
             int status = HttpStatus.UNAUTHORIZED.value();
             ResponseData result = new ResponseData()
                     .setCode(status)

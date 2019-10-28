@@ -22,28 +22,28 @@ public class BrowserProperties {
     /**
      * 登陆处理url
      */
-    private String signInProcessUrl = BrowserConstants.DEFAULT_SIGN_IN_PROCESSING_URL_FORM;
+    private String signInProcessingUrl = BrowserConstants.DEFAULT_SIGN_IN_PROCESSING_URL_FORM;
 
     /**
      * 登录成功后跳转的地址，如果设置了此属性，则登录成功后总是会跳到这个地址上。
      * 只在signInResponseType为REDIRECT时生效
      */
-    private String singInSuccessUrl;
+    private String singInSuccessUrl = BrowserConstants.DEFAULT_SIGN_IN_SUCCESS_URL;
 
     /**
      * 用户注册页面
      */
-    private String signUpUrl;
+    private String signUpUrl = BrowserConstants.DEFAULT_SIGN_UP_URL;
 
     /**
      * 退出处理url
      */
-    private String signOutUrl = BrowserConstants.DEFAULT_SIGN_OUT_URL;
+    private String signOutProcessingUrl = BrowserConstants.DEFAULT_SIGN_OUT_PROCESSING_URL;
 
     /**
      * 退出url
      */
-    private String signOutSuccessUrl;
+    private String signOutSuccessUrl = BrowserConstants.DEFAULT_SIGN_OUT_SUCCESS_URL;
 
     /**
      * '记住我'功能的有效时间，默认1小时
@@ -71,12 +71,12 @@ public class BrowserProperties {
         this.signInUrl = signInUrl;
     }
 
-    public String getSignInProcessUrl() {
-        return signInProcessUrl;
+    public String getSignInProcessingUrl() {
+        return signInProcessingUrl;
     }
 
-    public void setSignInProcessUrl(String signInProcessUrl) {
-        this.signInProcessUrl = signInProcessUrl;
+    public void setSignInProcessingUrl(String signInProcessingUrl) {
+        this.signInProcessingUrl = signInProcessingUrl;
     }
 
     public String getSingInSuccessUrl() {
@@ -103,12 +103,12 @@ public class BrowserProperties {
         this.signOutSuccessUrl = signOutSuccessUrl;
     }
 
-    public String getSignOutUrl() {
-        return signOutUrl;
+    public String getSignOutProcessingUrl() {
+        return signOutProcessingUrl;
     }
 
-    public void setSignOutUrl(String signOutUrl) {
-        this.signOutUrl = signOutUrl;
+    public void setSignOutProcessingUrl(String signOutProcessingUrl) {
+        this.signOutProcessingUrl = signOutProcessingUrl;
     }
 
     public int getRememberMeSeconds() {

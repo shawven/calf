@@ -1,12 +1,16 @@
 
 package com.starter.security.base.authentication.configurer;
 
+import com.starter.security.base.properties.SecurityProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * 授权信息管理器
@@ -19,6 +23,8 @@ public class AuthorizationConfigurerManager {
 	@Autowired
 	private List<AuthorizationConfigurerProvider> authorizationConfigurerProviders;
 
+	@Autowired
+    private SecurityProperties securityProperties;
 
 	public void config(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry config) {
 		boolean existAnyRequestConfig = false;
@@ -36,9 +42,17 @@ public class AuthorizationConfigurerManager {
 			}
 		}
 
-		if(existAnyRequestConfig){
+        configWhitelist(config);
+		if(!existAnyRequestConfig){
 			config.anyRequest().authenticated();
 		}
 	}
 
+	public void configWhitelist(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry config) {
+        String whitelistStr = securityProperties.getWhitelist();
+        String[] whitelist = StringUtils.split(whitelistStr, ",");
+        if (whitelist != null) {
+            config.antMatchers(whitelist).permitAll();
+        }
+    }
 }

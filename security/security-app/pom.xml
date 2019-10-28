@@ -16,11 +16,6 @@
 	<dependencies>
         <dependency>
             <groupId>com.starter.security</groupId>
-            <artifactId>security-social</artifactId>
-            <version>${security.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.starter.security</groupId>
             <artifactId>security-oauth2</artifactId>
             <version>${security.version}</version>
         </dependency>

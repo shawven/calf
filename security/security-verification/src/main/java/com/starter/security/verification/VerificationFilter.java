@@ -62,7 +62,7 @@ public class VerificationFilter extends OncePerRequestFilter implements Initiali
     @Override
     public void afterPropertiesSet() throws ServletException {
         super.afterPropertiesSet();
-        addUrlToMap(securityProperties.getCaptcha().getUrl(), VerificationType.IMAGE);
+        addUrlToMap(securityProperties.getCaptcha().getUrl(), VerificationType.CAPTCHA);
         addUrlToMap(securityProperties.getSms().getUrl(), VerificationType.SMS);
     }
 
@@ -74,7 +74,7 @@ public class VerificationFilter extends OncePerRequestFilter implements Initiali
      */
     protected void addUrlToMap(String urlString, VerificationType type) {
         if (StringUtils.isNotBlank(urlString)) {
-            String[] urls = StringUtils.splitByWholeSeparatorPreserveAllTokens(urlString, ",");
+            String[] urls = StringUtils.split(urlString, ",");
             for (String url : urls) {
                 urlMap.put(url, type);
             }
