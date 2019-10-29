@@ -20,8 +20,6 @@ import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.starter.demo.support.generator.CodeGenerator.WhiteListItem.*;
-
 /**
  * 代码生成器
  *
@@ -33,23 +31,22 @@ public class CodeGenerator {
     /**
      * 输出目录
      */
-    private String outputDir = System.getProperty("user.dir") + "/src/main/java";
+    private String outputDir = System.getProperty("user.dir");
 
     /**
      * 模板包路径（classpath下）
      */
-    private String templatePath = "/generator/templates";
+    private String templatePath = "/templates";
 
     /**
      * 父包和子包设置
      */
-    private String parentPackage = "com.starter";
-
+    private String parentPackage = "com.wqb.jz";
     private String controllerPackage = "controller";
     private String servicePackage = "service";
     private String serviceImplPackage = "service.impl";
-    private String mapperPackage = "mapper";
-    private String mapperXmlPackage = "mapper.xml";
+    private String mapperPackage = "mapper.xml";
+    private String mapperXmlPackage = "mapper";
     private String entityPackage = "domain";
 
     /**
@@ -61,12 +58,12 @@ public class CodeGenerator {
     private Class superMapper = BaseMapper.class;
     private Class superEntity;
 
-    private List<WhiteListItem> whiteList = new ArrayList<>();
+    private List<FileWhiteList> whiteList = new ArrayList<>();
 
     /**
      * 数据源设置
      */
-    private String dataSourceUrl = "jdbc:mysql://localhost:3306/es?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8";
+    private String dataSourceUrl = "jdbc:mysql://localhost:3306/wqb_system?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8";
     private String driverName = com.mysql.cj.jdbc.Driver.class.getName();
     private String username = "root";
     private String password = "root";
@@ -79,10 +76,19 @@ public class CodeGenerator {
 
     public static void main(String[] args) {
         new CodeGenerator()
-                .include(ENTITY)
-                .generate("Goods", "es_goods", IdType.AUTO)
-
-                ;
+                .setOutputPath("generator/src/main/java")
+                .prefixGroup("system", that -> {
+                    that
+                            .generate("User", "user", IdType.AUTO);
+                })
+                .prefixGroup("core", that -> {
+                    that
+                            .generate("Account", "account", IdType.AUTO)
+                            .generate("Company", "company", IdType.AUTO)
+                            .generate("Subject", "subject", IdType.AUTO)
+                            .generate("SubjectRecord", "subject_record", IdType.AUTO)
+                    ;
+                });
     }
 
     /**
@@ -165,50 +171,104 @@ public class CodeGenerator {
         return this;
     }
 
-
     /**
-     * 分组生成，生成的代码在配置的（包 + 组名）构成在二级包下
+     * 前缀分组生成，生成的代码在配置的（组名 + 包）构成在二级包下
      *
      * @param name
      * @param generatorFunction
      * @return
      */
-    public CodeGenerator group(String name, Consumer<CodeGenerator> generatorFunction) {
-        setGroupName(name);
+    public CodeGenerator prefixGroup(String name, Consumer<CodeGenerator> generatorFunction) {
+        setPrefixGroupName(name);
         generatorFunction.accept(this);
         // 删除组名不影响下一个生成
-        unsetGroupName(name);
+        unsetPrefixGroupName(name);
         return this;
     }
 
-    public CodeGenerator include(WhiteListItem... whiteList) {
+    /**
+     * 后缀分组生成，生成的代码在配置的（包 + 组名）构成在二级包下
+     *
+     * @param name
+     * @param generatorFunction
+     * @return
+     */
+    public CodeGenerator suffixGroup(String name, Consumer<CodeGenerator> generatorFunction) {
+        setSuffixGroupName(name);
+        generatorFunction.accept(this);
+        // 删除组名不影响下一个生成
+        unsetSuffixGroupName(name);
+        return this;
+    }
+
+    /**
+     * 包含的文件
+     *
+     * @param whiteList
+     * @return
+     */
+    public CodeGenerator include(FileWhiteList... whiteList) {
         if (whiteList != null) {
             Collections.addAll(this.whiteList, whiteList);
         }
         return this;
     }
 
-    public CodeGenerator exclude(WhiteListItem... whiteList) {
-        Collections.addAll(this.whiteList, CONTROLLER, SERVICE, SERVICE_IMPL, ENTITY, MAPPER, XML);
-        if (whiteList != null) {
-            List<WhiteListItem> exclusion = Arrays.asList(whiteList);
+    /**
+     * 排除的文件
+     *
+     * @param blacklist
+     * @return
+     */
+    public CodeGenerator exclude(FileWhiteList... blacklist) {
+        Collections.addAll(this.whiteList, FileWhiteList.CONTROLLER, FileWhiteList.SERVICE,
+                FileWhiteList.SERVICE_IMPL, FileWhiteList.ENTITY, FileWhiteList.MAPPER, FileWhiteList.XML);
+        if (blacklist != null) {
+            List<FileWhiteList> exclusion = Arrays.asList(blacklist);
             this.whiteList.removeIf(exclusion::contains);
         }
         return this;
     }
 
     public CodeGenerator includeEntityAndMapper() {
-        Collections.addAll(this.whiteList, ENTITY, MAPPER, XML);
+        Collections.addAll(this.whiteList, FileWhiteList.ENTITY, FileWhiteList.MAPPER, FileWhiteList.XML);
+        return this;
+    }
+
+    private CodeGenerator setOutputPath(String path) {
+        outputDir = outputDir + "/" + path;
         return this;
     }
 
     /**
-     * 设置组名
+     * 设置前缀组名
      *
      * @param name
      * @return
      */
-    private CodeGenerator setGroupName(String name) {
+    private CodeGenerator setPrefixGroupName(String name) {
+        parentPackage = parentPackage + "." + name;
+        return this;
+    }
+
+    /**
+     * 删除前缀组名
+     *
+     * @param name
+     * @return
+     */
+    private CodeGenerator unsetPrefixGroupName(String name) {
+        parentPackage = parentPackage.substring(0, parentPackage.length() - ("." + name).length());
+        return this;
+    }
+
+    /**
+     * 设置后缀组名
+     *
+     * @param name
+     * @return
+     */
+    private CodeGenerator setSuffixGroupName(String name) {
         controllerPackage = addSuffix(controllerPackage, name);
         servicePackage = addSuffix(servicePackage, name);
         serviceImplPackage = addSuffix(serviceImplPackage, name);
@@ -218,7 +278,13 @@ public class CodeGenerator {
         return this;
     }
 
-    private CodeGenerator unsetGroupName(String name) {
+    /**
+     * 删除后缀组名
+     *
+     * @param name
+     * @return
+     */
+    private CodeGenerator unsetSuffixGroupName(String name) {
         controllerPackage = removeSuffix(controllerPackage, name);
         servicePackage = removeSuffix(servicePackage, name);
         serviceImplPackage = removeSuffix(serviceImplPackage, name);
@@ -228,12 +294,14 @@ public class CodeGenerator {
         return this;
     }
 
-    private String addSuffix(String parentPackage, String childPackage) {
-        return parentPackage + (StringUtils.isNotBlank(childPackage) ? "." + childPackage : "");
+    private String addSuffix(String packageName, String suffix) {
+        return packageName + (StringUtils.isNotBlank(suffix) ? "." + suffix : "");
     }
 
-    private String removeSuffix(String parentPackage, String childPackage) {
-        return StringUtils.replace(parentPackage, "." + childPackage, "");
+    private String removeSuffix(String packageName, String suffix) {
+        return packageName.endsWith(suffix)
+                ? packageName.substring(0, packageName.length() - ("." + suffix).length())
+                : packageName;
     }
 
     class CustomFreemarkerTemplateEngine extends FreemarkerTemplateEngine {
@@ -266,42 +334,42 @@ public class CodeGenerator {
 
 
 
-                    if (canWrite(ENTITY) && null != entityName && null != pathInfo.get("entity_path")) {
+                    if (canWrite(FileWhiteList.ENTITY) && null != entityName && null != pathInfo.get("entity_path")) {
                         controllerFile = String.format(pathInfo.get("entity_path") + File.separator + "%s" + this.suffixJavaOrKt(), entityName);
                         if (this.isCreate(com.baomidou.mybatisplus.generator.config.rules.FileType.ENTITY, controllerFile)) {
                             this.writer(objectMap, this.templateFilePath(template.getEntity(this.getConfigBuilder().getGlobalConfig().isKotlin())), controllerFile);
                         }
                     }
 
-                    if (canWrite(MAPPER) && null != tableInfo.getMapperName() && null != pathInfo.get("mapper_path")) {
+                    if (canWrite(FileWhiteList.MAPPER) && null != tableInfo.getMapperName() && null != pathInfo.get("mapper_path")) {
                         controllerFile = String.format(pathInfo.get("mapper_path") + File.separator + tableInfo.getMapperName() + this.suffixJavaOrKt(), entityName);
                         if (this.isCreate(com.baomidou.mybatisplus.generator.config.rules.FileType.MAPPER, controllerFile)) {
                             this.writer(objectMap, this.templateFilePath(template.getMapper()), controllerFile);
                         }
                     }
 
-                    if (canWrite(XML) && null != tableInfo.getXmlName() && null != pathInfo.get("xml_path")) {
+                    if (canWrite(FileWhiteList.XML) && null != tableInfo.getXmlName() && null != pathInfo.get("xml_path")) {
                         controllerFile = String.format(pathInfo.get("xml_path") + File.separator + tableInfo.getXmlName() + ".xml", entityName);
                         if (this.isCreate(com.baomidou.mybatisplus.generator.config.rules.FileType.XML, controllerFile)) {
                             this.writer(objectMap, this.templateFilePath(template.getXml()), controllerFile);
                         }
                     }
 
-                    if (canWrite(SERVICE) && null != tableInfo.getServiceName() && null != pathInfo.get("service_path")) {
+                    if (canWrite(FileWhiteList.SERVICE) && null != tableInfo.getServiceName() && null != pathInfo.get("service_path")) {
                         controllerFile = String.format(pathInfo.get("service_path") + File.separator + tableInfo.getServiceName() + this.suffixJavaOrKt(), entityName);
                         if (this.isCreate(com.baomidou.mybatisplus.generator.config.rules.FileType.SERVICE, controllerFile)) {
                             this.writer(objectMap, this.templateFilePath(template.getService()), controllerFile);
                         }
                     }
 
-                    if (canWrite(SERVICE_IMPL) && null != tableInfo.getServiceImplName() && null != pathInfo.get("service_impl_path")) {
+                    if (canWrite(FileWhiteList.SERVICE_IMPL) && null != tableInfo.getServiceImplName() && null != pathInfo.get("service_impl_path")) {
                         controllerFile = String.format(pathInfo.get("service_impl_path") + File.separator + tableInfo.getServiceImplName() + this.suffixJavaOrKt(), entityName);
                         if (this.isCreate(com.baomidou.mybatisplus.generator.config.rules.FileType.SERVICE_IMPL, controllerFile)) {
                             this.writer(objectMap, this.templateFilePath(template.getServiceImpl()), controllerFile);
                         }
                     }
 
-                    if (canWrite(CONTROLLER) && null != tableInfo.getControllerName() && null != pathInfo.get("controller_path")) {
+                    if (canWrite(FileWhiteList.CONTROLLER) && null != tableInfo.getControllerName() && null != pathInfo.get("controller_path")) {
                         controllerFile = String.format(pathInfo.get("controller_path") + File.separator + tableInfo.getControllerName() + this.suffixJavaOrKt(), entityName);
                         if (this.isCreate(com.baomidou.mybatisplus.generator.config.rules.FileType.CONTROLLER, controllerFile)) {
                             this.writer(objectMap, this.templateFilePath(template.getController()), controllerFile);
@@ -309,13 +377,13 @@ public class CodeGenerator {
                     }
                 }
             } catch (Exception var11) {
-                logger.error("无法创建文件，请检查配置信息！", var11);
+                AbstractTemplateEngine.logger.error("无法创建文件，请检查配置信息！", var11);
             }
 
             return this;
         }
 
-        private boolean canWrite(WhiteListItem item) {
+        private boolean canWrite(FileWhiteList item) {
             if(CodeGenerator.this.whiteList == null || CodeGenerator.this.whiteList.isEmpty()) {
                 return true;
             }
@@ -323,7 +391,7 @@ public class CodeGenerator {
         }
     }
 
-    enum WhiteListItem {
+    public enum FileWhiteList {
         CONTROLLER,
         SERVICE,
         SERVICE_IMPL,

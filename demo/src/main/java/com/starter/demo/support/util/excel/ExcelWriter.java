@@ -370,14 +370,15 @@ public class ExcelWriter<T> {
                     // 创建子单元格集合
                     createComplexColumns(childColumns, columnIndex);
                     // 子列集合大于1列，表格会扩充列此时从新合并父单元格和头部
+                    int size = childColumns.size();
                     if (childColumns.size() > 1) {
                         // 合并父单元格
                         sheet.addMergedRegion(new CellRangeAddress(startRowIndex, startRowIndex,
-                                columnIndex, columnOffset + columns.size()));
+                                columnIndex, columnIndex + size + 1));
                         // 合并表格头部
                         if (headerName != null) {
                             sheet.addMergedRegion(new CellRangeAddress(headerIndex, headerIndex,
-                                    0, columnOffset + columns.size()));
+                                    0, columnIndex + size + 1));
                         }
                     }
                 } else {
@@ -505,7 +506,7 @@ public class ExcelWriter<T> {
                     }
                     cell.setCellValue(amount.setScale(2, RoundingMode.HALF_UP).toString());
                 } else {
-                    cell.setCellValue(0);
+                    cell.setCellValue("0.00");
                 }
                 break;
             case DOUBLE:

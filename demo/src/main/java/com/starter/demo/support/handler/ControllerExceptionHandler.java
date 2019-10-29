@@ -19,7 +19,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import java.util.List;
 
 /**
- * 控制器层全局异常处理器
+ * 控制器层全局异常处理器，业务异常BizException属于业务逻辑反馈(DEBUG输出)
  *
  * @author Shoven
  * @date  2018-11-09
@@ -51,8 +51,7 @@ public class ControllerExceptionHandler {
             sb.append("[").append(fielderror.getField()).append("]")
                     .append(fielderror.getDefaultMessage()).append(", ");
         }
-        String str = sb.length() > 0 ? sb.toString(): "请求的参数有误！";
-        str = str.replace(", ", "");
+        String str = sb.length() > 0 ? sb.toString().replace(", ", "") : "请求的参数有误！";
         logger.warn(str, e);
         return Response.badRequest(str);
     }
@@ -79,8 +78,8 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(BizException.class)
     @ResponseBody
     public ResponseEntity handleBizException(BizException e) {
-        logger.warn(e.getMessage(), e);
-        return Response.unprocesable( getErrorMessage(e));
+        logger.debug(e.getMessage(), e);
+        return Response.unprocesable(getErrorMessage(e));
     }
 
 
