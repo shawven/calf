@@ -16,9 +16,9 @@ import static java.util.stream.Collectors.toList;
  * @author Shoven
  * @date 2019-03-18 16:43
  */
-public class NodeTree<T, R extends NodeTree.Node> implements Serializable {
+public class NodeTree<T> implements Serializable {
 
-    private List<T> data = new ArrayList<>();
+    private List<T> data;
 
     /**
      * 父节点选择器
@@ -33,10 +33,7 @@ public class NodeTree<T, R extends NodeTree.Node> implements Serializable {
     /**
      * 节点转换器
      */
-    private Function<T, R> nodeConvert;
-
-    public NodeTree() {
-    }
+    private Function<T, Node> nodeConvert;
 
     public NodeTree(List<T> data) {
         this.data = data;
@@ -47,7 +44,7 @@ public class NodeTree<T, R extends NodeTree.Node> implements Serializable {
      *
      * @return
      */
-    public List<R> generate() {
+    public <R extends Node> List<R> generate() {
         if (data == null || data.isEmpty()) {
             return null;
         }
@@ -57,17 +54,17 @@ public class NodeTree<T, R extends NodeTree.Node> implements Serializable {
         requireNonNull(nodeConvert, "节点转换器不能为空");
 
         List<T> nodes = getParents(data, topFilter);
-        List<R> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         for (T node : nodes) {
             // 先把顶级节点转换成节点
-            R newNode = nodeConvert.apply(node);
+            Node newNode = nodeConvert.apply(node);
             // 寻找子节点
-            newNode.setChildren((List<Node>)findChildren(node));
+            newNode.setChildren(findChildren(node));
             newNodes.add(newNode);
         }
 
-        return newNodes;
+        return (List<R>)newNodes;
     }
 
     /**
@@ -90,18 +87,19 @@ public class NodeTree<T, R extends NodeTree.Node> implements Serializable {
      * @param oldParent
      * @return
      */
-    private List<R> findChildren(T oldParent) {
-        return data.stream()
+    private <R extends Node> List<R> findChildren(T oldParent) {
+        List<Node> nodes = data.stream()
                 // 继续寻找当前节点的子节点
                 .filter(node -> childFilter.test(oldParent, node))
                 .map(oldNode -> {
                     // 把旧节点转换成新节点
-                    R newNode = nodeConvert.apply(oldNode);
+                    Node newNode = nodeConvert.apply(oldNode);
                     // 递归下去
-                    newNode.setChildren((List<Node>)findChildren(oldNode));
+                    newNode.setChildren(findChildren(oldNode));
                     return newNode;
                 })
                 .collect(toList());
+        return (List<R>) nodes;
     }
 
     /**
@@ -145,22 +143,13 @@ public class NodeTree<T, R extends NodeTree.Node> implements Serializable {
         return (N)foundNode;
     }
 
-    public List<T> getData() {
-        return data;
-    }
-
-    public NodeTree<T, R> setData(List<T> data) {
-        this.data = data;
-        return this;
-    }
-
     /**
      * 顶级父节点元素过滤器
      *
      * @param topFilter
      * @return
      */
-    public NodeTree<T, R> setTopFilter(Predicate<T> topFilter) {
+    public NodeTree<T> firstFilter(Predicate<T> topFilter) {
         this.topFilter = topFilter;
         return this;
     }
@@ -172,7 +161,7 @@ public class NodeTree<T, R extends NodeTree.Node> implements Serializable {
      * @param childFilter
      * @return
      */
-    public NodeTree<T, R> setChildFilter(BiPredicate<T, T> childFilter) {
+    public NodeTree<T> childFilter(BiPredicate<T, T> childFilter) {
         this.childFilter = childFilter;
         return this;
     }
@@ -183,7 +172,7 @@ public class NodeTree<T, R extends NodeTree.Node> implements Serializable {
      * @param nodeConvert
      * @return
      */
-    public NodeTree<T, R> setNodeConvert(Function<T, R> nodeConvert) {
+    public NodeTree<T> map(Function<T, Node> nodeConvert) {
         this.nodeConvert = nodeConvert;
         return this;
     }
@@ -217,7 +206,7 @@ public class NodeTree<T, R extends NodeTree.Node> implements Serializable {
      * @author Shoveni
      * @date 2019-03-16
      */
-    public static class DefaultNode implements NodeTree.Node {
+    public static class DefaultNode implements Node {
 
         private static final long serialVersionUID = 1L;
 
