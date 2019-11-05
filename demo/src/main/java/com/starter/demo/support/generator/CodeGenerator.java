@@ -45,8 +45,8 @@ public class CodeGenerator {
     private String controllerPackage = "controller";
     private String servicePackage = "service";
     private String serviceImplPackage = "service.impl";
-    private String mapperPackage = "mapper.xml";
-    private String mapperXmlPackage = "mapper";
+    private String mapperPackage = "mapper";
+    private String mapperXmlPackage = "mapper.xml";
     private String entityPackage = "domain";
 
     /**
