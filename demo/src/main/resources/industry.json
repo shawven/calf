@@ -1,0 +1,4005 @@
+[
+  {
+    "category": "A",
+    "code": "A",
+    "name": "农、林、牧、渔业",
+    "children": [
+      {
+        "category": "01",
+        "code": "A01",
+        "name": "农业",
+        "children": [
+          {
+            "category": "011",
+            "code": "A011",
+            "name": "谷物种植",
+            "children": [
+              {
+                "category": "0111",
+                "code": "A0111",
+                "name": "稻谷种植",
+                "children": null
+              },
+              {
+                "category": "0112",
+                "code": "A0112",
+                "name": "小麦种植",
+                "children": null
+              },
+              {
+                "category": "0113",
+                "code": "A0113",
+                "name": "玉米种植",
+                "children": null
+              },
+              {
+                "category": "0119",
+                "code": "A0119",
+                "name": "其他谷物种植",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "012",
+            "code": "A012",
+            "name": "豆类、油料和薯类种植",
+            "children": [
+              {
+                "category": "0121",
+                "code": "A0121",
+                "name": "豆类种植",
+                "children": null
+              },
+              {
+                "category": "0122",
+                "code": "A0122",
+                "name": "油料种植",
+                "children": null
+              },
+              {
+                "category": "0123",
+                "code": "A0123",
+                "name": "薯类种植",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "013",
+            "code": "A013",
+            "name": "棉、麻、糖、烟草种植",
+            "children": [
+              {
+                "category": "0131",
+                "code": "A0131",
+                "name": "棉花种植",
+                "children": null
+              },
+              {
+                "category": "0133",
+                "code": "A0133",
+                "name": "糖料种植",
+                "children": null
+              },
+              {
+                "category": "0134",
+                "code": "A0134",
+                "name": "烟草种植",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "014",
+            "code": "A014",
+            "name": "蔬菜、食用菌及园艺作物种植",
+            "children": [
+              {
+                "category": "0141",
+                "code": "A0141",
+                "name": "蔬菜种植",
+                "children": null
+              },
+              {
+                "category": "0142",
+                "code": "A0142",
+                "name": "食用菌种植",
+                "children": null
+              },
+              {
+                "category": "0143",
+                "code": "A0143",
+                "name": "花卉种植",
+                "children": null
+              },
+              {
+                "category": "0149",
+                "code": "A0149",
+                "name": "其他园艺作物种植",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "015",
+            "code": "A015",
+            "name": "水果种植",
+            "children": [
+              {
+                "category": "0151",
+                "code": "A0151",
+                "name": "仁果类和核果类水果种植",
+                "children": null
+              },
+              {
+                "category": "0152",
+                "code": "A0152",
+                "name": "葡萄种植",
+                "children": null
+              },
+              {
+                "category": "0153",
+                "code": "A0153",
+                "name": "柑橘类种植",
+                "children": null
+              },
+              {
+                "category": "0154",
+                "code": "A0154",
+                "name": "香蕉等亚热带水果种植",
+                "children": null
+              },
+              {
+                "category": "0159",
+                "code": "A0159",
+                "name": "其他水果种植",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "016",
+            "code": "A016",
+            "name": "坚果、含油果、香料和饮料作物种植",
+            "children": [
+              {
+                "category": "0161",
+                "code": "A0161",
+                "name": "坚果种植",
+                "children": null
+              },
+              {
+                "category": "0162",
+                "code": "A0162",
+                "name": "含油果种植",
+                "children": null
+              },
+              {
+                "category": "0163",
+                "code": "A0163",
+                "name": "香料作物种植",
+                "children": null
+              },
+              {
+                "category": "0169",
+                "code": "A0169",
+                "name": "茶及其他饮料作物种植",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "02",
+        "code": "A02",
+        "name": "林业",
+        "children": [
+          {
+            "category": "021",
+            "code": "A021",
+            "name": "林木育种和育苗",
+            "children": [
+              {
+                "category": "0211",
+                "code": "A0211",
+                "name": "林木育种",
+                "children": null
+              },
+              {
+                "category": "0212",
+                "code": "A0212",
+                "name": "林木育苗",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "024",
+            "code": "A024",
+            "name": "木材和竹材采运",
+            "children": [
+              {
+                "category": "0241",
+                "code": "A0241",
+                "name": "木材采运",
+                "children": null
+              },
+              {
+                "category": "0242",
+                "code": "A0242",
+                "name": "竹材采运",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "025",
+            "code": "A025",
+            "name": "林产品采集",
+            "children": [
+              {
+                "category": "0251",
+                "code": "A0251",
+                "name": "木竹材林产品采集",
+                "children": null
+              },
+              {
+                "category": "0252",
+                "code": "A0252",
+                "name": "非木竹材林产品采集",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "03",
+        "code": "A03",
+        "name": "畜牧业",
+        "children": [
+          {
+            "category": "031",
+            "code": "A031",
+            "name": "牲畜饲养",
+            "children": [
+              {
+                "category": "0311",
+                "code": "A0311",
+                "name": "牛的饲养",
+                "children": null
+              },
+              {
+                "category": "0312",
+                "code": "A0312",
+                "name": "马的饲养",
+                "children": null
+              },
+              {
+                "category": "0313",
+                "code": "A0313",
+                "name": "猪的饲养",
+                "children": null
+              },
+              {
+                "category": "0314",
+                "code": "A0314",
+                "name": "羊的饲养",
+                "children": null
+              },
+              {
+                "category": "0315",
+                "code": "A0315",
+                "name": "骆驼饲养",
+                "children": null
+              },
+              {
+                "category": "0319",
+                "code": "A0319",
+                "name": "其他牲畜饲养",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "032",
+            "code": "A032",
+            "name": "家禽饲养",
+            "children": [
+              {
+                "category": "0321",
+                "code": "A0321",
+                "name": "鸡的饲养",
+                "children": null
+              },
+              {
+                "category": "0322",
+                "code": "A0322",
+                "name": "鸭的饲养",
+                "children": null
+              },
+              {
+                "category": "0323",
+                "code": "A0323",
+                "name": "鹅的饲养",
+                "children": null
+              },
+              {
+                "category": "0329",
+                "code": "A0329",
+                "name": "其他家禽饲养",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "04",
+        "code": "A04",
+        "name": "渔业",
+        "children": [
+          {
+            "category": "041",
+            "code": "A041",
+            "name": "水产养殖",
+            "children": [
+              {
+                "category": "0411",
+                "code": "A0411",
+                "name": "海水养殖",
+                "children": null
+              },
+              {
+                "category": "0412",
+                "code": "A0412",
+                "name": "内陆养殖",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "042",
+            "code": "A042",
+            "name": "水产捕捞",
+            "children": [
+              {
+                "category": "0421",
+                "code": "A0421",
+                "name": "海水捕捞",
+                "children": null
+              },
+              {
+                "category": "0422",
+                "code": "A0422",
+                "name": "内陆捕捞",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "05",
+        "code": "A05",
+        "name": "农、林、牧、渔服务业",
+        "children": [
+          {
+            "category": "051",
+            "code": "A051",
+            "name": "农业服务业",
+            "children": [
+              {
+                "category": "0511",
+                "code": "A0511",
+                "name": "农业机械服务",
+                "children": null
+              },
+              {
+                "category": "0512",
+                "code": "A0512",
+                "name": "灌溉服务",
+                "children": null
+              },
+              {
+                "category": "0513",
+                "code": "A0513",
+                "name": "农产品初加工服务",
+                "children": null
+              },
+              {
+                "category": "0519",
+                "code": "A0519",
+                "name": "其他农业服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "052",
+            "code": "A052",
+            "name": "林业服务业",
+            "children": [
+              {
+                "category": "0521",
+                "code": "A0521",
+                "name": "林业有害生物防治服务",
+                "children": null
+              },
+              {
+                "category": "0522",
+                "code": "A0522",
+                "name": "森林防火服务",
+                "children": null
+              },
+              {
+                "category": "0523",
+                "code": "A0523",
+                "name": "林产品初级加工服务",
+                "children": null
+              },
+              {
+                "category": "0529",
+                "code": "A0529",
+                "name": "其他林业服务",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "06",
+        "code": "A06",
+        "name": "煤炭开采和洗选业",
+        "children": null
+      },
+      {
+        "category": "07",
+        "code": "A07",
+        "name": "石油和天然气开采业",
+        "children": null
+      },
+      {
+        "category": "08",
+        "code": "A08",
+        "name": "黑色金属矿采选业",
+        "children": null
+      },
+      {
+        "category": "09",
+        "code": "A09",
+        "name": "有色金属矿采选业",
+        "children": [
+          {
+            "category": "091",
+            "code": "A091",
+            "name": "常用有色金属矿采选",
+            "children": [
+              {
+                "category": "0911",
+                "code": "A0911",
+                "name": "铜矿采选",
+                "children": null
+              },
+              {
+                "category": "0912",
+                "code": "A0912",
+                "name": "铅锌矿采选",
+                "children": null
+              },
+              {
+                "category": "0913",
+                "code": "A0913",
+                "name": "镍钴矿采选",
+                "children": null
+              },
+              {
+                "category": "0914",
+                "code": "A0914",
+                "name": "锡矿采选",
+                "children": null
+              },
+              {
+                "category": "0915",
+                "code": "A0915",
+                "name": "锑矿采选",
+                "children": null
+              },
+              {
+                "category": "0916",
+                "code": "A0916",
+                "name": "铝矿采选",
+                "children": null
+              },
+              {
+                "category": "0917",
+                "code": "A0917",
+                "name": "镁矿采选",
+                "children": null
+              },
+              {
+                "category": "0919",
+                "code": "A0919",
+                "name": "其他常用有色金属矿采选",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "092",
+            "code": "A092",
+            "name": "贵金属矿采选",
+            "children": [
+              {
+                "category": "0921",
+                "code": "A0921",
+                "name": "金矿采选",
+                "children": null
+              },
+              {
+                "category": "0922",
+                "code": "A0922",
+                "name": "银矿采选",
+                "children": null
+              },
+              {
+                "category": "0929",
+                "code": "A0929",
+                "name": "其他贵金属矿采选",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "093",
+            "code": "A093",
+            "name": "稀有稀土金属矿采选",
+            "children": [
+              {
+                "category": "0931",
+                "code": "A0931",
+                "name": "钨钼矿采选",
+                "children": null
+              },
+              {
+                "category": "0932",
+                "code": "A0932",
+                "name": "稀土金属矿采选",
+                "children": null
+              },
+              {
+                "category": "0933",
+                "code": "A0933",
+                "name": "放射性金属矿采选",
+                "children": null
+              },
+              {
+                "category": "0939",
+                "code": "A0939",
+                "name": "其他稀有金属矿采选",
+                "children": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "B",
+    "code": "B",
+    "name": "采矿业",
+    "children": null
+  },
+  {
+    "category": "C",
+    "code": "C",
+    "name": "制造业",
+    "children": [
+      {
+        "category": "10",
+        "code": "C10",
+        "name": "非金属矿采选业",
+        "children": [
+          {
+            "category": "101",
+            "code": "C101",
+            "name": "土砂石开采",
+            "children": [
+              {
+                "category": "1011",
+                "code": "C1011",
+                "name": "石灰石、石膏开采",
+                "children": null
+              },
+              {
+                "category": "1012",
+                "code": "C1012",
+                "name": "建筑装饰用石开采",
+                "children": null
+              },
+              {
+                "category": "1013",
+                "code": "C1013",
+                "name": "耐火土石开采",
+                "children": null
+              },
+              {
+                "category": "1019",
+                "code": "C1019",
+                "name": "粘土及其他土砂石开采",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "109",
+            "code": "C109",
+            "name": "石棉及其他非金属矿采选",
+            "children": [
+              {
+                "category": "1091",
+                "code": "C1091",
+                "name": "石棉、云母矿采选",
+                "children": null
+              },
+              {
+                "category": "1092",
+                "code": "C1092",
+                "name": "石墨、滑石采选",
+                "children": null
+              },
+              {
+                "category": "1093",
+                "code": "C1093",
+                "name": "宝石、玉石采选",
+                "children": null
+              },
+              {
+                "category": "1099",
+                "code": "C1099",
+                "name": "其他未列明非金属矿采选",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "11",
+        "code": "C11",
+        "name": "开采辅助活动",
+        "children": null
+      },
+      {
+        "category": "12",
+        "code": "C12",
+        "name": "其他采矿业",
+        "children": null
+      },
+      {
+        "category": "13",
+        "code": "C13",
+        "name": "农副食品加工业",
+        "children": [
+          {
+            "category": "132",
+            "code": "C132",
+            "name": "麻类种植",
+            "children": [
+              {
+                "category": "1320",
+                "code": "C1320",
+                "name": "饲料加工",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "133",
+            "code": "C133",
+            "name": "植物油加工",
+            "children": [
+              {
+                "category": "1331",
+                "code": "C1331",
+                "name": "食用植物油加工",
+                "children": null
+              },
+              {
+                "category": "1332",
+                "code": "C1332",
+                "name": "非食用植物油加工",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "135",
+            "code": "C135",
+            "name": "屠宰及肉类加工",
+            "children": [
+              {
+                "category": "1351",
+                "code": "C1351",
+                "name": "牲畜屠宰",
+                "children": null
+              },
+              {
+                "category": "1352",
+                "code": "C1352",
+                "name": "禽类屠宰",
+                "children": null
+              },
+              {
+                "category": "1353",
+                "code": "C1353",
+                "name": "肉制品及副产品加工",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "136",
+            "code": "C136",
+            "name": "水产品加工",
+            "children": [
+              {
+                "category": "1361",
+                "code": "C1361",
+                "name": "水产品冷冻加工",
+                "children": null
+              },
+              {
+                "category": "1362",
+                "code": "C1362",
+                "name": "鱼糜制品及水产品干腌制加工",
+                "children": null
+              },
+              {
+                "category": "1363",
+                "code": "C1363",
+                "name": "水产饲料制造",
+                "children": null
+              },
+              {
+                "category": "1364",
+                "code": "C1364",
+                "name": "鱼油提取及制品制造",
+                "children": null
+              },
+              {
+                "category": "1369",
+                "code": "C1369",
+                "name": "其他水产品加工",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "137",
+            "code": "C137",
+            "name": "蔬菜、水果和坚果加工",
+            "children": [
+              {
+                "category": "1371",
+                "code": "C1371",
+                "name": "蔬菜加工",
+                "children": null
+              },
+              {
+                "category": "1372",
+                "code": "C1372",
+                "name": "水果和坚果加工",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "139",
+            "code": "C139",
+            "name": "其他农副食品加工",
+            "children": [
+              {
+                "category": "1391",
+                "code": "C1391",
+                "name": "淀粉及淀粉制品制造",
+                "children": null
+              },
+              {
+                "category": "1392",
+                "code": "C1392",
+                "name": "豆制品制造",
+                "children": null
+              },
+              {
+                "category": "1393",
+                "code": "C1393",
+                "name": "蛋品加工",
+                "children": null
+              },
+              {
+                "category": "1399",
+                "code": "C1399",
+                "name": "其他未列明农副食品加工",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "14",
+        "code": "C14",
+        "name": "食品制造业",
+        "children": [
+          {
+            "category": "141",
+            "code": "C141",
+            "name": "焙烤食品制造",
+            "children": [
+              {
+                "category": "1411",
+                "code": "C1411",
+                "name": "糕点、面包制造",
+                "children": null
+              },
+              {
+                "category": "1419",
+                "code": "C1419",
+                "name": "饼干及其他焙烤食品制造",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "142",
+            "code": "C142",
+            "name": "糖果、巧克力及蜜饯制造",
+            "children": [
+              {
+                "category": "1421",
+                "code": "C1421",
+                "name": "糖果、巧克力制造",
+                "children": null
+              },
+              {
+                "category": "1422",
+                "code": "C1422",
+                "name": "蜜饯制作",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "143",
+            "code": "C143",
+            "name": "方便食品制造",
+            "children": [
+              {
+                "category": "1431",
+                "code": "C1431",
+                "name": "米、面制品制造",
+                "children": null
+              },
+              {
+                "category": "1432",
+                "code": "C1432",
+                "name": "速冻食品制造",
+                "children": null
+              },
+              {
+                "category": "1439",
+                "code": "C1439",
+                "name": "方便面及其他方便食品制造",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "145",
+            "code": "C145",
+            "name": "罐头食品制造",
+            "children": [
+              {
+                "category": "1451",
+                "code": "C1451",
+                "name": "肉、禽类罐头制造",
+                "children": null
+              },
+              {
+                "category": "1452",
+                "code": "C1452",
+                "name": "水产品罐头制造",
+                "children": null
+              },
+              {
+                "category": "1453",
+                "code": "C1453",
+                "name": "蔬菜、水果罐头制造",
+                "children": null
+              },
+              {
+                "category": "1459",
+                "code": "C1459",
+                "name": "其他罐头食品制造",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "146",
+            "code": "C146",
+            "name": "调味品、发酵制品制造",
+            "children": [
+              {
+                "category": "1461",
+                "code": "C1461",
+                "name": "味精制造",
+                "children": null
+              },
+              {
+                "category": "1462",
+                "code": "C1462",
+                "name": "酱油、食醋及类似制品制造",
+                "children": null
+              },
+              {
+                "category": "1469",
+                "code": "C1469",
+                "name": "其他调味品、发酵制品制造",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "149",
+            "code": "C149",
+            "name": "其他食品制造",
+            "children": [
+              {
+                "category": "1491",
+                "code": "C1491",
+                "name": "营养食品制造",
+                "children": null
+              },
+              {
+                "category": "1492",
+                "code": "C1492",
+                "name": "保健食品制造",
+                "children": null
+              },
+              {
+                "category": "1493",
+                "code": "C1493",
+                "name": "冷冻饮品及食用冰制造",
+                "children": null
+              },
+              {
+                "category": "1494",
+                "code": "C1494",
+                "name": "盐加工",
+                "children": null
+              },
+              {
+                "category": "1495",
+                "code": "C1495",
+                "name": "食品及饲料添加剂制造",
+                "children": null
+              },
+              {
+                "category": "1499",
+                "code": "C1499",
+                "name": "其他未列明食品制造",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "15",
+        "code": "C15",
+        "name": "酒、饮料和精制茶制造业",
+        "children": [
+          {
+            "category": "151",
+            "code": "C151",
+            "name": "酒的制造",
+            "children": [
+              {
+                "category": "1511",
+                "code": "C1511",
+                "name": "酒精制造",
+                "children": null
+              },
+              {
+                "category": "1512",
+                "code": "C1512",
+                "name": "白酒制造",
+                "children": null
+              },
+              {
+                "category": "1513",
+                "code": "C1513",
+                "name": "啤酒制造",
+                "children": null
+              },
+              {
+                "category": "1514",
+                "code": "C1514",
+                "name": "黄酒制造",
+                "children": null
+              },
+              {
+                "category": "1515",
+                "code": "C1515",
+                "name": "葡萄酒制造",
+                "children": null
+              },
+              {
+                "category": "1519",
+                "code": "C1519",
+                "name": "其他酒制造",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "152",
+            "code": "C152",
+            "name": "饮料制造",
+            "children": [
+              {
+                "category": "1521",
+                "code": "C1521",
+                "name": "碳酸饮料制造",
+                "children": null
+              },
+              {
+                "category": "1522",
+                "code": "C1522",
+                "name": "瓶（罐）装饮用水制造",
+                "children": null
+              },
+              {
+                "category": "1523",
+                "code": "C1523",
+                "name": "果菜汁及果菜汁饮料制造",
+                "children": null
+              },
+              {
+                "category": "1524",
+                "code": "C1524",
+                "name": "含乳饮料和植物蛋白饮料制造",
+                "children": null
+              },
+              {
+                "category": "1525",
+                "code": "C1525",
+                "name": "固体饮料制造",
+                "children": null
+              },
+              {
+                "category": "1529",
+                "code": "C1529",
+                "name": "茶饮料及其他饮料制造",
+                "children": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "D",
+    "code": "D",
+    "name": "电力、热力、燃气及水生产和供应业",
+    "children": [
+      {
+        "category": "44",
+        "code": "D44",
+        "name": "电力、热力生产和供应业",
+        "children": [
+          {
+            "category": "441",
+            "code": "D441",
+            "name": "电力生产",
+            "children": [
+              {
+                "category": "4411",
+                "code": "D4411",
+                "name": "火力发电",
+                "children": null
+              },
+              {
+                "category": "4412",
+                "code": "D4412",
+                "name": "水力发电",
+                "children": null
+              },
+              {
+                "category": "4413",
+                "code": "D4413",
+                "name": "核力发电",
+                "children": null
+              },
+              {
+                "category": "4414",
+                "code": "D4414",
+                "name": "风力发电",
+                "children": null
+              },
+              {
+                "category": "4415",
+                "code": "D4415",
+                "name": "太阳能发电",
+                "children": null
+              },
+              {
+                "category": "4419",
+                "code": "D4419",
+                "name": "其他电力生产",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "45",
+        "code": "D45",
+        "name": "燃气生产和供应业",
+        "children": null
+      },
+      {
+        "category": "46",
+        "code": "D46",
+        "name": "水的生产和供应业",
+        "children": null
+      },
+      {
+        "category": "47",
+        "code": "D47",
+        "name": "房屋建筑业",
+        "children": null
+      },
+      {
+        "category": "48",
+        "code": "D48",
+        "name": "土木工程建筑业",
+        "children": [
+          {
+            "category": "481",
+            "code": "D481",
+            "name": "铁路、道路、隧道和桥梁工程建筑",
+            "children": [
+              {
+                "category": "4811",
+                "code": "D4811",
+                "name": "铁路工程建筑",
+                "children": null
+              },
+              {
+                "category": "4812",
+                "code": "D4812",
+                "name": "公路工程建筑",
+                "children": null
+              },
+              {
+                "category": "4813",
+                "code": "D4813",
+                "name": "市政道路工程建筑",
+                "children": null
+              },
+              {
+                "category": "4819",
+                "code": "D4819",
+                "name": "其他道路、隧道和桥梁工程建筑",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "482",
+            "code": "D482",
+            "name": "水利和内河港口工程建筑",
+            "children": [
+              {
+                "category": "4821",
+                "code": "D4821",
+                "name": "水源及供水设施工程建筑",
+                "children": null
+              },
+              {
+                "category": "4822",
+                "code": "D4822",
+                "name": "河湖治理及防洪设施工程建筑",
+                "children": null
+              },
+              {
+                "category": "4823",
+                "code": "D4823",
+                "name": "港口及航运设施工程建筑",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "485",
+            "code": "D485",
+            "name": "架线和管道工程建筑",
+            "children": [
+              {
+                "category": "4851",
+                "code": "D4851",
+                "name": "架线及设备工程建筑",
+                "children": null
+              },
+              {
+                "category": "4852",
+                "code": "D4852",
+                "name": "管道工程建筑",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "49",
+        "code": "D49",
+        "name": "建筑安装业",
+        "children": null
+      },
+      {
+        "category": "50",
+        "code": "D50",
+        "name": "建筑装饰和其他建筑业",
+        "children": [
+          {
+            "category": "502",
+            "code": "D502",
+            "name": "工程准备活动",
+            "children": [
+              {
+                "category": "5021",
+                "code": "D5021",
+                "name": "建筑物拆除活动",
+                "children": null
+              },
+              {
+                "category": "5029",
+                "code": "D5029",
+                "name": "其他工程准备活动",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "51",
+        "code": "D51",
+        "name": "批发业",
+        "children": [
+          {
+            "category": "511",
+            "code": "D511",
+            "name": "农、林、牧产品批发",
+            "children": [
+              {
+                "category": "5111",
+                "code": "D5111",
+                "name": "谷物、豆及薯类批发",
+                "children": null
+              },
+              {
+                "category": "5112",
+                "code": "D5112",
+                "name": "种子批发",
+                "children": null
+              },
+              {
+                "category": "5113",
+                "code": "D5113",
+                "name": "饲料批发",
+                "children": null
+              },
+              {
+                "category": "5114",
+                "code": "D5114",
+                "name": "棉、麻批发",
+                "children": null
+              },
+              {
+                "category": "5115",
+                "code": "D5115",
+                "name": "林业产品批发",
+                "children": null
+              },
+              {
+                "category": "5116",
+                "code": "D5116",
+                "name": "牲畜批发",
+                "children": null
+              },
+              {
+                "category": "5119",
+                "code": "D5119",
+                "name": "其他农牧产品批发",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "512",
+            "code": "D512",
+            "name": "食品、饮料及烟草制品批发",
+            "children": [
+              {
+                "category": "5121",
+                "code": "D5121",
+                "name": "米、面制品及食用油批发",
+                "children": null
+              },
+              {
+                "category": "5122",
+                "code": "D5122",
+                "name": "糕点、糖果及糖批发",
+                "children": null
+              },
+              {
+                "category": "5123",
+                "code": "D5123",
+                "name": "果品、蔬菜批发",
+                "children": null
+              },
+              {
+                "category": "5124",
+                "code": "D5124",
+                "name": "肉、禽、蛋、奶及水产品批发",
+                "children": null
+              },
+              {
+                "category": "5125",
+                "code": "D5125",
+                "name": "盐及调味品批发",
+                "children": null
+              },
+              {
+                "category": "5126",
+                "code": "D5126",
+                "name": "营养和保健品批发",
+                "children": null
+              },
+              {
+                "category": "5127",
+                "code": "D5127",
+                "name": "酒、饮料及茶叶批发",
+                "children": null
+              },
+              {
+                "category": "5128",
+                "code": "D5128",
+                "name": "烟草制品批发",
+                "children": null
+              },
+              {
+                "category": "5129",
+                "code": "D5129",
+                "name": "其他食品批发",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "513",
+            "code": "D513",
+            "name": "纺织、服装及家庭用品批发",
+            "children": [
+              {
+                "category": "5131",
+                "code": "D5131",
+                "name": "纺织品、针织品及原料批发",
+                "children": null
+              },
+              {
+                "category": "5132",
+                "code": "D5132",
+                "name": "服装批发",
+                "children": null
+              },
+              {
+                "category": "5133",
+                "code": "D5133",
+                "name": "鞋帽批发",
+                "children": null
+              },
+              {
+                "category": "5134",
+                "code": "D5134",
+                "name": "化妆品及卫生用品批发",
+                "children": null
+              },
+              {
+                "category": "5135",
+                "code": "D5135",
+                "name": "厨房、卫生间用具及日用杂货批发",
+                "children": null
+              },
+              {
+                "category": "5136",
+                "code": "D5136",
+                "name": "灯具、装饰物品批发",
+                "children": null
+              },
+              {
+                "category": "5137",
+                "code": "D5137",
+                "name": "家用电器批发",
+                "children": null
+              },
+              {
+                "category": "5139",
+                "code": "D5139",
+                "name": "其他家庭用品批发",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "514",
+            "code": "D514",
+            "name": "文化、体育用品及器材批发",
+            "children": [
+              {
+                "category": "5141",
+                "code": "D5141",
+                "name": "文具用品批发",
+                "children": null
+              },
+              {
+                "category": "5142",
+                "code": "D5142",
+                "name": "体育用品及器材批发",
+                "children": null
+              },
+              {
+                "category": "5143",
+                "code": "D5143",
+                "name": "图书批发",
+                "children": null
+              },
+              {
+                "category": "5144",
+                "code": "D5144",
+                "name": "报刊批发",
+                "children": null
+              },
+              {
+                "category": "5145",
+                "code": "D5145",
+                "name": "音像制品及电子出版物批发",
+                "children": null
+              },
+              {
+                "category": "5146",
+                "code": "D5146",
+                "name": "首饰、工艺品及收藏品批发",
+                "children": null
+              },
+              {
+                "category": "5149",
+                "code": "D5149",
+                "name": "其他文化用品批发",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "515",
+            "code": "D515",
+            "name": "医药及医疗器材批发",
+            "children": [
+              {
+                "category": "5151",
+                "code": "D5151",
+                "name": "西药批发",
+                "children": null
+              },
+              {
+                "category": "5152",
+                "code": "D5152",
+                "name": "中药批发",
+                "children": null
+              },
+              {
+                "category": "5153",
+                "code": "D5153",
+                "name": "医疗用品及器材批发",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "516",
+            "code": "D516",
+            "name": "矿产品、建材及化工产品批发",
+            "children": [
+              {
+                "category": "5161",
+                "code": "D5161",
+                "name": "煤炭及制品批发",
+                "children": null
+              },
+              {
+                "category": "5162",
+                "code": "D5162",
+                "name": "石油及制品批发",
+                "children": null
+              },
+              {
+                "category": "5163",
+                "code": "D5163",
+                "name": "非金属矿及制品批发",
+                "children": null
+              },
+              {
+                "category": "5164",
+                "code": "D5164",
+                "name": "金属及金属矿批发",
+                "children": null
+              },
+              {
+                "category": "5165",
+                "code": "D5165",
+                "name": "建材批发",
+                "children": null
+              },
+              {
+                "category": "5166",
+                "code": "D5166",
+                "name": "化肥批发",
+                "children": null
+              },
+              {
+                "category": "5167",
+                "code": "D5167",
+                "name": "农药批发",
+                "children": null
+              },
+              {
+                "category": "5168",
+                "code": "D5168",
+                "name": "农用薄膜批发",
+                "children": null
+              },
+              {
+                "category": "5169",
+                "code": "D5169",
+                "name": "其他化工产品批发",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "517",
+            "code": "D517",
+            "name": "机械设备、五金产品及电子产品批发",
+            "children": [
+              {
+                "category": "5171",
+                "code": "D5171",
+                "name": "农业机械批发",
+                "children": null
+              },
+              {
+                "category": "5172",
+                "code": "D5172",
+                "name": "汽车批发",
+                "children": null
+              },
+              {
+                "category": "5173",
+                "code": "D5173",
+                "name": "汽车零配件批发",
+                "children": null
+              },
+              {
+                "category": "5174",
+                "code": "D5174",
+                "name": "摩托车及零配件批发",
+                "children": null
+              },
+              {
+                "category": "5175",
+                "code": "D5175",
+                "name": "五金产品批发",
+                "children": null
+              },
+              {
+                "category": "5176",
+                "code": "D5176",
+                "name": "电气设备批发",
+                "children": null
+              },
+              {
+                "category": "5177",
+                "code": "D5177",
+                "name": "计算机、软件及辅助设备批发",
+                "children": null
+              },
+              {
+                "category": "5178",
+                "code": "D5178",
+                "name": "通讯及广播电视设备批发",
+                "children": null
+              },
+              {
+                "category": "5179",
+                "code": "D5179",
+                "name": "其他机械设备及电子产品批发",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "518",
+            "code": "D518",
+            "name": "贸易经纪与代理",
+            "children": [
+              {
+                "category": "5181",
+                "code": "D5181",
+                "name": "贸易代理",
+                "children": null
+              },
+              {
+                "category": "5182",
+                "code": "D5182",
+                "name": "拍卖",
+                "children": null
+              },
+              {
+                "category": "5189",
+                "code": "D5189",
+                "name": "其他贸易经纪与代理",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "519",
+            "code": "D519",
+            "name": "其他批发业",
+            "children": [
+              {
+                "category": "5191",
+                "code": "D5191",
+                "name": "再生物资回收与批发",
+                "children": null
+              },
+              {
+                "category": "5199",
+                "code": "D5199",
+                "name": "其他未列明批发业",
+                "children": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "E",
+    "code": "E",
+    "name": "建筑业",
+    "children": null
+  },
+  {
+    "category": "F",
+    "code": "F",
+    "name": "批发和零售业",
+    "children": null
+  },
+  {
+    "category": "G",
+    "code": "G",
+    "name": "交通运输、仓储和邮政业",
+    "children": [
+      {
+        "category": "52",
+        "code": "G52",
+        "name": "零售业",
+        "children": [
+          {
+            "category": "521",
+            "code": "G521",
+            "name": "综合零售",
+            "children": [
+              {
+                "category": "5211",
+                "code": "G5211",
+                "name": "百货零售",
+                "children": null
+              },
+              {
+                "category": "5212",
+                "code": "G5212",
+                "name": "超级市场零售",
+                "children": null
+              },
+              {
+                "category": "5219",
+                "code": "G5219",
+                "name": "其他综合零售",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "522",
+            "code": "G522",
+            "name": "食品、饮料及烟草制品专门零售",
+            "children": [
+              {
+                "category": "5221",
+                "code": "G5221",
+                "name": "粮油零售",
+                "children": null
+              },
+              {
+                "category": "5222",
+                "code": "G5222",
+                "name": "糕点、面包零售",
+                "children": null
+              },
+              {
+                "category": "5223",
+                "code": "G5223",
+                "name": "果品、蔬菜零售",
+                "children": null
+              },
+              {
+                "category": "5224",
+                "code": "G5224",
+                "name": "肉、禽、蛋、奶及水产品零售",
+                "children": null
+              },
+              {
+                "category": "5225",
+                "code": "G5225",
+                "name": "营养和保健品零售",
+                "children": null
+              },
+              {
+                "category": "5226",
+                "code": "G5226",
+                "name": "酒、饮料及茶叶零售",
+                "children": null
+              },
+              {
+                "category": "5227",
+                "code": "G5227",
+                "name": "烟草制品零售",
+                "children": null
+              },
+              {
+                "category": "5229",
+                "code": "G5229",
+                "name": "其他食品零售",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "523",
+            "code": "G523",
+            "name": "纺织、服装及日用品专门零售",
+            "children": [
+              {
+                "category": "5231",
+                "code": "G5231",
+                "name": "纺织品及针织品零售",
+                "children": null
+              },
+              {
+                "category": "5232",
+                "code": "G5232",
+                "name": "服装零售",
+                "children": null
+              },
+              {
+                "category": "5233",
+                "code": "G5233",
+                "name": "鞋帽零售",
+                "children": null
+              },
+              {
+                "category": "5234",
+                "code": "G5234",
+                "name": "化妆品及卫生用品零售",
+                "children": null
+              },
+              {
+                "category": "5235",
+                "code": "G5235",
+                "name": "钟表、眼镜零售",
+                "children": null
+              },
+              {
+                "category": "5236",
+                "code": "G5236",
+                "name": "箱、包零售",
+                "children": null
+              },
+              {
+                "category": "5237",
+                "code": "G5237",
+                "name": "厨房用具及日用杂品零售",
+                "children": null
+              },
+              {
+                "category": "5238",
+                "code": "G5238",
+                "name": "自行车零售",
+                "children": null
+              },
+              {
+                "category": "5239",
+                "code": "G5239",
+                "name": "其他日用品零售",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "524",
+            "code": "G524",
+            "name": "文化、体育用品及器材专门零售",
+            "children": [
+              {
+                "category": "5241",
+                "code": "G5241",
+                "name": "文具用品零售",
+                "children": null
+              },
+              {
+                "category": "5242",
+                "code": "G5242",
+                "name": "体育用品及器材零售",
+                "children": null
+              },
+              {
+                "category": "5243",
+                "code": "G5243",
+                "name": "图书、报刊零售",
+                "children": null
+              },
+              {
+                "category": "5244",
+                "code": "G5244",
+                "name": "音像制品及电子出版物零售",
+                "children": null
+              },
+              {
+                "category": "5245",
+                "code": "G5245",
+                "name": "珠宝首饰零售",
+                "children": null
+              },
+              {
+                "category": "5246",
+                "code": "G5246",
+                "name": "工艺美术品及收藏品零售",
+                "children": null
+              },
+              {
+                "category": "5247",
+                "code": "G5247",
+                "name": "乐器零售",
+                "children": null
+              },
+              {
+                "category": "5248",
+                "code": "G5248",
+                "name": "照相器材零售",
+                "children": null
+              },
+              {
+                "category": "5249",
+                "code": "G5249",
+                "name": "其他文化用品零售",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "525",
+            "code": "G525",
+            "name": "医药及医疗器材专门零售",
+            "children": [
+              {
+                "category": "5251",
+                "code": "G5251",
+                "name": "药品零售",
+                "children": null
+              },
+              {
+                "category": "5252",
+                "code": "G5252",
+                "name": "医疗用品及器材零售",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "526",
+            "code": "G526",
+            "name": "汽车、摩托车、燃料及零配件专门零售",
+            "children": [
+              {
+                "category": "5261",
+                "code": "G5261",
+                "name": "汽车零售",
+                "children": null
+              },
+              {
+                "category": "5262",
+                "code": "G5262",
+                "name": "汽车零配件零售",
+                "children": null
+              },
+              {
+                "category": "5263",
+                "code": "G5263",
+                "name": "摩托车及零配件零售",
+                "children": null
+              },
+              {
+                "category": "5264",
+                "code": "G5264",
+                "name": "机动车燃料零售",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "527",
+            "code": "G527",
+            "name": "家用电器及电子产品专门零售",
+            "children": [
+              {
+                "category": "5271",
+                "code": "G5271",
+                "name": "家用视听设备零售",
+                "children": null
+              },
+              {
+                "category": "5272",
+                "code": "G5272",
+                "name": "日用家电设备零售",
+                "children": null
+              },
+              {
+                "category": "5273",
+                "code": "G5273",
+                "name": "计算机、软件及辅助设备零售",
+                "children": null
+              },
+              {
+                "category": "5274",
+                "code": "G5274",
+                "name": "通信设备零售",
+                "children": null
+              },
+              {
+                "category": "5279",
+                "code": "G5279",
+                "name": "其他电子产品零售",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "528",
+            "code": "G528",
+            "name": "五金、家具及室内装饰材料专门零售",
+            "children": [
+              {
+                "category": "5281",
+                "code": "G5281",
+                "name": "五金零售",
+                "children": null
+              },
+              {
+                "category": "5282",
+                "code": "G5282",
+                "name": "灯具零售",
+                "children": null
+              },
+              {
+                "category": "5283",
+                "code": "G5283",
+                "name": "家具零售",
+                "children": null
+              },
+              {
+                "category": "5284",
+                "code": "G5284",
+                "name": "涂料零售",
+                "children": null
+              },
+              {
+                "category": "5285",
+                "code": "G5285",
+                "name": "卫生洁具零售",
+                "children": null
+              },
+              {
+                "category": "5286",
+                "code": "G5286",
+                "name": "木质装饰材料零售",
+                "children": null
+              },
+              {
+                "category": "5287",
+                "code": "G5287",
+                "name": "陶瓷、石材装饰材料零售",
+                "children": null
+              },
+              {
+                "category": "5289",
+                "code": "G5289",
+                "name": "其他室内装饰材料零售",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "529",
+            "code": "G529",
+            "name": "货摊、无店铺及其他零售业",
+            "children": [
+              {
+                "category": "5291",
+                "code": "G5291",
+                "name": "货摊食品零售",
+                "children": null
+              },
+              {
+                "category": "5292",
+                "code": "G5292",
+                "name": "货摊纺织、服装及鞋零售",
+                "children": null
+              },
+              {
+                "category": "5293",
+                "code": "G5293",
+                "name": "货摊日用品零售",
+                "children": null
+              },
+              {
+                "category": "5294",
+                "code": "G5294",
+                "name": "互联网零售",
+                "children": null
+              },
+              {
+                "category": "5295",
+                "code": "G5295",
+                "name": "邮购及电视、电话零售",
+                "children": null
+              },
+              {
+                "category": "5296",
+                "code": "G5296",
+                "name": "旧货零售",
+                "children": null
+              },
+              {
+                "category": "5297",
+                "code": "G5297",
+                "name": "生活用燃料零售",
+                "children": null
+              },
+              {
+                "category": "5299",
+                "code": "G5299",
+                "name": "其他未列明零售业",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "53",
+        "code": "G53",
+        "name": "铁路运输业",
+        "children": [
+          {
+            "category": "533",
+            "code": "G533",
+            "name": "铁路运输辅助活动",
+            "children": [
+              {
+                "category": "5331",
+                "code": "G5331",
+                "name": "客运火车站",
+                "children": null
+              },
+              {
+                "category": "5332",
+                "code": "G5332",
+                "name": "货运火车站",
+                "children": null
+              },
+              {
+                "category": "5339",
+                "code": "G5339",
+                "name": "其他铁路运输辅助活动",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "54",
+        "code": "G54",
+        "name": "道路运输业",
+        "children": [
+          {
+            "category": "541",
+            "code": "G541",
+            "name": "城市公共交通运输",
+            "children": [
+              {
+                "category": "5411",
+                "code": "G5411",
+                "name": "公共电汽车客运",
+                "children": null
+              },
+              {
+                "category": "5412",
+                "code": "G5412",
+                "name": "城市轨道交通",
+                "children": null
+              },
+              {
+                "category": "5413",
+                "code": "G5413",
+                "name": "出租车客运",
+                "children": null
+              },
+              {
+                "category": "5419",
+                "code": "G5419",
+                "name": "其他城市公共交通运输",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "544",
+            "code": "G544",
+            "name": "道路运输辅助活动",
+            "children": [
+              {
+                "category": "5441",
+                "code": "G5441",
+                "name": "客运汽车站",
+                "children": null
+              },
+              {
+                "category": "5442",
+                "code": "G5442",
+                "name": "公路管理与养护",
+                "children": null
+              },
+              {
+                "category": "5449",
+                "code": "G5449",
+                "name": "其他道路运输辅助活动",
+                "children": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "H",
+    "code": "H",
+    "name": "住宿和餐饮业",
+    "children": [
+      {
+        "category": "55",
+        "code": "H55",
+        "name": "水上运输业",
+        "children": [
+          {
+            "category": "551",
+            "code": "H551",
+            "name": "水上旅客运输",
+            "children": [
+              {
+                "category": "5511",
+                "code": "H5511",
+                "name": "海洋旅客运输",
+                "children": null
+              },
+              {
+                "category": "5512",
+                "code": "H5512",
+                "name": "内河旅客运输",
+                "children": null
+              },
+              {
+                "category": "5513",
+                "code": "H5513",
+                "name": "客运轮渡运输",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "552",
+            "code": "H552",
+            "name": "水上货物运输",
+            "children": [
+              {
+                "category": "5521",
+                "code": "H5521",
+                "name": "远洋货物运输",
+                "children": null
+              },
+              {
+                "category": "5522",
+                "code": "H5522",
+                "name": "沿海货物运输",
+                "children": null
+              },
+              {
+                "category": "5523",
+                "code": "H5523",
+                "name": "内河货物运输",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "553",
+            "code": "H553",
+            "name": "水上运输辅助活动",
+            "children": [
+              {
+                "category": "5531",
+                "code": "H5531",
+                "name": "客运港口",
+                "children": null
+              },
+              {
+                "category": "5532",
+                "code": "H5532",
+                "name": "货运港口",
+                "children": null
+              },
+              {
+                "category": "5539",
+                "code": "H5539",
+                "name": "其他水上运输辅助活动",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "56",
+        "code": "H56",
+        "name": "航空运输业",
+        "children": [
+          {
+            "category": "561",
+            "code": "H561",
+            "name": "航空客货运输",
+            "children": [
+              {
+                "category": "5611",
+                "code": "H5611",
+                "name": "航空旅客运输",
+                "children": null
+              },
+              {
+                "category": "5612",
+                "code": "H5612",
+                "name": "航空货物运输",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "563",
+            "code": "H563",
+            "name": "航空运输辅助活动",
+            "children": [
+              {
+                "category": "5631",
+                "code": "H5631",
+                "name": "机场",
+                "children": null
+              },
+              {
+                "category": "5632",
+                "code": "H5632",
+                "name": "空中交通管理",
+                "children": null
+              },
+              {
+                "category": "5639",
+                "code": "H5639",
+                "name": "其他航空运输辅助活动",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "57",
+        "code": "H57",
+        "name": "管道运输业",
+        "children": null
+      },
+      {
+        "category": "58",
+        "code": "H58",
+        "name": "装卸搬运和运输代理业",
+        "children": [
+          {
+            "category": "582",
+            "code": "H582",
+            "name": "运输代理业",
+            "children": [
+              {
+                "category": "5821",
+                "code": "H5821",
+                "name": "货物运输代理",
+                "children": null
+              },
+              {
+                "category": "5822",
+                "code": "H5822",
+                "name": "旅客票务代理",
+                "children": null
+              },
+              {
+                "category": "5829",
+                "code": "H5829",
+                "name": "其他运输代理业",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "59",
+        "code": "H59",
+        "name": "仓储业",
+        "children": [
+          {
+            "category": "591",
+            "code": "H591",
+            "name": "谷物、棉花等农产品仓储",
+            "children": [
+              {
+                "category": "5911",
+                "code": "H5911",
+                "name": "谷物仓储",
+                "children": null
+              },
+              {
+                "category": "5912",
+                "code": "H5912",
+                "name": "棉花仓储",
+                "children": null
+              },
+              {
+                "category": "5919",
+                "code": "H5919",
+                "name": "其他农产品仓储",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "60",
+        "code": "H60",
+        "name": "邮政业",
+        "children": null
+      },
+      {
+        "category": "61",
+        "code": "H61",
+        "name": "住宿业",
+        "children": null
+      },
+      {
+        "category": "62",
+        "code": "H62",
+        "name": "餐饮业",
+        "children": [
+          {
+            "category": "623",
+            "code": "H623",
+            "name": "饮料及冷饮服务",
+            "children": [
+              {
+                "category": "6231",
+                "code": "H6231",
+                "name": "茶馆服务",
+                "children": null
+              },
+              {
+                "category": "6232",
+                "code": "H6232",
+                "name": "咖啡馆服务",
+                "children": null
+              },
+              {
+                "category": "6233",
+                "code": "H6233",
+                "name": "酒吧服务",
+                "children": null
+              },
+              {
+                "category": "6239",
+                "code": "H6239",
+                "name": "其他饮料及冷饮服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "629",
+            "code": "H629",
+            "name": "其他餐饮业",
+            "children": [
+              {
+                "category": "6291",
+                "code": "H6291",
+                "name": "小吃服务",
+                "children": null
+              },
+              {
+                "category": "6292",
+                "code": "H6292",
+                "name": "餐饮配送服务",
+                "children": null
+              },
+              {
+                "category": "6299",
+                "code": "H6299",
+                "name": "其他未列明餐饮业",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "63",
+        "code": "H63",
+        "name": "电信、广播电视和卫星传输服务",
+        "children": [
+          {
+            "category": "631",
+            "code": "H631",
+            "name": "电信",
+            "children": [
+              {
+                "category": "6311",
+                "code": "H6311",
+                "name": "固定电信服务",
+                "children": null
+              },
+              {
+                "category": "6312",
+                "code": "H6312",
+                "name": "移动电信服务",
+                "children": null
+              },
+              {
+                "category": "6319",
+                "code": "H6319",
+                "name": "其他电信服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "632",
+            "code": "H632",
+            "name": "广播电视传输服务",
+            "children": [
+              {
+                "category": "6321",
+                "code": "H6321",
+                "name": "有线广播电视传输服务",
+                "children": null
+              },
+              {
+                "category": "6322",
+                "code": "H6322",
+                "name": "无线广播电视传输服务",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "64",
+        "code": "H64",
+        "name": "互联网和相关服务",
+        "children": null
+      },
+      {
+        "category": "65",
+        "code": "H65",
+        "name": "软件和信息技术服务业",
+        "children": [
+          {
+            "category": "659",
+            "code": "H659",
+            "name": "其他信息技术服务业",
+            "children": [
+              {
+                "category": "6591",
+                "code": "H6591",
+                "name": "数字内容服务",
+                "children": null
+              },
+              {
+                "category": "6592",
+                "code": "H6592",
+                "name": "呼叫中心",
+                "children": null
+              },
+              {
+                "category": "6599",
+                "code": "H6599",
+                "name": "其他未列明信息技术服务业",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "66",
+        "code": "H66",
+        "name": "货币金融服务",
+        "children": [
+          {
+            "category": "663",
+            "code": "H663",
+            "name": "非货币银行服务",
+            "children": [
+              {
+                "category": "6631",
+                "code": "H6631",
+                "name": "金融租赁服务",
+                "children": null
+              },
+              {
+                "category": "6632",
+                "code": "H6632",
+                "name": "财务公司",
+                "children": null
+              },
+              {
+                "category": "6633",
+                "code": "H6633",
+                "name": "典当",
+                "children": null
+              },
+              {
+                "category": "6639",
+                "code": "H6639",
+                "name": "其他非货币银行服务",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "67",
+        "code": "H67",
+        "name": "资本市场服务",
+        "children": [
+          {
+            "category": "671",
+            "code": "H671",
+            "name": "证券市场服务",
+            "children": [
+              {
+                "category": "6711",
+                "code": "H6711",
+                "name": "证券市场管理服务",
+                "children": null
+              },
+              {
+                "category": "6712",
+                "code": "H6712",
+                "name": "证券经纪交易服务",
+                "children": null
+              },
+              {
+                "category": "6713",
+                "code": "H6713",
+                "name": "基金管理服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "672",
+            "code": "H672",
+            "name": "期货市场服务",
+            "children": [
+              {
+                "category": "6721",
+                "code": "H6721",
+                "name": "期货市场管理服务",
+                "children": null
+              },
+              {
+                "category": "6729",
+                "code": "H6729",
+                "name": "其他期货市场服务",
+                "children": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "I",
+    "code": "I",
+    "name": "信息传输、软件和信息技术服务业",
+    "children": null
+  },
+  {
+    "category": "J",
+    "code": "J",
+    "name": "金融业",
+    "children": null
+  },
+  {
+    "category": "L",
+    "code": "L",
+    "name": "租赁和商务服务业",
+    "children": [
+      {
+        "category": "68",
+        "code": "L68",
+        "name": "保险业",
+        "children": [
+          {
+            "category": "681",
+            "code": "L681",
+            "name": "人身保险",
+            "children": [
+              {
+                "category": "6811",
+                "code": "L6811",
+                "name": "人寿保险",
+                "children": null
+              },
+              {
+                "category": "6812",
+                "code": "L6812",
+                "name": "健康和意外保险",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "689",
+            "code": "L689",
+            "name": "其他保险活动",
+            "children": [
+              {
+                "category": "6891",
+                "code": "L6891",
+                "name": "风险和损失评估",
+                "children": null
+              },
+              {
+                "category": "6899",
+                "code": "L6899",
+                "name": "其他未列明保险活动",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "69",
+        "code": "L69",
+        "name": "其他金融业",
+        "children": null
+      },
+      {
+        "category": "70",
+        "code": "L70",
+        "name": "房地产业",
+        "children": null
+      },
+      {
+        "category": "71",
+        "code": "L71",
+        "name": "租赁业",
+        "children": [
+          {
+            "category": "711",
+            "code": "L711",
+            "name": "机械设备租赁",
+            "children": [
+              {
+                "category": "7111",
+                "code": "L7111",
+                "name": "汽车租赁",
+                "children": null
+              },
+              {
+                "category": "7112",
+                "code": "L7112",
+                "name": "农业机械租赁",
+                "children": null
+              },
+              {
+                "category": "7113",
+                "code": "L7113",
+                "name": "建筑工程机械与设备租赁",
+                "children": null
+              },
+              {
+                "category": "7114",
+                "code": "L7114",
+                "name": "计算机及通讯设备租赁",
+                "children": null
+              },
+              {
+                "category": "7119",
+                "code": "L7119",
+                "name": "其他机械与设备租赁",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "712",
+            "code": "L712",
+            "name": "文化及日用品出租",
+            "children": [
+              {
+                "category": "7121",
+                "code": "L7121",
+                "name": "娱乐及体育设备出租",
+                "children": null
+              },
+              {
+                "category": "7122",
+                "code": "L7122",
+                "name": "图书出租",
+                "children": null
+              },
+              {
+                "category": "7123",
+                "code": "L7123",
+                "name": "音像制品出租",
+                "children": null
+              },
+              {
+                "category": "7129",
+                "code": "L7129",
+                "name": "其他文化及日用品出租",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "72",
+        "code": "L72",
+        "name": "商务服务业",
+        "children": [
+          {
+            "category": "721",
+            "code": "L721",
+            "name": "企业管理服务",
+            "children": [
+              {
+                "category": "7211",
+                "code": "L7211",
+                "name": "企业总部管理",
+                "children": null
+              },
+              {
+                "category": "7212",
+                "code": "L7212",
+                "name": "投资与资产管理",
+                "children": null
+              },
+              {
+                "category": "7213",
+                "code": "L7213",
+                "name": "单位后勤管理服务",
+                "children": null
+              },
+              {
+                "category": "7219",
+                "code": "L7219",
+                "name": "其他企业管理服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "722",
+            "code": "L722",
+            "name": "法律服务",
+            "children": [
+              {
+                "category": "7221",
+                "code": "L7221",
+                "name": "律师及相关法律服务",
+                "children": null
+              },
+              {
+                "category": "7222",
+                "code": "L7222",
+                "name": "公证服务",
+                "children": null
+              },
+              {
+                "category": "7229",
+                "code": "L7229",
+                "name": "其他法律服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "723",
+            "code": "L723",
+            "name": "咨询与调查",
+            "children": [
+              {
+                "category": "7231",
+                "code": "L7231",
+                "name": "会计、审计及税务服务",
+                "children": null
+              },
+              {
+                "category": "7232",
+                "code": "L7232",
+                "name": "市场调查",
+                "children": null
+              },
+              {
+                "category": "7233",
+                "code": "L7233",
+                "name": "社会经济咨询",
+                "children": null
+              },
+              {
+                "category": "7239",
+                "code": "L7239",
+                "name": "其他专业咨询",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "726",
+            "code": "L726",
+            "name": "人力资源服务",
+            "children": [
+              {
+                "category": "7261",
+                "code": "L7261",
+                "name": "公共就业服务",
+                "children": null
+              },
+              {
+                "category": "7262",
+                "code": "L7262",
+                "name": "职业中介服务",
+                "children": null
+              },
+              {
+                "category": "7263",
+                "code": "L7263",
+                "name": "劳务派遣服务",
+                "children": null
+              },
+              {
+                "category": "7269",
+                "code": "L7269",
+                "name": "其他人力资源服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "727",
+            "code": "L727",
+            "name": "旅行社及相关服务",
+            "children": [
+              {
+                "category": "7271",
+                "code": "L7271",
+                "name": "旅行社服务",
+                "children": null
+              },
+              {
+                "category": "7272",
+                "code": "L7272",
+                "name": "旅游管理服务",
+                "children": null
+              },
+              {
+                "category": "7279",
+                "code": "L7279",
+                "name": "其他旅行社相关服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "728",
+            "code": "L728",
+            "name": "安全保护服务",
+            "children": [
+              {
+                "category": "7281",
+                "code": "L7281",
+                "name": "安全服务",
+                "children": null
+              },
+              {
+                "category": "7282",
+                "code": "L7282",
+                "name": "安全系统监控服务",
+                "children": null
+              },
+              {
+                "category": "7289",
+                "code": "L7289",
+                "name": "其他安全保护服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "729",
+            "code": "L729",
+            "name": "其他商务服务业",
+            "children": [
+              {
+                "category": "7291",
+                "code": "L7291",
+                "name": "市场管理",
+                "children": null
+              },
+              {
+                "category": "7292",
+                "code": "L7292",
+                "name": "会议及展览服务",
+                "children": null
+              },
+              {
+                "category": "7293",
+                "code": "L7293",
+                "name": "包装服务",
+                "children": null
+              },
+              {
+                "category": "7294",
+                "code": "L7294",
+                "name": "办公服务",
+                "children": null
+              },
+              {
+                "category": "7295",
+                "code": "L7295",
+                "name": "信用服务",
+                "children": null
+              },
+              {
+                "category": "7296",
+                "code": "L7296",
+                "name": "担保服务",
+                "children": null
+              },
+              {
+                "category": "7299",
+                "code": "L7299",
+                "name": "其他未列明商务服务业",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "73",
+        "code": "L73",
+        "name": "研究和试验发展",
+        "children": null
+      },
+      {
+        "category": "74",
+        "code": "L74",
+        "name": "专业技术服务业",
+        "children": [
+          {
+            "category": "746",
+            "code": "L746",
+            "name": "环境与生态监测",
+            "children": [
+              {
+                "category": "7461",
+                "code": "L7461",
+                "name": "环境保护监测",
+                "children": null
+              },
+              {
+                "category": "7462",
+                "code": "L7462",
+                "name": "生态监测",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "747",
+            "code": "L747",
+            "name": "地质勘查",
+            "children": [
+              {
+                "category": "7471",
+                "code": "L7471",
+                "name": "能源矿产地质勘查",
+                "children": null
+              },
+              {
+                "category": "7472",
+                "code": "L7472",
+                "name": "固体矿产地质勘查",
+                "children": null
+              },
+              {
+                "category": "7473",
+                "code": "L7473",
+                "name": "水、二氧化碳等矿产地质勘查",
+                "children": null
+              },
+              {
+                "category": "7474",
+                "code": "L7474",
+                "name": "基础地质勘查",
+                "children": null
+              },
+              {
+                "category": "7475",
+                "code": "L7475",
+                "name": "地质勘查技术服务",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "748",
+            "code": "L748",
+            "name": "工程技术",
+            "children": [
+              {
+                "category": "7481",
+                "code": "L7481",
+                "name": "工程管理服务",
+                "children": null
+              },
+              {
+                "category": "7482",
+                "code": "L7482",
+                "name": "工程勘察设计",
+                "children": null
+              },
+              {
+                "category": "7483",
+                "code": "L7483",
+                "name": "规划管理",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "749",
+            "code": "L749",
+            "name": "其他专业技术服务业",
+            "children": [
+              {
+                "category": "7491",
+                "code": "L7491",
+                "name": "专业化设计服务",
+                "children": null
+              },
+              {
+                "category": "7492",
+                "code": "L7492",
+                "name": "摄影扩印服务",
+                "children": null
+              },
+              {
+                "category": "7493",
+                "code": "L7493",
+                "name": "兽医服务",
+                "children": null
+              },
+              {
+                "category": "7499",
+                "code": "L7499",
+                "name": "其他未列明专业技术服务业",
+                "children": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "M",
+    "code": "M",
+    "name": "科学研究和技术服务业",
+    "children": null
+  },
+  {
+    "category": "N",
+    "code": "N",
+    "name": "水利、环境和公共设施管理业",
+    "children": [
+      {
+        "category": "75",
+        "code": "N75",
+        "name": "科技推广和应用服务业",
+        "children": [
+          {
+            "category": "751",
+            "code": "N751",
+            "name": "技术推广服务",
+            "children": [
+              {
+                "category": "7511",
+                "code": "N7511",
+                "name": "农业技术推广服务",
+                "children": null
+              },
+              {
+                "category": "7512",
+                "code": "N7512",
+                "name": "生物技术推广服务",
+                "children": null
+              },
+              {
+                "category": "7513",
+                "code": "N7513",
+                "name": "新材料技术推广服务",
+                "children": null
+              },
+              {
+                "category": "7514",
+                "code": "N7514",
+                "name": "节能技术推广服务",
+                "children": null
+              },
+              {
+                "category": "7519",
+                "code": "N7519",
+                "name": "其他技术推广服务",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "76",
+        "code": "N76",
+        "name": "水利管理业",
+        "children": null
+      },
+      {
+        "category": "77",
+        "code": "N77",
+        "name": "生态保护和环境治理业",
+        "children": [
+          {
+            "category": "771",
+            "code": "N771",
+            "name": "生态保护",
+            "children": [
+              {
+                "category": "7711",
+                "code": "N7711",
+                "name": "自然保护区管理",
+                "children": null
+              },
+              {
+                "category": "7712",
+                "code": "N7712",
+                "name": "野生动物保护",
+                "children": null
+              },
+              {
+                "category": "7713",
+                "code": "N7713",
+                "name": "野生植物保护",
+                "children": null
+              },
+              {
+                "category": "7719",
+                "code": "N7719",
+                "name": "其他自然保护",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "772",
+            "code": "N772",
+            "name": "环境治理业",
+            "children": [
+              {
+                "category": "7721",
+                "code": "N7721",
+                "name": "水污染治理",
+                "children": null
+              },
+              {
+                "category": "7722",
+                "code": "N7722",
+                "name": "大气污染治理",
+                "children": null
+              },
+              {
+                "category": "7723",
+                "code": "N7723",
+                "name": "固体废物治理",
+                "children": null
+              },
+              {
+                "category": "7724",
+                "code": "N7724",
+                "name": "危险废物治理",
+                "children": null
+              },
+              {
+                "category": "7725",
+                "code": "N7725",
+                "name": "放射性废物治理",
+                "children": null
+              },
+              {
+                "category": "7729",
+                "code": "N7729",
+                "name": "其他污染治理",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "78",
+        "code": "N78",
+        "name": "公共设施管理业",
+        "children": [
+          {
+            "category": "785",
+            "code": "N785",
+            "name": "公园和游览景区管理",
+            "children": [
+              {
+                "category": "7851",
+                "code": "N7851",
+                "name": "公园管理",
+                "children": null
+              },
+              {
+                "category": "7852",
+                "code": "N7852",
+                "name": "游览景区管理",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "79",
+        "code": "N79",
+        "name": "居民服务业",
+        "children": null
+      },
+      {
+        "category": "80",
+        "code": "N80",
+        "name": "机动车、电子产品和日用产品修理业",
+        "children": [
+          {
+            "category": "801",
+            "code": "N801",
+            "name": "汽车、摩托车修理与维护",
+            "children": [
+              {
+                "category": "8011",
+                "code": "N8011",
+                "name": "汽车修理与维护",
+                "children": null
+              },
+              {
+                "category": "8012",
+                "code": "N8012",
+                "name": "摩托车修理与维护",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "802",
+            "code": "N802",
+            "name": "计算机和办公设备维修",
+            "children": [
+              {
+                "category": "8021",
+                "code": "N8021",
+                "name": "计算机和辅助设备修理",
+                "children": null
+              },
+              {
+                "category": "8022",
+                "code": "N8022",
+                "name": "通讯设备修理",
+                "children": null
+              },
+              {
+                "category": "8029",
+                "code": "N8029",
+                "name": "其他办公设备维修",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "803",
+            "code": "N803",
+            "name": "家用电器修理",
+            "children": [
+              {
+                "category": "8031",
+                "code": "N8031",
+                "name": "家用电子产品修理",
+                "children": null
+              },
+              {
+                "category": "8032",
+                "code": "N8032",
+                "name": "日用电器修理",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "809",
+            "code": "N809",
+            "name": "其他日用产品修理业",
+            "children": [
+              {
+                "category": "8091",
+                "code": "N8091",
+                "name": "自行车修理",
+                "children": null
+              },
+              {
+                "category": "8092",
+                "code": "N8092",
+                "name": "鞋和皮革修理",
+                "children": null
+              },
+              {
+                "category": "8093",
+                "code": "N8093",
+                "name": "家具和相关物品修理",
+                "children": null
+              },
+              {
+                "category": "8099",
+                "code": "N8099",
+                "name": "其他未列明日用产品修理业",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "81",
+        "code": "N81",
+        "name": "其他服务业",
+        "children": [
+          {
+            "category": "811",
+            "code": "N811",
+            "name": "清洁服务",
+            "children": [
+              {
+                "category": "8111",
+                "code": "N8111",
+                "name": "建筑物清洁服务",
+                "children": null
+              },
+              {
+                "category": "8119",
+                "code": "N8119",
+                "name": "其他清洁服务",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "82",
+        "code": "N82",
+        "name": "教育",
+        "children": [
+          {
+            "category": "822",
+            "code": "N822",
+            "name": "初等教育",
+            "children": [
+              {
+                "category": "8221",
+                "code": "N8221",
+                "name": "普通小学教育",
+                "children": null
+              },
+              {
+                "category": "8222",
+                "code": "N8222",
+                "name": "成人小学教育",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "823",
+            "code": "N823",
+            "name": "中等教育",
+            "children": [
+              {
+                "category": "8231",
+                "code": "N8231",
+                "name": "普通初中教育",
+                "children": null
+              },
+              {
+                "category": "8232",
+                "code": "N8232",
+                "name": "职业初中教育",
+                "children": null
+              },
+              {
+                "category": "8233",
+                "code": "N8233",
+                "name": "成人初中教育",
+                "children": null
+              },
+              {
+                "category": "8234",
+                "code": "N8234",
+                "name": "普通高中教育",
+                "children": null
+              },
+              {
+                "category": "8235",
+                "code": "N8235",
+                "name": "成人高中教育",
+                "children": null
+              },
+              {
+                "category": "8236",
+                "code": "N8236",
+                "name": "中等职业学校教育",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "824",
+            "code": "N824",
+            "name": "高等教育",
+            "children": [
+              {
+                "category": "8241",
+                "code": "N8241",
+                "name": "普通高等教育",
+                "children": null
+              },
+              {
+                "category": "8242",
+                "code": "N8242",
+                "name": "成人高等教育",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "829",
+            "code": "N829",
+            "name": "技能培训、教育辅助及其他教育",
+            "children": [
+              {
+                "category": "8291",
+                "code": "N8291",
+                "name": "职业技能培训",
+                "children": null
+              },
+              {
+                "category": "8292",
+                "code": "N8292",
+                "name": "体校及体育培训",
+                "children": null
+              },
+              {
+                "category": "8293",
+                "code": "N8293",
+                "name": "文化艺术培训",
+                "children": null
+              },
+              {
+                "category": "8294",
+                "code": "N8294",
+                "name": "教育辅助服务",
+                "children": null
+              },
+              {
+                "category": "8299",
+                "code": "N8299",
+                "name": "其他未列明教育",
+                "children": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "O",
+    "code": "O",
+    "name": "居民服务、修理和其他服务业",
+    "children": null
+  },
+  {
+    "category": "Q",
+    "code": "Q",
+    "name": "卫生和社会工作",
+    "children": [
+      {
+        "category": "83",
+        "code": "Q83",
+        "name": "卫生",
+        "children": [
+          {
+            "category": "831",
+            "code": "Q831",
+            "name": "医院",
+            "children": [
+              {
+                "category": "8311",
+                "code": "Q8311",
+                "name": "综合医院",
+                "children": null
+              },
+              {
+                "category": "8312",
+                "code": "Q8312",
+                "name": "中医医院",
+                "children": null
+              },
+              {
+                "category": "8313",
+                "code": "Q8313",
+                "name": "中西医结合医院",
+                "children": null
+              },
+              {
+                "category": "8314",
+                "code": "Q8314",
+                "name": "民族医院",
+                "children": null
+              },
+              {
+                "category": "8315",
+                "code": "Q8315",
+                "name": "专科医院",
+                "children": null
+              },
+              {
+                "category": "8316",
+                "code": "Q8316",
+                "name": "疗养院",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "832",
+            "code": "Q832",
+            "name": "社区医疗与卫生院",
+            "children": [
+              {
+                "category": "8321",
+                "code": "Q8321",
+                "name": "社区卫生服务中心（站）",
+                "children": null
+              },
+              {
+                "category": "8322",
+                "code": "Q8322",
+                "name": "街道卫生院",
+                "children": null
+              },
+              {
+                "category": "8323",
+                "code": "Q8323",
+                "name": "乡镇卫生院",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "84",
+        "code": "Q84",
+        "name": "社会工作",
+        "children": [
+          {
+            "category": "841",
+            "code": "Q841",
+            "name": "提供住宿社会工作",
+            "children": [
+              {
+                "category": "8411",
+                "code": "Q8411",
+                "name": "干部休养所",
+                "children": null
+              },
+              {
+                "category": "8412",
+                "code": "Q8412",
+                "name": "护理机构服务",
+                "children": null
+              },
+              {
+                "category": "8413",
+                "code": "Q8413",
+                "name": "精神康复服务",
+                "children": null
+              },
+              {
+                "category": "8414",
+                "code": "Q8414",
+                "name": "老年人、残疾人养护服务",
+                "children": null
+              },
+              {
+                "category": "8415",
+                "code": "Q8415",
+                "name": "孤残儿童收养和庇护服务",
+                "children": null
+              },
+              {
+                "category": "8419",
+                "code": "Q8419",
+                "name": "其他提供住宿社会救助",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "842",
+            "code": "Q842",
+            "name": "不提供住宿社会工作",
+            "children": [
+              {
+                "category": "8421",
+                "code": "Q8421",
+                "name": "社会看护与帮助服务",
+                "children": null
+              },
+              {
+                "category": "8429",
+                "code": "Q8429",
+                "name": "其他不提供住宿社会工作",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "85",
+        "code": "Q85",
+        "name": "新闻和出版业",
+        "children": [
+          {
+            "category": "852",
+            "code": "Q852",
+            "name": "出版业",
+            "children": [
+              {
+                "category": "8521",
+                "code": "Q8521",
+                "name": "图书出版",
+                "children": null
+              },
+              {
+                "category": "8522",
+                "code": "Q8522",
+                "name": "报纸出版",
+                "children": null
+              },
+              {
+                "category": "8523",
+                "code": "Q8523",
+                "name": "期刊出版",
+                "children": null
+              },
+              {
+                "category": "8524",
+                "code": "Q8524",
+                "name": "音像制品出版",
+                "children": null
+              },
+              {
+                "category": "8525",
+                "code": "Q8525",
+                "name": "电子出版物出版",
+                "children": null
+              },
+              {
+                "category": "8529",
+                "code": "Q8529",
+                "name": "其他出版业",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "86",
+        "code": "Q86",
+        "name": "广播、电视、电影和影视录音制作业",
+        "children": null
+      },
+      {
+        "category": "87",
+        "code": "Q87",
+        "name": "文化艺术业",
+        "children": [
+          {
+            "category": "873",
+            "code": "Q873",
+            "name": "图书馆与档案馆",
+            "children": [
+              {
+                "category": "8731",
+                "code": "Q8731",
+                "name": "图书馆",
+                "children": null
+              },
+              {
+                "category": "8732",
+                "code": "Q8732",
+                "name": "档案馆",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "88",
+        "code": "Q88",
+        "name": "体育",
+        "children": null
+      },
+      {
+        "category": "89",
+        "code": "Q89",
+        "name": "娱乐业",
+        "children": [
+          {
+            "category": "891",
+            "code": "Q891",
+            "name": "室内娱乐活动",
+            "children": [
+              {
+                "category": "8911",
+                "code": "Q8911",
+                "name": "歌舞厅娱乐活动",
+                "children": null
+              },
+              {
+                "category": "8912",
+                "code": "Q8912",
+                "name": "电子游艺厅娱乐活动",
+                "children": null
+              },
+              {
+                "category": "8913",
+                "code": "Q8913",
+                "name": "网吧活动",
+                "children": null
+              },
+              {
+                "category": "8919",
+                "code": "Q8919",
+                "name": "其他室内娱乐活动",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "894",
+            "code": "Q894",
+            "name": "文化、娱乐、体育经纪代理",
+            "children": [
+              {
+                "category": "8941",
+                "code": "Q8941",
+                "name": "文化娱乐经纪人",
+                "children": null
+              },
+              {
+                "category": "8942",
+                "code": "Q8942",
+                "name": "体育经纪人",
+                "children": null
+              },
+              {
+                "category": "8949",
+                "code": "Q8949",
+                "name": "其他文化艺术经纪代理",
+                "children": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "category": "90",
+        "code": "Q90",
+        "name": "中国共产党机关",
+        "children": null
+      },
+      {
+        "category": "91",
+        "code": "Q91",
+        "name": "国家机构",
+        "children": [
+          {
+            "category": "912",
+            "code": "Q912",
+            "name": "国家行政机构",
+            "children": [
+              {
+                "category": "9121",
+                "code": "Q9121",
+                "name": "综合事务管理机构",
+                "children": null
+              },
+              {
+                "category": "9122",
+                "code": "Q9122",
+                "name": "对外事务管理机构",
+                "children": null
+              },
+              {
+                "category": "9123",
+                "code": "Q9123",
+                "name": "公共安全管理机构",
+                "children": null
+              },
+              {
+                "category": "9124",
+                "code": "Q9124",
+                "name": "社会事务管理机构",
+                "children": null
+              },
+              {
+                "category": "9125",
+                "code": "Q9125",
+                "name": "经济事务管理机构",
+                "children": null
+              },
+              {
+                "category": "9126",
+                "code": "Q9126",
+                "name": "行政监督检查机构",
+                "children": null
+              }
+            ]
+          },
+          {
+            "category": "913",
+            "code": "Q913",
+            "name": "人民法院和人民检察院",
+            "children": [
+              {
+                "category": "9131",
+                "code": "Q9131",
+                "name": "人民法院",
+                "children": null
+              },
+              {
+                "category": "9132",
+                "code": "Q9132",
+                "name": "人民检察院",
+                "children": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "R",
+    "code": "R",
+    "name": "文化、体育和娱乐业",
+    "children": null
+  },
+  {
+    "category": "S",
+    "code": "S",
+    "name": "公共管理、社会保障和社会组织",
+    "children": null
+  }
+]
