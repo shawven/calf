@@ -1,7 +1,5 @@
 package com.starter.payment.support;
 
-import com.alipay.api.internal.util.file.StringBuilderWriter;
-
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -44,7 +42,7 @@ public class PaymentUtils {
     }
 
     public static String read(InputStream inputStream) {
-        StringBuilderWriter writer = new StringBuilderWriter();
+        StringWriter writer = new StringWriter();
         InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         char[] buf = new char[4096];
         int n;

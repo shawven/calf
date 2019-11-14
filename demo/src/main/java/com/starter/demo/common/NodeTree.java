@@ -11,8 +11,10 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+
 
 /**
  * 节点树，主要应用于无限极菜单树、分类树等类似结构
@@ -40,7 +42,7 @@ public class NodeTree<T> implements Serializable {
     private Function<T, Node> nodeConvert;
 
     public NodeTree(List<T> data) {
-        this.data = data;
+        this.data = new ArrayList<>(data);
     }
 
     /**
@@ -51,7 +53,7 @@ public class NodeTree<T> implements Serializable {
      */
     public <N extends Node<N>> List<N> generate() {
         if (data == null || data.isEmpty()) {
-            return null;
+            return emptyList();
         }
 
         requireNonNull(rootFilter, "父节点选择器不能为空");
@@ -188,6 +190,47 @@ public class NodeTree<T> implements Serializable {
     }
 
     /**
+     * 压扁当前节点及其子节点成列表
+     *
+     * @param node
+     * @param <N>
+     * @return
+     */
+    public static <N extends Node<N>> List<N> flatList(N node) {
+        List<N> nodes = new ArrayList<>();
+        nodes.add(node);
+        return flatList(nodes);
+    }
+
+    /**
+     * 压扁当前节点集合及其子节点成列表
+     *
+     * @param nodes
+     * @param <N>
+     * @return
+     */
+    public static <N extends Node<N>> List<N> flatList(List<N> nodes) {
+        if (nodes == null || nodes.isEmpty()) {
+            return emptyList();
+        }
+        List<N> list = new ArrayList<>();
+        Stack<N> stack = new Stack<>();
+        nodes.forEach(stack::push);
+        while (!stack.isEmpty()) {
+            N node = stack.pop();
+            List<N> children = node.getChildren();
+
+            // 清除子节点指针
+            node.setChildren(null);
+            list.add(node);
+            if (children != null && !children.isEmpty()) {
+                children.forEach(stack::push);
+            }
+        }
+        return list;
+    }
+
+    /**
      * 设置根节点过滤器
      *
      * @param rootFilter 根节点过滤器
@@ -261,4 +304,3 @@ public class NodeTree<T> implements Serializable {
         private List<DefaultNode> children;
     }
 }
-

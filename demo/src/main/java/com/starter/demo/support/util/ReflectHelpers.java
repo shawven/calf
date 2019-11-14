@@ -31,7 +31,7 @@ public class ReflectHelpers {
         if (obj == null) {
             return;
         }
-        PropertyDescriptor[] pds = getPropertiesHelper(obj.getClass(), true, false);
+        PropertyDescriptor[] pds = getPropertyDescriptors(obj.getClass(), true, false);
         for (PropertyDescriptor pd : pds) {
             Method writeMethod = pd.getWriteMethod();
             Object result = pd.getReadMethod().invoke(obj);
@@ -52,7 +52,7 @@ public class ReflectHelpers {
             return null;
         }
         T obj = cls.newInstance();
-        PropertyDescriptor[] pds = getPropertiesHelper(cls, true, false);
+        PropertyDescriptor[] pds = getPropertyDescriptors(cls, true, false);
         for (PropertyDescriptor pd : pds) {
             pd.getWriteMethod().invoke(obj, map.get(pd.getName()));
         }
@@ -69,7 +69,7 @@ public class ReflectHelpers {
         if (obj == null) {
             return emptyMap();
         }
-        PropertyDescriptor[] pds = getPropertiesHelper(obj.getClass(), false, true);
+        PropertyDescriptor[] pds = getPropertyDescriptors(obj.getClass(), false, true);
         Map<String, Object> map = new HashMap<>(pds.length);
         for (PropertyDescriptor pd : pds) {
             String key = pd.getName();
@@ -136,18 +136,19 @@ public class ReflectHelpers {
         String simpleName = cls.getSimpleName();
         Type genType = cls.getGenericSuperclass();
         if (!(genType instanceof ParameterizedType)) {
-            throw new RuntimeException(String.format("%s's superclass not ParameterizedType", simpleName));
+            throw new IllegalArgumentException(String.format("%s's superclass not ParameterizedType", simpleName));
         } else {
             Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
             if (index < params.length && index >= 0) {
                 if (!(params[index] instanceof Class)) {
-                    throw new RuntimeException(String.format("%s not set the actual class on" +
+                    throw new IllegalArgumentException(String.format("%s not set the actual class on" +
                             " superclass generic parameter", simpleName));
                 } else {
+                    //noinspection unchecked
                     return (Class<T>) params[index];
                 }
             } else {
-                throw new RuntimeException(String.format("Warn: Index: %s, Size of %s's ParameterizedType: %s .",
+                throw new IndexOutOfBoundsException(String.format("Warn: Index: %s, Size of %s's ParameterizedType: %s .",
                         index, cls.getSimpleName(), params.length));
             }
         }
@@ -169,12 +170,13 @@ public class ReflectHelpers {
                 Type[] params = ((ParameterizedType) genericInterface).getActualTypeArguments();
                 if (index < params.length && index >= 0) {
                     if (params[index] instanceof Class) {
+                        //noinspection unchecked
                         return (Class<T>) params[index];
                     }
                 }
             }
         }
-        throw new RuntimeException(String.format("Class %s not ParameterizedType", simpleName));
+        throw new IllegalArgumentException(String.format("Class %s not ParameterizedType from interfaces ", simpleName));
     }
 
     /**
@@ -192,6 +194,7 @@ public class ReflectHelpers {
                 return false;
             }
             for (Type param : params) {
+                //noinspection unchecked
                 if (param instanceof Class && ((Class) param).isAssignableFrom(needle)) {
                     return true;
                 }
@@ -216,6 +219,7 @@ public class ReflectHelpers {
                     return false;
                 }
                 for (Type param : params) {
+                    //noinspection unchecked
                     if (param instanceof Class && ((Class) param).isAssignableFrom(needle)) {
                         return true;
                     }
@@ -234,7 +238,7 @@ public class ReflectHelpers {
         }
     }
 
-    private static PropertyDescriptor[] getPropertiesHelper(Class type, boolean read, boolean write) {
+    private static PropertyDescriptor[] getPropertyDescriptors(Class type, boolean read, boolean write) {
         BeanInfo info;
         try {
             info = Introspector.getBeanInfo(type, Object.class);
