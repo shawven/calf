@@ -42,6 +42,7 @@ public class NodeTree<T> implements Serializable {
     private Function<T, Node> nodeConvert;
 
     public NodeTree(List<T> data) {
+        // 拷贝，避免修改外部数据
         this.data = new ArrayList<>(data);
     }
 
@@ -213,9 +214,11 @@ public class NodeTree<T> implements Serializable {
         if (nodes == null || nodes.isEmpty()) {
             return emptyList();
         }
+        // 拷贝，避免修改外部数据
+        List<N> copyNodes = new ArrayList<>(nodes);
         List<N> list = new ArrayList<>();
         Stack<N> stack = new Stack<>();
-        nodes.forEach(stack::push);
+        copyNodes.forEach(stack::push);
         while (!stack.isEmpty()) {
             N node = stack.pop();
             List<N> children = node.getChildren();
