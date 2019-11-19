@@ -1,18 +1,20 @@
 package com.starter.demo.support.util;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.starter.demo.common.NodeTree;
 import lombok.Data;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -121,24 +123,22 @@ public class RegionUtils {
      * @return 区域集合
      */
     public static List<Region> getRegions() {
-        if (reference == null || reference.get() == null) {
+        List<Region> regions;
+        if (reference == null || (regions = reference.get()) == null) {
             String data;
             try {
                 data = IOUtils.resourceToString("/china_region.json", UTF_8);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            List<Region> regions = new Gson().fromJson(data, new TypeToken<List<Province>>() {}.getType());
-            // 不可变List
-            regions = ImmutableList.copyOf(regions);
+            regions = new Gson().fromJson(data, new TypeToken<List<Province>>() {}.getType());
             reference = new SoftReference<>(regions);
-            return regions;
         }
-        return reference.get();
+        return regions.parallelStream().map(SerializationUtils::clone).collect(Collectors.toList());
     }
 
     @Data
-    public static class Region {
+    public static class Region implements Serializable {
         /**
          * 编码
          */

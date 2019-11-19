@@ -3,10 +3,7 @@ package com.starter.demo.common;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -15,13 +12,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
-
-/**
- * 节点树，主要应用于无限极菜单树、分类树等类似结构
- *
- * @author Shoven
- * @date 2019-03-18 16:43
- */
 public class NodeTree<T> implements Serializable {
 
     private List<T> data;
@@ -42,7 +32,6 @@ public class NodeTree<T> implements Serializable {
     private Function<T, Node> nodeConvert;
 
     public NodeTree(List<T> data) {
-        // 拷贝，避免修改外部数据
         this.data = new ArrayList<>(data);
     }
 
@@ -63,7 +52,7 @@ public class NodeTree<T> implements Serializable {
 
         // 寻找根节点列表
         List<T> roots = getRoots(data, rootFilter);
-        // ①优化：排除根节点列表
+        // 排除根节点列表
         data.removeAll(roots);
 
         List<N> newNodes = new ArrayList<>();
@@ -102,7 +91,7 @@ public class NodeTree<T> implements Serializable {
                         oldStack.push(child);
                         newStack.push(newChild);
 
-                        // ②优化：排除已找到挂载子节点
+                        // 排除已找到挂载子节点
                         iterator.remove();
                     }
                 }
@@ -157,8 +146,10 @@ public class NodeTree<T> implements Serializable {
         if (nodes == null || nodes.isEmpty() || predicate == null) {
             return null;
         }
+
         Stack<N> stack = new Stack<>();
         nodes.forEach(stack::push);
+
         while (!stack.isEmpty()) {
             N node = stack.pop();
             if (predicate.test(node)) {
@@ -214,20 +205,19 @@ public class NodeTree<T> implements Serializable {
         if (nodes == null || nodes.isEmpty()) {
             return emptyList();
         }
-        // 拷贝，避免修改外部数据
-        List<N> copyNodes = new ArrayList<>(nodes);
-        List<N> list = new ArrayList<>();
-        Stack<N> stack = new Stack<>();
-        copyNodes.forEach(stack::push);
-        while (!stack.isEmpty()) {
-            N node = stack.pop();
-            List<N> children = node.getChildren();
 
+        LinkedList<N> queue = new LinkedList<>(nodes);
+        List<N> list = new ArrayList<>();
+
+        while (!queue.isEmpty()) {
+            N node = queue.pop();
+            List<N> children = node.getChildren();
             // 清除子节点指针
             node.setChildren(null);
             list.add(node);
             if (children != null && !children.isEmpty()) {
-                children.forEach(stack::push);
+                // 添加到队列头
+                queue.addAll(0, children);
             }
         }
         return list;

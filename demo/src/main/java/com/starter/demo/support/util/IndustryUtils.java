@@ -5,13 +5,16 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.starter.demo.common.NodeTree;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -28,23 +31,20 @@ public class IndustryUtils {
      * @return
      */
     public static List<Industry> getIndustries() {
-        if (reference == null || reference.get() == null) {
+        List<Industry> industries;
+        if (reference == null || (industries = reference.get()) == null) {
             String data;
             try {
                 data = IOUtils.resourceToString("/industry.json", UTF_8);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            List<Industry> industries = new Gson().fromJson(data, new TypeToken<List<Industry>>() {
+            industries = new Gson().fromJson(data, new TypeToken<List<Industry>>() {
             }.getType());
 //            List<Industry> industries = transform(data);
-
-            // 不可变List
-            industries = ImmutableList.copyOf(industries);
             reference = new SoftReference<>(industries);
-            return industries;
         }
-        return reference.get();
+        return industries.parallelStream().map(SerializationUtils::clone).collect(Collectors.toList());
     }
 
     public static Industry getIndustryByCode(String code) {
@@ -67,6 +67,13 @@ public class IndustryUtils {
             }
         }
         return null;
+    }
+
+    public static Industry getIndustryByName(String name) {
+        Objects.requireNonNull(name, "行业名称不能为空");
+        final String findName = name.trim();
+        List<Industry> industries = new ArrayList<>(getIndustries());
+        return NodeTree.findNode(industries, industry -> industry.getName().equals(findName));
     }
 
     private static List<Industry> transform(String data) {
@@ -117,7 +124,6 @@ public class IndustryUtils {
 
     @Data
     public static class Industry implements NodeTree.Node<Industry> {
-
         /**
          * 行业分类
          */
@@ -132,6 +138,11 @@ public class IndustryUtils {
          * 行业名称
          */
         public String name;
+
+        /**
+         * 展示名称
+         */
+        public String displayName;
 
         private List<Industry> children;
     }
