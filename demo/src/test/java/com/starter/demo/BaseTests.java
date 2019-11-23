@@ -1,6 +1,7 @@
 package com.starter.demo;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonObject;
 import com.starter.demo.support.util.excel.ExcelWriter;
 import org.junit.After;
 import org.junit.Before;
@@ -34,12 +35,7 @@ public class BaseTests {
 
     @Test
     public void testMain() throws Exception {
-        List<String> collect = Stream.of("2019-04-30", "2019-05-31", "2019-04-31")
-                .sorted((o1, o2) -> {
-                    return o1.compareTo(o2) > 0 ? 2 : -2;
-                })
-                .collect(toList());
-        System.out.println(collect);
+
     }
 
     @Test

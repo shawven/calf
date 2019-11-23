@@ -7,8 +7,7 @@ import org.springframework.http.ResponseEntity;
 import static org.springframework.http.HttpStatus.*;
 
 /**
- * 自定义响应消息体
- * 提供一些静态方法封装 ResponseEntity 以适应RestFull风格API，会改变http status
+ * 自定义响应消息体，提供一些静态方法封装 ResponseEntity 以适应RestFull风格API，会改变http status
  *
  * @author Shoven
  * @date 2019-07-10 14:27
@@ -153,7 +152,7 @@ public class Response {
     }
 
     /**
-     * 202 Accepted - [*]：表示一个请求已经进入后台排队（异步任务）
+     * 202 Accepted：表示一个请求已经进入后台排队（异步任务）
      *
      * @return 响应体
      */
@@ -187,7 +186,7 @@ public class Response {
     }
 
     /**
-     * 204 No Content - [DELEObjectE]：用户删除数据成功，无数据返回
+     * 204 No Content：用户删除数据成功，无数据返回
      *
      * @return 响应体
      */
@@ -196,7 +195,7 @@ public class Response {
     }
 
     /**
-     * 400 Bad Request - [*]：请求参数有误
+     * 400 Bad Request：请求参数有误
      *
      * @return 响应体
      */
@@ -213,7 +212,7 @@ public class Response {
     }
 
     /**
-     * 401 Unauthorized - [*]：表示用户没有权限（令牌、用户名、密码错误）
+     * 401 Unauthorized：表示用户没有权限（令牌、用户名、密码错误）
      *
      * @return 响应体
      */
@@ -222,7 +221,7 @@ public class Response {
     }
 
     /**
-     * 401 Unauthorized - [*]：表示用户没有权限（令牌、用户名、密码错误）
+     * 401 Unauthorized：表示用户没有权限（令牌、用户名、密码错误）
      *
      * @return 响应体
      */
@@ -231,7 +230,7 @@ public class Response {
     }
 
     /**
-     * 401 Unauthorized - [*]：表示用户没有权限（令牌、用户名、密码错误）
+     * 401 Unauthorized：表示用户没有权限（令牌、用户名、密码错误）
      *
      * @return 响应体
      */
@@ -240,7 +239,7 @@ public class Response {
     }
 
     /**
-     * 403 Forbidden - [*] 表示用户得到授权（与401错误相对），但是访问是被禁止的
+     * 403 Forbidden：表示用户得到授权（与401错误相对），但是访问是被禁止的
      *
      * @return 响应体
      */
@@ -249,7 +248,7 @@ public class Response {
     }
 
     /**
-     * 403 Forbidden - [*] 表示用户得到授权（与401错误相对），但是访问是被禁止的
+     * 403 Forbidden 表示用户得到授权（与401错误相对），但是访问是被禁止的
      *
      * @return 响应体
      */
@@ -258,8 +257,6 @@ public class Response {
     }
 
     /**
-     * 403 Forbidden - [*] 表示用户得到授权（与401错误相对），但是访问是被禁止的
-     *
      * @param code 状态码
      * @return 响应体
      */
@@ -268,7 +265,7 @@ public class Response {
     }
 
     /**
-     * 404 Not Found - [*]：用户发出的请求针对的是不存在的记录，服务器没有进行操作，该操作是幂等的。
+     * 404 Not Found：用户发出的请求针对的是不存在的记录，服务器没有进行操作，该操作是幂等的。
      *
      * @return 响应体
      */
@@ -285,7 +282,23 @@ public class Response {
     }
 
     /**
-     * 406 Not Acceptable - [GEObject]：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。
+     * 405 METHOD_NOT_ALLOWED：HTTP方法不允许
+     *
+     * @return 响应体
+     */
+    public static ResponseEntity methodNotAllowed() {
+        return methodNotAllowed(METHOD_NOT_ALLOWED.getReasonPhrase());
+    }
+
+    /**
+     * @return 响应体
+     */
+    public static ResponseEntity methodNotAllowed(String msg) {
+        return build(METHOD_NOT_ALLOWED, msg);
+    }
+
+    /**
+     * 406 Not Acceptable：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。
      *
      * @return 响应体
      */
@@ -294,7 +307,7 @@ public class Response {
     }
 
     /**
-     * 406 Not Acceptable - [GEObject]：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。
+     * 406 Not Acceptable：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。
      *
      * @return 响应体
      */
@@ -303,7 +316,7 @@ public class Response {
     }
 
     /**
-     * 422  Unprocesable entity - [POSObject/PUObject/PAObjectCH] 当创建一个对象时，发生一个验证错误，语义错误，无法响应。
+     * 422  Unprocesable entity - [POST/PUT/PATCH] 当创建一个对象时，发生一个验证错误，无法响应。
      *
      * @return 响应体
      */
@@ -329,7 +342,7 @@ public class Response {
     }
 
     /**
-     * 500 Internal Server Error - [*]：服务器发生错误，用户将无法判断发出的请求是否成功。
+     * 500 Internal Server Error：服务器发生错误，用户将无法判断发出的请求是否成功。
      *
      * @param msg 消息
      * @return    响应体

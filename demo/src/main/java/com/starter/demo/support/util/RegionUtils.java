@@ -2,7 +2,6 @@ package com.starter.demo.support.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.starter.demo.common.NodeTree;
 import lombok.Data;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;

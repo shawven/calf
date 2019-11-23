@@ -61,7 +61,7 @@ public class ExcelReader {
     public ExcelReader(String name, int sheetIndex) throws IOException {
         this.workbook = getWorkbook(new File(name));
         switchSheetAt(sheetIndex);
-        this.stream = stream();
+        this.stream = createStream();
     }
 
     /**
@@ -72,22 +72,28 @@ public class ExcelReader {
     public ExcelReader(InputStream inputStream, int sheetIndex) throws IOException {
         this.workbook = getWorkbook(inputStream);
         switchSheetAt(sheetIndex);
-        this.stream = stream();
+        this.stream = createStream();
+    }
+
+
+    /**
+     * @return Stream
+     */
+    public Stream<Line<String>> stream() {
+        return stream;
     }
 
     /**
-     * 读取数据
+     * 读取数据，可定位异常位置
      * 从起始索引到终止索引
      *
-     * @param consumer   消费函数
+     * @param consumer 消费函数
      * @return
      */
-    public int foreach(Consumer<Line<String>> consumer) {
-        AtomicInteger counter = new AtomicInteger();
+    public void read(Consumer<Line<String>> consumer) {
         stream.forEach(line -> {
             try {
                 consumer.accept(line);
-                counter.incrementAndGet();
             } catch (Exception e) {
                 if (line != null) {
                     CellAddress address = line.getCurrentAddress();
@@ -97,7 +103,6 @@ public class ExcelReader {
                 throw e;
             }
         });
-        return counter.get();
     }
 
     /**
@@ -174,20 +179,21 @@ public class ExcelReader {
      *
      * @return
      */
-    private Stream<Line<String>> stream() {
-        return Stream.iterate(0, i -> i + 1)
-                .limit(sheet.getLastRowNum())
-                .map(i -> {
-                    Row row = sheet.getRow(i);
-                    int cellSize = row.getLastCellNum();
+    private Stream<Line<String>> createStream() {
+        int rowNum = sheet.getLastRowNum();
+        List<Line<String>> lines = new ArrayList<>(rowNum);
+        for (int i = 0; i <= rowNum; i++) {
+            Row row = sheet.getRow(i);
+            int cellSize = row.getLastCellNum();
 
-                    Map<CellAddress, String> line = new LinkedHashMap<>(cellSize);
-                    for (int j = 0; j < cellSize; j++) {
-                        Cell cell = row.getCell(j);
-                        line.put(getAddress(cell, i, j), getValue(cell));
-                    }
-                    return new Line<>(i, line);
-                });
+            Map<CellAddress, String> line = new LinkedHashMap<>(cellSize);
+            for (int j = 0; j < cellSize; j++) {
+                Cell cell = row.getCell(j);
+                line.put(getAddress(cell, i, j), getValue(cell));
+            }
+            lines.add(new Line<>(i, line));
+        }
+        return lines.stream();
     }
 
     /**
@@ -341,6 +347,23 @@ public class ExcelReader {
 
         public CellAddress getCurrentAddress() {
             return currentAddress;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)  {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Line<?> line = (Line<?>) o;
+            return Objects.equals(row.values().toString(), line.row.values().toString());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(row.values().toString());
         }
 
         @Override

@@ -1,11 +1,8 @@
 package com.starter.demo.support.util;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.starter.demo.common.NodeTree;
 import lombok.Data;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -80,7 +77,7 @@ public class IndustryUtils {
         List<IndustryRaw> raws = new Gson().fromJson(data, new TypeToken<List<IndustryRaw>>() {
         }.getType());
 
-        List<Industry> industries = new NodeTree<>(raws)
+        List<Industry> industries =NodeTree.<IndustryRaw, Industry>from(raws)
                 .rootFilter(industry -> industry.getCode().length() == 1)
                 .childFilter((parent, child) -> {
                     String parentId= parent.getId();
@@ -102,7 +99,7 @@ public class IndustryUtils {
                     industry.setName(industryRaw.getName().trim());
                     return industry;
                 })
-                .generate();
+                .build();
         mergeCode(industries, null);
         return industries;
     }
