@@ -203,8 +203,14 @@ public class NodeTree {
             Map<Boolean, List<T>> map = data.parallelStream().collect(groupingBy(o -> rootFilter.test(o)));
             // 根节点列表
             List<T> roots = map.get(true);
+            if (roots == null) {
+                roots = emptyList();
+            }
             // 其他节点列表
             List<T> others = map.get(false);
+            if (others == null) {
+                others = emptyList();
+            }
 
             List<R> newNodes = new ArrayList<>();
             // 遍历根节点
@@ -267,7 +273,8 @@ public class NodeTree {
          */
         private <N extends Node<N>> void addChild(N parent, N child) {
             List<N> children = parent.getChildren();
-            if (children == null) {
+            // 防止默认值为emptyList时不能添加数据
+            if (children == null || children.equals(emptyList())) {
                 children = new ArrayList<>();
                 children.add(child);
                 parent.setChildren(children);

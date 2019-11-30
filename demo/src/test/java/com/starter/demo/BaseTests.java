@@ -2,14 +2,18 @@ package com.starter.demo;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
+import com.starter.demo.support.util.NodeTree;
 import com.starter.demo.support.util.excel.ExcelWriter;
+import org.assertj.core.util.Lists;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -35,7 +39,46 @@ public class BaseTests {
 
     @Test
     public void testMain() throws Exception {
+        System.out.println(Long.valueOf("2").compareTo(Long.valueOf("111")));
+    }
 
+    public void testTree() {
+        class Menu implements NodeTree.Node<Menu> {
+            String name;
+            String id;
+
+            private List<Menu> children;
+
+            public Menu(String name, String id) {
+                this.name = name;
+                this.id = id;
+            }
+
+            @Override
+            public List<Menu> getChildren() {
+                return children;
+            }
+
+            @Override
+            public void setChildren(List<Menu> children) {
+                this.children = children;
+            }
+        }
+
+
+        ArrayList<Menu> menus = Lists.newArrayList(
+                new Menu("A", "1"),
+                new Menu("AA", "11"),
+                new Menu("AAA", "111"),
+                new Menu("B", "2"));
+
+        List<Menu> tree = NodeTree.<Menu, Menu>from(menus)
+                .rootFilter(menu -> menu.id.length() == 1)
+                .childFilter((parent, child) -> parent.id.concat("1").equals(child.id))
+                .map(menu -> menu)
+                .build();
+
+        System.out.println(tree);
     }
 
     @Test
