@@ -16,7 +16,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * 控制器层全局异常处理器，业务异常BizException属于业务逻辑反馈(DEBUG输出)
@@ -51,9 +56,12 @@ public class ControllerExceptionHandler {
             sb.append("[").append(fielderror.getField()).append("]")
                     .append(fielderror.getDefaultMessage()).append(", ");
         }
-        String str = sb.length() > 0 ? sb.toString().replace(", ", "") : "请求的参数有误！";
-        logger.warn(str, e);
-        return Response.badRequest(str);
+        String msg = sb.toString();
+        msg = fieldErrors.size() > 0
+                ? msg.substring(0, msg.length() - 2)
+                : "请求的参数有误！";
+        logger.warn(msg, e);
+        return Response.badRequest(msg);
     }
 
 
@@ -79,7 +87,16 @@ public class ControllerExceptionHandler {
     @ResponseBody
     public ResponseEntity handleBizException(BizException e) {
         logger.debug(e.getMessage(), e);
-        return Response.unprocesable(getErrorMessage(e));
+        BizException last = e;
+        List<Throwable> throwableList = ExceptionUtils.getThrowableList(e);
+        if (throwableList.size() > 1) {
+            for (Throwable throwable :  ExceptionUtils.getThrowableList(e)) {
+                if (throwable instanceof BizException) {
+                    last = (BizException) throwable;
+                }
+            }
+        }
+        return Response.unprocesable(getErrorMessage(last));
     }
 
 
@@ -91,12 +108,19 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public ResponseEntity handleException(Exception e) {
+    public ResponseEntity handleException(HttpServletRequest request, Exception e) {
         int index;
         if ((index = ExceptionUtils.indexOfType(e, BizException.class)) != - 1) {
             Throwable throwable = ExceptionUtils.getThrowableList(e).get(index);
             return handleBizException((BizException)throwable);
         }
+
+        if (!request.getParameterMap().isEmpty()) {
+            Map<String, String> params = request.getParameterMap().entrySet().stream()
+                    .collect(toMap(Map.Entry::getKey, entry -> Arrays.toString(entry.getValue())));
+            logger.error("请求参数：{}", params);
+        }
+
         logger.error(e.getMessage(), e);
         if (withDetail()) {
             if (e instanceof NullPointerException) {

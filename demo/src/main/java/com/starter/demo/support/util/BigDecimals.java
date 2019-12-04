@@ -139,15 +139,29 @@ public class BigDecimals {
     }
 
     /**
+     * 小数点后两位
+     *
+     * @param val 数字或者字符串类型
+     * @return 两位小数的字符串数字
+     */
+    public static BigDecimal to2decimal(Object val) {
+        return of(val).setScale(2, HALF_UP);
+    }
+
+    /**
+     * 金额字符串
+     *
      * @param val 数字或者字符串类型
      * @return 两位小数的字符串数字
      */
     public static String toAmount(Object val) {
-        return of(val).setScale(2, HALF_UP).toString();
+        return to2decimal(val).toString();
     }
 
 
     /**
+     * 转double
+     *
      * @param val 数字或者字符串类型
      * @return double
      */
@@ -156,14 +170,18 @@ public class BigDecimals {
     }
 
     /**
+     * 转int
+     *
      * @param val 数字或者字符串类型
      * @return int
      */
-    public static int toIn(Object val) {
+    public static int toInt(Object val) {
         return of(val).intValue();
     }
 
     /**
+     * 转long
+     *
      * @param val 数字或者字符串类型
      * @return long
      */
@@ -186,14 +204,20 @@ public class BigDecimals {
             return new BigDecimal(val.toString());
         } else {
             String str = val.toString();
-            return !NumberUtils.isCreatable(str) ? ZERO : new BigDecimal(str);
+            return !NumberUtils.isParsable(str) ? ZERO : new BigDecimal(str);
         }
     }
 
-    private static Object[] ensureArray(Object o) {
-        if (o != null && o.getClass().isArray()) {
-            return (Object[])o;
+    /**
+     * 确保是数组
+     *
+     * @param input 入参
+     * @return 数组
+     */
+    private static Object[] ensureArray(Object input) {
+        if (input != null && input.getClass().isArray()) {
+            return (Object[])input;
         }
-        return new Object[]{o};
+        return new Object[]{input};
     }
 }

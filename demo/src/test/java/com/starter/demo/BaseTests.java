@@ -4,12 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.starter.demo.support.util.NodeTree;
 import com.starter.demo.support.util.excel.ExcelWriter;
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.security.Security;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +41,26 @@ public class BaseTests {
 
     @Test
     public void testMain() throws Exception {
-        System.out.println(Long.valueOf("2").compareTo(Long.valueOf("111")));
+
+        class Demo {
+
+            private String name;
+            private Demo child;
+
+            public Demo(String name) {
+                this.name = name;
+            }
+        }
+
+        Demo a = new Demo("a");
+        Demo b = new Demo("b");
+        a.child = b;
+        b.child = a;
+
+        Demo c = a.child;
+        while ((c = c.child) != null) {
+            System.out.println(c.child);
+        }
     }
 
     public void testTree() {

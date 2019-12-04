@@ -66,6 +66,46 @@ public class NodeTree {
         return null;
     }
 
+
+    /**
+     * 追踪节点，找出顶级节点到目标节点的路径
+     *
+     * @param nodes 待查找节点列表
+     * @param predicate 断言函数
+     * @param <N> 返回类型
+     * @return 继承于Node的具体类型
+     */
+    public static <N extends Node<N>> List<N> traceNode(List<N> nodes, Predicate<N> predicate) {
+        if (nodes == null || nodes.isEmpty()) {
+            return emptyList();
+        }
+        LinkedList<N> link = new LinkedList<>();
+        Stack<N> stack = new Stack<>();
+
+        for (N node : nodes) {
+            stack.push(node);
+            link.clear();
+            while (!stack.isEmpty()) {
+                // 先添加（形成一条最终链）在判断
+                N elem = stack.pop();
+                N clone = clone(elem);
+                clone.setChildren(null);
+                link.add(clone);
+
+                List<N> children = elem.getChildren();
+                if (children != null && !children.isEmpty()) {
+                    children.forEach(stack::push);
+                } else {
+                    link.pollLast();
+                    if (predicate.test(elem)) {
+                        return link;
+                    }
+                }
+            }
+        }
+        return emptyList();
+    }
+
     /**
      * 压扁当前节点及其子节点成列表
      *
@@ -75,7 +115,7 @@ public class NodeTree {
      */
     public static <N extends Node<N>> List<N> flatList(N node) {
         if (node == null) {
-            return null;
+            return emptyList();
         }
         List<N> nodes = new ArrayList<>();
         nodes.add(node);
@@ -212,13 +252,14 @@ public class NodeTree {
                 others = emptyList();
             }
 
+            // 保存原来的数据
+            Stack<T> oldStack = new Stack<>();
+            // 保存转换后的数据
+            Stack<R> newStack = new Stack<>();
             List<R> newNodes = new ArrayList<>();
+
             // 遍历根节点
             for (T root : roots) {
-                // 保存原来的数据
-                Stack<T> oldStack = new Stack<>();
-                // 保存转换后的数据
-                Stack<R> newStack = new Stack<>();
                 // 根节点转换
                 R newRoot = nodeConvert.apply(root);
                 // 根节点元素入栈，触发寻找子节点这个过程
@@ -301,10 +342,12 @@ public class NodeTree {
         void setChildren(List<T> children);
 
         default T findChild(Predicate<T> predicate) {
+            //noinspection unchecked
             return (T) findNode(getChildren(), predicate);
         }
 
         default List<T> flatChildren(Predicate<T> predicate) {
+            //noinspection unchecked
             return (List<T>) findNode(getChildren(), predicate);
         }
     }
