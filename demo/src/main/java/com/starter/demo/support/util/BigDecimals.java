@@ -103,7 +103,7 @@ public class BigDecimals {
     }
 
     /**
-     * 是否所有都相等，此处 0 == null
+     * 是否所有都相等，此处 0 == null视为相等
      *
      * @param o1 比较对象1
      * @param o2 比较对象2
@@ -125,7 +125,7 @@ public class BigDecimals {
     }
 
     /**
-     * 比较结果，此处 0 == null
+     * 比较结果，此处 0 == null视为相等
      *
      * @param o1 比较对象1
      * @param o2 比较对象2
@@ -139,12 +139,12 @@ public class BigDecimals {
     }
 
     /**
-     * 小数点后两位
+     * 四舍五入小数点后两位
      *
      * @param val 数字或者字符串类型
      * @return 两位小数的字符串数字
      */
-    public static BigDecimal to2decimal(Object val) {
+    public static BigDecimal rounding2decimal(Object val) {
         return of(val).setScale(2, HALF_UP);
     }
 
@@ -155,7 +155,7 @@ public class BigDecimals {
      * @return 两位小数的字符串数字
      */
     public static String toAmount(Object val) {
-        return to2decimal(val).toString();
+        return rounding2decimal(val).toString();
     }
 
 
