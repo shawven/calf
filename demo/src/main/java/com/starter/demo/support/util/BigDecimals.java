@@ -5,8 +5,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import static java.awt.Event.DOWN;
 import static java.math.BigDecimal.ZERO;
 import static java.math.RoundingMode.HALF_UP;
+
 
 /**
  * BigDecimals工具
@@ -135,17 +137,23 @@ public class BigDecimals {
         if (o1 == o2) {
             return 0;
         }
-        return of(o1).compareTo(of(o2));
+        BigDecimal d1 = of(o1);
+        BigDecimal d2 = of(o2);
+        int scala = Math.max(d1.scale(), d2.scale());
+        // noinspection BigDecimalMethodWithoutRoundingCalled
+        return d1.setScale(scala).compareTo(d2.setScale(scala));
     }
 
     /**
-     * 四舍五入小数点后两位
+     * 与0比较结果，此处 0 == null视为相等
      *
-     * @param val 数字或者字符串类型
-     * @return 两位小数的字符串数字
+     * @param o 比较对象1
+     * @return 比较结果
      */
-    public static BigDecimal rounding2decimal(Object val) {
-        return of(val).setScale(2, HALF_UP);
+    public static int compareZero(Object o) {
+        BigDecimal decimal = of(o);
+        // noinspection BigDecimalMethodWithoutRoundingCalled
+        return decimal.compareTo(ZERO.setScale(decimal.scale()));
     }
 
     /**
@@ -155,9 +163,46 @@ public class BigDecimals {
      * @return 两位小数的字符串数字
      */
     public static String toAmount(Object val) {
-        return rounding2decimal(val).toString();
+        return toScalaString(val, 2);
     }
 
+    /**
+     * 四舍五入小数点后两位
+     *
+     * @param val 数字或者字符串类型
+     * @return 两位小数的字符串数字
+     */
+    public static BigDecimal rounding2decimal(Object val) {
+        return of(val).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * 转指定小数位数字符串
+     *
+     * @param val 数字或者字符串类型
+     * @return 两位小数的字符串数字
+     */
+    public static String toScalaString(Object val, int scale) {
+        // 去除超过位数的数字
+        String str = of(val).setScale(scale, RoundingMode.DOWN).toString();
+        // 0.0000 => 0
+        // noinspection BigDecimalMethodWithoutRoundingCalled
+        return str.equals(ZERO.setScale(scale).toString()) ? "0" : str;
+    }
+
+    /**
+     * 转指定小数位数四舍五入字符串
+     *
+     * @param val 数字或者字符串类型
+     * @return 两位小数的字符串数字
+     */
+    public static String toScalaRoundingString(Object val, int scale) {
+        // 去除超过位数的数字
+        String str = of(val).setScale(scale, RoundingMode.HALF_UP).toString();
+        // 0.0000 => 0
+        // noinspection BigDecimalMethodWithoutRoundingCalled
+        return str.equals(ZERO.setScale(scale).toString()) ? "0" : str;
+    }
 
     /**
      * 转double

@@ -122,7 +122,7 @@ public class Response {
      *
      * @return 响应体
      */
-    public static ResponseEntity created() {
+    public static ResponseEntity<Response> created() {
         return created(CREATED.getReasonPhrase());
     }
 
@@ -152,11 +152,11 @@ public class Response {
     }
 
     /**
-     * 202 Accepted：表示一个请求已经进入后台排队（异步任务）
+     * 202 Accepted - [*]：表示一个请求已经进入后台排队（异步任务）
      *
      * @return 响应体
      */
-    public static ResponseEntity accepted() {
+    public static ResponseEntity<Response> accepted() {
         return accepted(null);
     }
 
@@ -164,7 +164,7 @@ public class Response {
      * @param msg 消息
      * @return   响应体
      */
-    public static ResponseEntity accepted(String msg) {
+    public static ResponseEntity<Response> accepted(String msg) {
         return accepted(msg, null);
     }
 
@@ -172,7 +172,7 @@ public class Response {
      * @param data 数据
      * @return   响应体
      */
-    public static ResponseEntity accepted(Object data) {
+    public static ResponseEntity<Response> accepted(Object data) {
         return accepted(ACCEPTED.getReasonPhrase(), data);
     }
 
@@ -181,25 +181,25 @@ public class Response {
      * @param data 数据
      * @return   响应体
      */
-    public static ResponseEntity accepted(String msg, Object data) {
+    public static ResponseEntity<Response> accepted(String msg, Object data) {
         return build(ACCEPTED, 0, msg, data);
     }
 
     /**
-     * 204 No Content：用户删除数据成功，无数据返回
+     * 204 No Content - [DELEObjectE]：用户删除数据成功，无数据返回
      *
      * @return 响应体
      */
-    public static ResponseEntity noContent() {
+    public static ResponseEntity<Response> noContent() {
         return build(NO_CONTENT, 0, NO_CONTENT.getReasonPhrase());
     }
 
     /**
-     * 400 Bad Request：请求参数有误
+     * 400 Bad Request - [*]：请求参数有误
      *
      * @return 响应体
      */
-    public static ResponseEntity badRequest() {
+    public static ResponseEntity<Response> badRequest() {
         return badRequest(BAD_REQUEST.getReasonPhrase());
     }
 
@@ -207,120 +207,125 @@ public class Response {
      * @param msg 消息
      * @return    响应体
      */
-    public static ResponseEntity badRequest(String msg) {
-        return build(BAD_REQUEST, BAD_REQUEST.value(), msg);
+    public static ResponseEntity<Response> badRequest(String msg) {
+        return build(BAD_REQUEST, msg);
     }
 
     /**
-     * 401 Unauthorized：表示用户没有权限（令牌、用户名、密码错误）
+     * 401 Unauthorized - [*]：表示用户没有权限（令牌、用户名、密码错误）
      *
      * @return 响应体
      */
-    public static ResponseEntity unauthorized () {
+    public static ResponseEntity<Response> unauthorized () {
         return unauthorized(UNAUTHORIZED.getReasonPhrase());
     }
 
     /**
-     * 401 Unauthorized：表示用户没有权限（令牌、用户名、密码错误）
+     * 401 Unauthorized - [*]：表示用户没有权限（令牌、用户名、密码错误）
      *
      * @return 响应体
      */
-    public static ResponseEntity unauthorized (String msg) {
+    public static ResponseEntity<Response> unauthorized (String msg) {
         return unauthorized(UNAUTHORIZED.value(), msg);
     }
 
     /**
-     * 401 Unauthorized：表示用户没有权限（令牌、用户名、密码错误）
+     * 401 Unauthorized - [*]：表示用户没有权限（令牌、用户名、密码错误）
      *
      * @return 响应体
      */
-    public static ResponseEntity unauthorized (int code, String msg) {
+    public static ResponseEntity<Response> unauthorized (int code, String msg) {
         return build(UNAUTHORIZED, code, msg);
     }
 
     /**
-     * 403 Forbidden：表示用户得到授权（与401错误相对），但是访问是被禁止的
+     * 403 Forbidden - [*] 表示用户得到授权（与401错误相对），但是访问是被禁止的
      *
      * @return 响应体
      */
-    public static ResponseEntity forbidden () {
+    public static ResponseEntity<Response> forbidden () {
         return forbidden(FORBIDDEN.getReasonPhrase());
     }
 
     /**
-     * 403 Forbidden 表示用户得到授权（与401错误相对），但是访问是被禁止的
+     * 403 Forbidden - [*] 表示用户得到授权（与401错误相对），但是访问是被禁止的
      *
      * @return 响应体
      */
-    public static ResponseEntity forbidden (String msg) {
+    public static ResponseEntity<Response> forbidden (String msg) {
         return forbidden(FORBIDDEN.value(), msg);
     }
 
     /**
+     * 403 Forbidden - [*] 表示用户得到授权（与401错误相对），但是访问是被禁止的
+     *
      * @param code 状态码
      * @return 响应体
      */
-    public static ResponseEntity forbidden (int code, String msg) {
+    public static ResponseEntity<Response> forbidden (int code, String msg) {
         return build(FORBIDDEN, code, msg);
     }
 
     /**
-     * 404 Not Found：用户发出的请求针对的是不存在的记录，服务器没有进行操作，该操作是幂等的。
+     * 404 Not Found - [*]：用户发出的请求针对的是不存在的记录。
      *
      * @return 响应体
      */
-    public static ResponseEntity notFound() {
+    public static ResponseEntity<Response> notFound() {
         return notFound(NOT_FOUND.getReasonPhrase());
+    }
+
+
+    /**
+     * 405 METHOD_NOT_ALLOWED - [*]：HTTP方法不允许
+     *
+     * @return 响应体
+     */
+    public static ResponseEntity<Response> methodNotAllowed() {
+        return methodNotAllowed(METHOD_NOT_ALLOWED.getReasonPhrase());
+    }
+
+    /**
+     * 405 METHOD_NOT_ALLOWED - [*]：HTTP方法不允许
+     *
+     * @return 响应体
+     */
+    public static ResponseEntity<Response> methodNotAllowed(String msg) {
+        return build(METHOD_NOT_ALLOWED, msg);
     }
 
     /**
      * @param msg 消息
      * @return    响应体
      */
-    public static ResponseEntity notFound(String msg) {
-        return build(NOT_FOUND, NOT_FOUND.value(), msg);
+    public static ResponseEntity<Response> notFound(String msg) {
+        return build(NOT_FOUND, msg);
     }
 
     /**
-     * 405 METHOD_NOT_ALLOWED：HTTP方法不允许
+     * 406 Not Acceptable - [GEObject]：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。
      *
      * @return 响应体
      */
-    public static ResponseEntity methodNotAllowed() {
-        return methodNotAllowed(METHOD_NOT_ALLOWED.getReasonPhrase());
-    }
-
-    /**
-     * @return 响应体
-     */
-    public static ResponseEntity methodNotAllowed(String msg) {
-        return build(METHOD_NOT_ALLOWED, msg);
-    }
-
-    /**
-     * 406 Not Acceptable：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。
-     *
-     * @return 响应体
-     */
-    public static ResponseEntity notAcceptable() {
+    public static ResponseEntity<Response> notAcceptable() {
         return notAcceptable(NOT_ACCEPTABLE.getReasonPhrase());
     }
 
     /**
-     * 406 Not Acceptable：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。
+     * 406 Not Acceptable - [GEObject]：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。
      *
      * @return 响应体
      */
-    public static ResponseEntity notAcceptable(String msg) {
-        return build(NOT_ACCEPTABLE, NOT_ACCEPTABLE.value(), msg);
+    public static ResponseEntity<Response> notAcceptable(String msg) {
+        return build(NOT_ACCEPTABLE, msg);
     }
 
     /**
-     * 422  Unprocesable entity - [POST/PUT/PATCH] 当创建一个对象时，发生一个验证错误，无法响应。
+     * 422  Unprocesable entity - [POSObject/PUObject/PAObjectCH] 当创建一个对象时，发生一个验证错误，语义错误，无法响应。
      *
      * @return 响应体
      */
-    public static ResponseEntity unprocesable() {
+    public static ResponseEntity<Response> unprocesable() {
         return unprocesable(UNPROCESSABLE_ENTITY.getReasonPhrase());
     }
 
@@ -328,7 +333,7 @@ public class Response {
      * @param msg 消息
      * @return    响应体
      */
-    public static ResponseEntity unprocesable(String msg) {
+    public static ResponseEntity<Response> unprocesable(String msg) {
         return unprocesable(UNPROCESSABLE_ENTITY.value(), msg);
     }
 
@@ -337,12 +342,12 @@ public class Response {
      * @param msg 消息
      * @return    响应体
      */
-    public static ResponseEntity unprocesable(int code, String msg) {
+    public static ResponseEntity<Response> unprocesable(int code, String msg) {
         return build(UNPROCESSABLE_ENTITY, code, msg);
     }
 
     /**
-     * 500 Internal Server Error：服务器发生错误，用户将无法判断发出的请求是否成功。
+     * 500 Internal Server Error - [*]：服务器发生错误，用户将无法判断发出的请求是否成功。
      *
      * @param msg 消息
      * @return    响应体

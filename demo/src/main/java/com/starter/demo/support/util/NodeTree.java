@@ -38,7 +38,7 @@ public class NodeTree {
     }
 
     /**
-     * 寻找当前树里的节点
+     * 寻找节点
      *
      * @param nodes 待查找节点列表
      * @param predicate 断言函数
@@ -68,7 +68,7 @@ public class NodeTree {
 
 
     /**
-     * 追踪节点，找出顶级节点到目标节点的路径
+     * 追踪节点（顶级节点到目标节点的路径）
      *
      * @param nodes 待查找节点列表
      * @param predicate 断言函数
@@ -107,7 +107,7 @@ public class NodeTree {
     }
 
     /**
-     * 压扁当前节点及其子节点成列表
+     * 压扁节点树成列表（平铺当前节点及其子节点）
      *
      * @param node
      * @param <N>
