@@ -35,7 +35,7 @@ public class ExcelReader {
     /**
      * 数据流
      */
-    private Stream<Line<String>> stream;
+    private Stream<Row> stream;
 
     /**
      * @param name 文件名称
@@ -79,7 +79,7 @@ public class ExcelReader {
     /**
      * @return Stream
      */
-    public Stream<Line<String>> stream() {
+    public Stream<Row> stream() {
         return stream;
     }
 
@@ -90,13 +90,13 @@ public class ExcelReader {
      * @param consumer 消费函数
      * @return
      */
-    public void read(Consumer<Line<String>> consumer) {
-        stream.forEach(line -> {
+    public void read(Consumer<Row> consumer) {
+        stream.forEach(row -> {
             try {
-                consumer.accept(line);
+                consumer.accept(row);
             } catch (Exception e) {
-                if (line != null) {
-                    CellAddress address = line.getCurrentAddress();
+                if (row != null) {
+                    CellAddress address = row.getCurrentAddress();
                     throw new RuntimeException(String.format("第 %s 行 %s 列 %s 单元格：%s",address.getRow() + 1,
                             address.getColumn() + 1, address.toString(), e.getMessage()));
                 }
@@ -150,7 +150,7 @@ public class ExcelReader {
         return this;
     }
 
-    public ExcelReader filter(Predicate<Line> lineFilter) {
+    public ExcelReader filter(Predicate<Row> lineFilter) {
         stream = stream.filter(lineFilter);
         return this;
     }
@@ -179,11 +179,11 @@ public class ExcelReader {
      *
      * @return
      */
-    private Stream<Line<String>> createStream() {
+    private Stream<Row> createStream() {
         int rowNum = sheet.getLastRowNum();
-        List<Line<String>> lines = new ArrayList<>(rowNum);
+        List<Row> rows = new ArrayList<>(rowNum);
         for (int i = 0; i <= rowNum; i++) {
-            Row row = sheet.getRow(i);
+            org.apache.poi.ss.usermodel.Row row = sheet.getRow(i);
             int cellSize = row.getLastCellNum();
 
             Map<CellAddress, String> line = new LinkedHashMap<>(cellSize);
@@ -191,9 +191,9 @@ public class ExcelReader {
                 Cell cell = row.getCell(j);
                 line.put(getAddress(cell, i, j), getValue(cell));
             }
-            lines.add(new Line<>(i, line));
+            rows.add(new Row(i, line));
         }
-        return lines.stream();
+        return rows.stream();
     }
 
     /**
@@ -295,9 +295,8 @@ public class ExcelReader {
 
     /**
      * excel行
-     * @param <T>
      */
-    public class Line<T> {
+    public class Row {
 
         /**
          * 单元格列名地址索引（第几个如第B列或第2列）
@@ -307,7 +306,7 @@ public class ExcelReader {
         /**
          * 单元格数据映射（地址对应数据）
          */
-        private Map<CellAddress, T> row;
+        private Map<CellAddress, ?> row;
 
         private int rowIndex;
 
@@ -316,7 +315,7 @@ public class ExcelReader {
          */
         private CellAddress currentAddress;
 
-        private Line(int rowIndex, Map<CellAddress, T> row) {
+        private Row(int rowIndex, Map<CellAddress, ?> row) {
             this.rowIndex = rowIndex;
             this.row = row;
             this.indexes = new HashMap<>();
@@ -327,18 +326,33 @@ public class ExcelReader {
         }
 
         /**
-         * 获取第几列
-         * 获取第B列：get("B") 或者第2列 get("2")
+         * 获取第几列, 如2列：get("B") 或者第2列 get("2")
          *
          * @param key
          * @return
          */
-        public T get(String key) {
+        public String get(String key) {
             if (key == null) {
                 return null;
             }
             this.currentAddress = indexes.get(key);
-            return row.get(currentAddress);
+            Object value = row.get(currentAddress);
+            return value == null ? null : value.toString().trim();
+        }
+
+        public int getInt(String key) {
+            String value = get(key);
+            return Double.valueOf(value).intValue();
+        }
+
+        public long getLong(String key) {
+            String value = get(key);
+            return Double.valueOf(value).longValue();
+        }
+
+        public double getDouble(String key) {
+            String value = get(key);
+            return Double.parseDouble(value);
         }
 
         public int getRowIndex() {
@@ -350,15 +364,16 @@ public class ExcelReader {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o)  {
+        public boolean equals(Object another) {
+            if (this == another)  {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (another == null || getClass() != another.getClass()) {
                 return false;
             }
-            Line<?> line = (Line<?>) o;
-            return Objects.equals(row.values().toString(), line.row.values().toString());
+            Row anotherRow = (Row) another;
+            return Objects.equals(this.row.values().toString(),
+                    anotherRow.row.values().toString());
         }
 
         @Override

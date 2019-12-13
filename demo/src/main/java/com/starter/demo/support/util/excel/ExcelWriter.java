@@ -632,7 +632,7 @@ public class ExcelWriter<T> {
         }
     }
 
-
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private Object getCellValue(Object line, Column column) {
         String fieldName = column.getKey();
         if (line instanceof Map) {

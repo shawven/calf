@@ -113,6 +113,7 @@ public class ReflectHelpers {
      * @param aClass 注解Class
      * @return 属性数组
      */
+    @SuppressWarnings("rawtypes")
     public static Field[] getPropertyNameByAnnotation(Class cls, Class<? extends Annotation> aClass) {
         Field[] declaredFields = cls.getDeclaredFields();
         List<Field> fields = new ArrayList<>();
@@ -121,7 +122,7 @@ public class ReflectHelpers {
                 fields.add(declaredField);
             }
         }
-        return fields.toArray(new Field[fields.size()]);
+        return fields.toArray(new Field[0]);
     }
 
     /**
@@ -132,7 +133,8 @@ public class ReflectHelpers {
      * @param <T> 参数类型
      * @return 参数类型Class
      */
-    public static <T> Class<T> getSuperClassGenericType(Class cls, int index) {
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> getSuperClassGenericType(Class<?> cls, int index) {
         String simpleName = cls.getSimpleName();
         Type genType = cls.getGenericSuperclass();
         if (!(genType instanceof ParameterizedType)) {
@@ -144,7 +146,6 @@ public class ReflectHelpers {
                     throw new IllegalArgumentException(String.format("%s not set the actual class on" +
                             " superclass generic parameter", simpleName));
                 } else {
-                    //noinspection unchecked
                     return (Class<T>) params[index];
                 }
             } else {
@@ -162,7 +163,8 @@ public class ReflectHelpers {
      * @param <T> 参数类型
      * @return 参数类型Class
      */
-    public static <T> Class<T> getInterfaceGenericType(Class cls, int index) {
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> getInterfaceGenericType(Class<?> cls, int index) {
         String simpleName = cls.getSimpleName();
         Type[] genericInterfaces = cls.getGenericInterfaces();
         for (Type genericInterface : genericInterfaces) {
@@ -170,7 +172,6 @@ public class ReflectHelpers {
                 Type[] params = ((ParameterizedType) genericInterface).getActualTypeArguments();
                 if (index < params.length && index >= 0) {
                     if (params[index] instanceof Class) {
-                        //noinspection unchecked
                         return (Class<T>) params[index];
                     }
                 }
@@ -186,7 +187,7 @@ public class ReflectHelpers {
      * @param needle 待查找的参数类型
      * @return 查找结果
      */
-    public static boolean existSuperClassGenericType(Class cls, Class needle) {
+    public static boolean existSuperClassGenericType(Class<?> cls, Class<?> needle) {
         Type genType = cls.getGenericSuperclass();
         if (genType instanceof ParameterizedType) {
             Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
@@ -194,8 +195,7 @@ public class ReflectHelpers {
                 return false;
             }
             for (Type param : params) {
-                //noinspection unchecked
-                if (param instanceof Class && ((Class) param).isAssignableFrom(needle)) {
+                if (param instanceof Class && ((Class<?>) param).isAssignableFrom(needle)) {
                     return true;
                 }
             }
@@ -210,7 +210,7 @@ public class ReflectHelpers {
      * @param needle 待查找的参数类型
      * @return 查找结果
      */
-    public static boolean existInterfaceGenericType(Class cls, Class needle) {
+    public static boolean existInterfaceGenericType(Class<?> cls, Class<?> needle) {
         Type[] genericInterfaces = cls.getGenericInterfaces();
         for (Type genericInterface : genericInterfaces) {
             if (genericInterface instanceof ParameterizedType) {
@@ -219,8 +219,7 @@ public class ReflectHelpers {
                     return false;
                 }
                 for (Type param : params) {
-                    //noinspection unchecked
-                    if (param instanceof Class && ((Class) param).isAssignableFrom(needle)) {
+                    if (param instanceof Class && ((Class<?>) param).isAssignableFrom(needle)) {
                         return true;
                     }
                 }
@@ -238,7 +237,7 @@ public class ReflectHelpers {
         }
     }
 
-    private static PropertyDescriptor[] getPropertyDescriptors(Class type, boolean read, boolean write) {
+    private static PropertyDescriptor[] getPropertyDescriptors(Class<?> type, boolean read, boolean write) {
         BeanInfo info;
         try {
             info = Introspector.getBeanInfo(type, Object.class);
@@ -255,7 +254,7 @@ public class ReflectHelpers {
                     properties.add(pd);
                 }
             }
-            return properties.toArray(new PropertyDescriptor[properties.size()]);
+            return properties.toArray(new PropertyDescriptor[0]);
         }
     }
 }

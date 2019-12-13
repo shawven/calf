@@ -50,22 +50,21 @@ public class NodeTree {
             return null;
         }
 
-        Stack<N> stack = new Stack<>();
-        nodes.forEach(stack::push);
+        Deque<N> queue = new LinkedList<>();
+        nodes.forEach(queue::push);
 
-        while (!stack.isEmpty()) {
-            N node = stack.pop();
+        while (!queue.isEmpty()) {
+            N node = queue.pop();
             if (predicate.test(node)) {
                 return node;
             }
             List<N> children = node.getChildren();
             if (children != null && !children.isEmpty()) {
-                children.forEach(stack::push);
+                children.forEach(queue::push);
             }
         }
         return null;
     }
-
 
     /**
      * 追踪节点（顶级节点到目标节点的路径）
@@ -80,21 +79,21 @@ public class NodeTree {
             return emptyList();
         }
         LinkedList<N> link = new LinkedList<>();
-        Stack<N> stack = new Stack<>();
+        Deque<N> queue = new LinkedList<>();
 
         for (N node : nodes) {
-            stack.push(node);
+            queue.push(node);
             link.clear();
-            while (!stack.isEmpty()) {
+            while (!queue.isEmpty()) {
                 // 先添加（形成一条最终链）在判断
-                N elem = stack.pop();
+                N elem = queue.pop();
                 N clone = clone(elem);
                 clone.setChildren(null);
                 link.add(clone);
 
                 List<N> children = elem.getChildren();
                 if (children != null && !children.isEmpty()) {
-                    children.forEach(stack::push);
+                    children.forEach(queue::push);
                 } else {
                     link.pollLast();
                     if (predicate.test(elem)) {
@@ -109,9 +108,9 @@ public class NodeTree {
     /**
      * 压扁节点树成列表（平铺当前节点及其子节点）
      *
-     * @param node
-     * @param <N>
-     * @return
+     * @param node 待处理节点
+     * @param <N> 节点类型
+     * @return 扁平节点集合
      */
     public static <N extends Node<N>> List<N> flatList(N node) {
         if (node == null) {
@@ -125,31 +124,32 @@ public class NodeTree {
     /**
      * 压扁当前节点集合及其子节点成列表
      *
-     * @param nodes
-     * @param <N>
-     * @return
+     * @param nodes 待处理节点集合
+     * @param <N> 节点类型
+     * @return 扁平节点集合
      */
     public static <N extends Node<N>> List<N> flatList(List<N> nodes) {
         if (nodes == null || nodes.isEmpty()) {
             return emptyList();
         }
-        LinkedList<N> queue = nodes.parallelStream().map(NodeTree::clone).collect(toCollection(LinkedList::new));
+        LinkedList<N> linkedList = nodes.parallelStream().map(NodeTree::clone).collect(toCollection(LinkedList::new));
         List<N> list = new ArrayList<>();
 
-        while (!queue.isEmpty()) {
-            N node = queue.pop();
+        while (!linkedList.isEmpty()) {
+            N node = linkedList.pop();
             List<N> children = node.getChildren();
             // 清除子节点指针
             node.setChildren(null);
             list.add(node);
             if (children != null && !children.isEmpty()) {
                 // 添加到队列头
-                queue.addAll(0, children);
+                linkedList.addAll(0, children);
             }
         }
         return list;
     }
 
+    @SuppressWarnings("unchecked")
     private static <T extends Serializable> T clone(T object) {
         if (object == null) {
             return null;
@@ -162,7 +162,6 @@ public class NodeTree {
         }
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         try (ObjectInputStream in = new ObjectInputStream(bais)) {
-            //noinspection unchecked
             return (T) in.readObject();
         } catch (ClassNotFoundException ex) {
             throw new SerializationException("ClassNotFoundException while reading cloned object data", ex);
@@ -253,9 +252,9 @@ public class NodeTree {
             }
 
             // 保存原来的数据
-            Stack<T> oldStack = new Stack<>();
+            Deque<T> oldStack = new LinkedList<>();
             // 保存转换后的数据
-            Stack<R> newStack = new Stack<>();
+            Deque<R> newStack = new LinkedList<>();
             List<R> newNodes = new ArrayList<>();
 
             // 遍历根节点
@@ -275,7 +274,8 @@ public class NodeTree {
             return newNodes;
         }
 
-        private void doBuild(List<T> others, Stack<T> oldStack, Stack<R> newStack) {
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        private void doBuild(List<T> others, Deque<T> oldStack, Deque<R> newStack) {
             while (!oldStack.isEmpty()) {
                 // 弹出临时父节点
                 T tempParent = oldStack.pop();
@@ -291,6 +291,11 @@ public class NodeTree {
                     if (childFilter.test(tempParent, child)) {
                         // 子节点转换
                         R newChild = nodeConvert.apply(child);
+
+                        if (newChild instanceof DeNode) {
+                            ((DeNode) newChild).setParent((DeNode)newTempParent);
+                        }
+
                         // 构造父子关系（最终返回的是转换后的节点，所有对转换后的节点设置）
                         addChild(newTempParent, newChild);
 
@@ -325,7 +330,12 @@ public class NodeTree {
         }
     }
 
-    public interface Node<T extends Node> extends Serializable {
+    /**
+     * 节点
+     *
+     * @param <T>
+     */
+    public interface Node<T extends Node<T>> extends Serializable {
         /**
          * 获取所有孩子节点
          *
@@ -341,14 +351,60 @@ public class NodeTree {
          */
         void setChildren(List<T> children);
 
+        /**
+         * 寻找子节点
+         *
+         * @param predicate 断言函数
+         * @return 子节点集合
+         */
         default T findChild(Predicate<T> predicate) {
-            //noinspection unchecked
-            return (T) findNode(getChildren(), predicate);
+            return findNode(getChildren(), predicate);
         }
 
-        default List<T> flatChildren(Predicate<T> predicate) {
-            //noinspection unchecked
-            return (List<T>) findNode(getChildren(), predicate);
+        /**
+         * 扁平子节点集合
+         *
+         * @return 子节点集合
+         */
+        default List<T> flatChildren() {
+            return flatList(getChildren());
+        }
+    }
+
+    /**
+     * 双向节点
+     *
+     * @param <T>
+     */
+    public interface DeNode<T extends DeNode<T>> extends Node<T> {
+
+        /**
+         * 获取父节点
+         *
+         * @return 父节点
+         */
+        T getParent();
+
+        /**
+         * 设置父节点
+         *
+         * @param parent 父节点
+         */
+        void setParent(T parent);
+
+        /**
+         * 追踪祖先节点
+         *
+         * @return 祖先节点集合
+         */
+        default List<T> traceAncestors() {
+            LinkedList<T> ancestors = new LinkedList<>();
+            T parent  = getParent();
+            while (parent != null) {
+                ancestors.addFirst(parent);
+                parent = parent.getParent();
+            }
+            return new ArrayList<>(ancestors);
         }
     }
 }

@@ -2,6 +2,7 @@ package com.starter.demo;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
+import com.starter.demo.support.util.BigDecimals;
 import com.starter.demo.support.util.NodeTree;
 import com.starter.demo.support.util.excel.ExcelWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -10,14 +11,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.security.Security;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static java.time.temporal.ChronoField.DAY_OF_MONTH;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -42,25 +46,9 @@ public class BaseTests {
     @Test
     public void testMain() throws Exception {
 
-        class Demo {
-
-            private String name;
-            private Demo child;
-
-            public Demo(String name) {
-                this.name = name;
-            }
-        }
-
-        Demo a = new Demo("a");
-        Demo b = new Demo("b");
-        a.child = b;
-        b.child = a;
-
-        Demo c = a.child;
-        while ((c = c.child) != null) {
-            System.out.println(c.child);
-        }
+        String[] codes = {"3", "", "11", "222"};
+        Arrays.sort(codes);
+        System.out.println(Arrays.toString(codes));
     }
 
     public void testTree() {

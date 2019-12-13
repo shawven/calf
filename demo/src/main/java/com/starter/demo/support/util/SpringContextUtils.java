@@ -19,8 +19,10 @@ public class SpringContextUtils implements ApplicationContextAware {
 
     private static ApplicationContext context;
 
+
     @Override
-    public void setApplicationContext(ApplicationContext context) throws BeansException {
+    public void setApplicationContext(@SuppressWarnings("NullableProblems") ApplicationContext context)
+            throws BeansException {
         SpringContextUtils.context = Objects.requireNonNull(context);
     }
 
@@ -32,7 +34,8 @@ public class SpringContextUtils implements ApplicationContextAware {
      * @param <T>     注解
      * @return        bean
      */
-    public static <T> T getBeanByParameterizedType(Class cls, Class<? extends Annotation> aClass) {
+    @SuppressWarnings("unchecked")
+    public static <T> T getBeanByParameterizedType(Class<?> cls, Class<? extends Annotation> aClass) {
         Map<String, Object> beans = getContext().getBeansWithAnnotation(aClass);
         for (Object bean : beans.values()) {
             Object target;
@@ -41,13 +44,11 @@ public class SpringContextUtils implements ApplicationContextAware {
             } catch (Exception e) {
                 continue;
             }
-            Class targetClass = target.getClass();
+            Class<?> targetClass = target.getClass();
             if (ReflectHelpers.existSuperClassGenericType(targetClass, cls)) {
-                //noinspection unchecked
                 return (T)bean;
             }
             if (ReflectHelpers.existInterfaceGenericType(targetClass, cls)) {
-                //noinspection unchecked
                 return (T)bean;
             }
         }
@@ -63,8 +64,8 @@ public class SpringContextUtils implements ApplicationContextAware {
      * @param <T> 要加载的Bean的类型
      * @return Bean
      */
+    @SuppressWarnings("unchecked")
     public static <T> T getBean(String name) {
-        //noinspection unchecked
         return (T) getContext().getBean(name);
     }
 

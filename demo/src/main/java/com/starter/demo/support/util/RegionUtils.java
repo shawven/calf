@@ -18,12 +18,14 @@ import java.util.stream.Collectors;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
+ * 行政地区工具
+ *
  * @author Shoven
  * @date 2019-11-04
  */
 public class RegionUtils {
 
-    private static SoftReference<List<Region>> reference;
+    private static SoftReference<List<Province>> reference;
 
     /**
      * 解析行政地址
@@ -68,7 +70,7 @@ public class RegionUtils {
      */
     public static Province provinceOf(String province) {
         Objects.requireNonNull(province, "省份不能为空");
-        return (Province)getRegions().parallelStream()
+        return getRegions().parallelStream()
                 .filter(provinceRegion -> provinceRegion.getName().startsWith(province))
                 .peek(provinceRegion -> provinceRegion.setFullName(provinceRegion.getName()))
                 .findFirst()
@@ -121,8 +123,8 @@ public class RegionUtils {
      *
      * @return 区域集合
      */
-    public static List<Region> getRegions() {
-        List<Region> regions;
+    public static List<Province> getRegions() {
+        List<Province> regions;
         if (reference == null || (regions = reference.get()) == null) {
             String data;
             try {
@@ -138,6 +140,9 @@ public class RegionUtils {
 
     @Data
     public static class Region implements Serializable {
+
+        private static final long serialVersionUID = 3487962100670057757L;
+
         /**
          * 编码
          */
@@ -155,51 +160,45 @@ public class RegionUtils {
 
     }
 
-    public static class Province extends Region implements NodeTree.Node<City> {
+    public static class Province extends Region {
+
+        private static final long serialVersionUID = 2436389774406543258L;
+
         /**
          * 下属城市
          */
         private List<City> cityList;
 
-        @Override
         public List<City> getChildren() {
             return cityList;
         }
 
-        @Override
         public void setChildren(List<City> children) {
             this.cityList = children;
         }
     }
 
-    public static class City extends Region implements NodeTree.Node<Country>{
+    public static class City extends Region {
+
+        private static final long serialVersionUID = 9085363875009465890L;
+
         /**
          * 下属地区
          */
         private List<Country> areaList;
 
-        @Override
         public List<Country> getChildren() {
             return areaList;
         }
 
-        @Override
         public void setChildren(List<Country> children) {
             this.areaList = children;
         }
     }
 
-    public static class Country extends Region implements NodeTree.Node {
+    public static class Country extends Region {
 
-        @Override
-        public List getChildren() {
-            return null;
-        }
-
-        @Override
-        public void setChildren(List children) {
-
-        }
+        private static final long serialVersionUID = 5344567900154338252L;
     }
 
     @Data

@@ -48,8 +48,7 @@ import static org.apache.http.entity.ContentType.*;
 
 
 /**
- * HttpClient工具类 线程安全
- * <p>线程安全、涉及的超时时间都是秒</p>
+ * HttpClient工具类 异步、任意、连接池线程安全等，超时时间秒为单位
  * <p>创建实例</p>
  * <pre>
  *  // 非连接池
@@ -662,6 +661,7 @@ public class HttpUtil {
          * @param <R>
          * @return
          */
+        @SuppressWarnings("unchecked")
         private <R> R parseResponse(String str, Class<R> responseType) {
             if (str == null) {
                 return null;
@@ -680,6 +680,7 @@ public class HttpUtil {
          * @param <R>
          * @return
          */
+        @SuppressWarnings("unchecked")
         private <R> R parseResponse(String str, TypeToken<R> responseType) {
             if (str == null) {
                 return null;
@@ -974,7 +975,7 @@ public class HttpUtil {
             ContentType contentType = MULTIPART_FORM_DATA.withCharset(CHARSET);
             builder.setContentType(contentType);
 
-            for (Map.Entry entry : payload.entrySet()) {
+            for (Map.Entry<?, ?> entry : payload.entrySet()) {
                 String key = String.valueOf(entry.getKey());
                 Object value = entry.getValue();
                 if (isNotBlank(key) || value == null) {
@@ -1011,7 +1012,7 @@ public class HttpUtil {
             }
             Map<String, Object> result;
             if (input instanceof Map) {
-                Map<Object, Object> source = (Map<Object, Object>) input;
+                Map<?, ?> source = (Map<?, ?>) input;
                 result = new LinkedHashMap<>(source.size());
                 source.forEach((key, value) -> result.put(String.valueOf(key), value));
             } else {
@@ -1100,7 +1101,9 @@ public class HttpUtil {
      * 包装的IO异常
      */
     private static class InternalIOException extends RuntimeException {
-        public InternalIOException(Throwable cause) {
+        private static final long serialVersionUID = -6984037130236738749L;
+
+        InternalIOException(Throwable cause) {
             super(cause);
         }
     }
