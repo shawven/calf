@@ -17,6 +17,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
+
 /**
  * @author Shoven
  * @date 2019-08-12
@@ -35,7 +37,7 @@ public class ExcelReader {
     /**
      * 数据流
      */
-    private Stream<Row> stream;
+    private Stream<DataRow> stream;
 
     /**
      * @param name 文件名称
@@ -79,7 +81,7 @@ public class ExcelReader {
     /**
      * @return Stream
      */
-    public Stream<Row> stream() {
+    public Stream<DataRow> stream() {
         return stream;
     }
 
@@ -90,13 +92,13 @@ public class ExcelReader {
      * @param consumer 消费函数
      * @return
      */
-    public void read(Consumer<Row> consumer) {
-        stream.forEach(row -> {
+    public void read(Consumer<DataRow> consumer) {
+        stream.forEach(dataRow -> {
             try {
-                consumer.accept(row);
+                consumer.accept(dataRow);
             } catch (Exception e) {
-                if (row != null) {
-                    CellAddress address = row.getCurrentAddress();
+                if (dataRow != null) {
+                    CellAddress address = dataRow.getCurrentAddress();
                     throw new RuntimeException(String.format("第 %s 行 %s 列 %s 单元格：%s",address.getRow() + 1,
                             address.getColumn() + 1, address.toString(), e.getMessage()));
                 }
@@ -150,7 +152,7 @@ public class ExcelReader {
         return this;
     }
 
-    public ExcelReader filter(Predicate<Row> lineFilter) {
+    public ExcelReader filter(Predicate<DataRow> lineFilter) {
         stream = stream.filter(lineFilter);
         return this;
     }
@@ -179,21 +181,26 @@ public class ExcelReader {
      *
      * @return
      */
-    private Stream<Row> createStream() {
+    private Stream<DataRow> createStream() {
         int rowNum = sheet.getLastRowNum();
-        List<Row> rows = new ArrayList<>(rowNum);
+        List<DataRow> dataRows = new ArrayList<>(rowNum);
         for (int i = 0; i <= rowNum; i++) {
-            org.apache.poi.ss.usermodel.Row row = sheet.getRow(i);
-            int cellSize = row.getLastCellNum();
-
-            Map<CellAddress, String> line = new LinkedHashMap<>(cellSize);
-            for (int j = 0; j < cellSize; j++) {
-                Cell cell = row.getCell(j);
-                line.put(getAddress(cell, i, j), getValue(cell));
+            Row row = sheet.getRow(i);
+            Map<CellAddress, String> line;
+            // 行没有数据
+            if (row == null) {
+                line = emptyMap();
+            } else {
+                int cellSize = row.getLastCellNum();
+                line = new LinkedHashMap<>(cellSize);
+                for (int j = 0; j < cellSize; j++) {
+                    Cell cell = row.getCell(j);
+                    line.put(getAddress(cell, i, j), getValue(cell));
+                }
             }
-            rows.add(new Row(i, line));
+            dataRows.add(new DataRow(i, line));
         }
-        return rows.stream();
+        return dataRows.stream();
     }
 
     /**
@@ -272,31 +279,31 @@ public class ExcelReader {
     private Workbook getWorkbook(InputStream inputStream) throws IOException {
         // 采用inputStream时不知道excel格式，逐个尝试
         // 但直接使用inputStream 创建workbook会污染inputStream导致不能后续尝试，所以每次尝试构造一个新的inputStream
-        byte[] bytes = getBytes(inputStream);
+        InputStream is = newByteArrayInputStream(inputStream);
         Workbook wb;
         try {
             // Excel 2007
-            wb = new XSSFWorkbook(new ByteArrayInputStream(bytes));
+            wb = new XSSFWorkbook(is);
         } catch (Exception e) {
             // Excel 2003
-            wb = new HSSFWorkbook(new ByteArrayInputStream(bytes));
+            wb = new HSSFWorkbook(is);
         }
         return wb;
     }
 
-    private byte[] getBytes(InputStream is) throws IOException {
+    private InputStream newByteArrayInputStream(InputStream is) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
         for(int n; -1 != (n = is.read(buffer));) {
             out.write(buffer, 0, n);
         }
-        return out.toByteArray();
+        return new ByteArrayInputStream(out.toByteArray());
     }
 
     /**
      * excel行
      */
-    public class Row {
+    public class DataRow {
 
         /**
          * 单元格列名地址索引（第几个如第B列或第2列）
@@ -315,7 +322,7 @@ public class ExcelReader {
          */
         private CellAddress currentAddress;
 
-        private Row(int rowIndex, Map<CellAddress, ?> row) {
+        private DataRow(int rowIndex, Map<CellAddress, ?> row) {
             this.rowIndex = rowIndex;
             this.row = row;
             this.indexes = new HashMap<>();
@@ -342,17 +349,17 @@ public class ExcelReader {
 
         public int getInt(String key) {
             String value = get(key);
-            return Double.valueOf(value).intValue();
+            return value == null || value.isEmpty() ? 0 : Double.valueOf(value).intValue();
         }
 
         public long getLong(String key) {
             String value = get(key);
-            return Double.valueOf(value).longValue();
+            return value == null || value.isEmpty() ? 0L : Double.valueOf(value).longValue();
         }
 
         public double getDouble(String key) {
             String value = get(key);
-            return Double.parseDouble(value);
+            return value == null || value.isEmpty() ? 0D : Double.parseDouble(value);
         }
 
         public int getRowIndex() {
@@ -371,7 +378,7 @@ public class ExcelReader {
             if (another == null || getClass() != another.getClass()) {
                 return false;
             }
-            Row anotherRow = (Row) another;
+            DataRow anotherRow = (DataRow) another;
             return Objects.equals(this.row.values().toString(),
                     anotherRow.row.values().toString());
         }
