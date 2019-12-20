@@ -118,8 +118,7 @@ public class BigDecimals {
         BigDecimal b1 = of(o1);
         for (Object n : ensureArray(o2)) {
             BigDecimal b2 = of(n);
-            int scala = Math.max(b1.scale(), b2.scale());
-            if (!b1.setScale(scala, HALF_UP).equals(b2.setScale(scala, HALF_UP))) {
+            if (b1.compareTo(b2) != 0) {
                 return false;
             }
         }
@@ -137,11 +136,7 @@ public class BigDecimals {
         if (o1 == o2) {
             return 0;
         }
-        BigDecimal d1 = of(o1);
-        BigDecimal d2 = of(o2);
-        int scala = Math.max(d1.scale(), d2.scale());
-        // noinspection BigDecimalMethodWithoutRoundingCalled
-        return d1.setScale(scala).compareTo(d2.setScale(scala));
+        return of(o1).compareTo(of(o2));
     }
 
     /**
@@ -151,9 +146,7 @@ public class BigDecimals {
      * @return 比较结果
      */
     public static int compareZero(Object o) {
-        BigDecimal decimal = of(o);
-        // noinspection BigDecimalMethodWithoutRoundingCalled
-        return decimal.compareTo(ZERO.setScale(decimal.scale()));
+        return of(o).compareTo(ZERO);
     }
 
     /**

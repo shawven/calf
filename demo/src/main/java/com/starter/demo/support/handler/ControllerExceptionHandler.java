@@ -124,9 +124,9 @@ public class ControllerExceptionHandler {
         logger.error(e.getMessage(), e);
         if (withDetail()) {
             if (e instanceof NullPointerException) {
-                StackTraceElement stackTraceElement = e.getStackTrace()[0];
-                return Response.error(String.format("%s %s行空指针异常",
-                        stackTraceElement.getFileName(), stackTraceElement.getLineNumber()));
+                StackTraceElement rootTrace = ExceptionUtils.getRootCause(e).getStackTrace()[0];
+                String message = String.format("%s %s行空指针异常", rootTrace.getFileName(), rootTrace.getLineNumber());
+                return Response.error(message);
             }
             return Response.error(e.getMessage());
         }

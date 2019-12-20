@@ -29,9 +29,9 @@ import java.util.function.Consumer;
 public class CodeGenerator {
 
     /**
-     * 输出目录
+     * 基本输出目录
      */
-    private String outputDir = System.getProperty("user.dir");
+    private String baseOutputDir = System.getProperty("user.dir");
 
     /**
      * 模板包路径（classpath下）
@@ -42,7 +42,6 @@ public class CodeGenerator {
      * 父包和子包设置
      */
     private String parentPackage = "com.wqb.jz";
-    private String controllerPackage = "controller";
     private String servicePackage = "service";
     private String serviceImplPackage = "service.impl";
     private String mapperPackage = "mapper";
@@ -52,41 +51,51 @@ public class CodeGenerator {
     /**
      * 需要继承的基类设置
      */
-    private Class superController = BaseController.class;
-    private Class superService = BaseService.class;
-    private Class superServiceImpl = BaseServiceImpl.class;
-    private Class superMapper = BaseMapper.class;
-    private Class superEntity;
+    private Class<?> superMapper = BaseMapper.class;
 
     private List<FileWhiteList> whiteList = new ArrayList<>();
 
     /**
      * 数据源设置
      */
-    private String dataSourceUrl = "jdbc:mysql://localhost:3306/wqb_system?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8";
+    private String dataSourceUrl = "jdbc:mysql://192.168.1.10:3306/wqb_jz?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8";
     private String driverName = com.mysql.cj.jdbc.Driver.class.getName();
-    private String username = "root";
-    private String password = "root";
+    private String username = "jzdev";
+    private String password = "Jzdev1130.";
 
     /**
      * 存在时是否覆盖，建议设置为false
      */
-    private boolean overwrite = false;
+    private boolean overwrite = true;
 
 
     public static void main(String[] args) {
         new CodeGenerator()
-                .setOutputPath("generator/src/main/java")
+                .setOutputPath("generator/src/test/java")
                 .prefixGroup("system", that -> {
-                    that
-                            .generate("User", "user", IdType.AUTO);
+//                    that.
+//                            .generate("User", "user", IdType.AUTO)
+//                            .generate("UserCooperation", "user_cooperation", IdType.AUTO)
+//                            .generate("Account", "account", IdType.AUTO)
+//                            .generate("AccountCompany", "account_company", IdType.INPUT)
+//
+//                            .generate("RbacPermission", "rbac_permission", IdType.AUTO)
+//                            .generate("RbacAccountRole", "rbac_role", IdType.AUTO)
+//                            .generate("RbacUserRole", "rbac_user_role", IdType.NONE)
+//                            .generate("RbacUserAccount", "user_account", IdType.NONE)
+//
+//                            .generate("Subject", "subject", IdType.AUTO)
+//                            .generate("SubjectRecord", "subject_record", IdType.AUTO)
+//
+
+
                 })
-                .prefixGroup("core", that -> {
-                    that
-                            .generate("Account", "account", IdType.AUTO)
-                            .generate("Company", "company", IdType.AUTO)
-                            .generate("Subject", "subject", IdType.AUTO)
-                            .generate("SubjectRecord", "subject_record", IdType.AUTO)
+                .prefixGroup("service", that -> {
+//                    that
+//                            .generate("SubjectLedger", "subject_ledger", IdType.INPUT)
+//                            .generate("ForeignCurrency", "foreign_currency", IdType.AUTO)
+//                            .generate("SubjectAuxiliaryItem","subject_auxiliary_item", IdType.NONE)
+//                            .generate("SubjectAuxiliaryLedger","subject_auxiliary_ledger", IdType.AUTO)
                     ;
                 });
     }
@@ -102,14 +111,13 @@ public class CodeGenerator {
 
         // 全局配置
         GlobalConfig globalConfig = new GlobalConfig()
-                .setOutputDir(outputDir)
-                .setControllerName(entity + "Controller")
+                .setOutputDir(baseOutputDir)
                 .setServiceName(entity + "Service")
                 .setServiceImplName(entity + "ServiceImpl")
                 .setMapperName(entity + "Mapper")
                 .setXmlName(entity + "Mapper")
                 .setEntityName(entity)
-                .setAuthor("Shoven")
+                .setAuthor("Generator")
                 .setFileOverride(overwrite)
                 .setBaseResultMap(true)
                 .setBaseColumnList(true)
@@ -128,7 +136,6 @@ public class CodeGenerator {
         // 包配置
         PackageConfig pc = new PackageConfig()
                 .setParent(parentPackage)
-                .setController(controllerPackage)
                 .setService(servicePackage)
                 .setServiceImpl(serviceImplPackage)
                 .setMapper(mapperPackage)
@@ -142,15 +149,10 @@ public class CodeGenerator {
                 .setColumnNaming(NamingStrategy.underline_to_camel)
                 .setEntityLombokModel(true)
                 .setRestControllerStyle(true)
-                .setSuperControllerClass(superController == null ? null : superController.getName())
-                .setSuperServiceClass(superService == null ? null : superService.getName())
-                .setSuperServiceImplClass(superServiceImpl == null ? null : superServiceImpl.getName())
-                .setSuperMapperClass(superMapper == null ? null : superMapper.getName())
-                .setSuperEntityClass(superEntity == null ? null : superEntity.getName());
+                .setSuperMapperClass(superMapper == null ? null : superMapper.getName());
 
         // 模板配置
         TemplateConfig templateConfig = new TemplateConfig()
-                .setController(templatePath + "/controller.java")
                 .setService(templatePath + "/service.java")
                 .setServiceImpl(templatePath + "/serviceImpl.java")
                 .setEntity(templatePath + "/entity.java")
@@ -172,7 +174,7 @@ public class CodeGenerator {
     }
 
     /**
-     * 前缀分组生成，生成的代码在配置的（组名 + 包）构成在二级包下
+     * 前缀分组生成，生成的代码在配置的（parentPackage + 组名 + 具体的包）构成在二级包下
      *
      * @param name
      * @param generatorFunction
@@ -187,7 +189,7 @@ public class CodeGenerator {
     }
 
     /**
-     * 后缀分组生成，生成的代码在配置的（包 + 组名）构成在二级包下
+     * 后缀分组生成，生成的代码在配置的（parentPackage + 具体的包 + 组名）构成在二级包下
      *
      * @param name
      * @param generatorFunction
@@ -230,13 +232,24 @@ public class CodeGenerator {
         return this;
     }
 
+    /**
+     * 包含基础数据访问层
+     *
+     * @return
+     */
     public CodeGenerator includeEntityAndMapper() {
         Collections.addAll(this.whiteList, FileWhiteList.ENTITY, FileWhiteList.MAPPER, FileWhiteList.XML);
         return this;
     }
 
+    /**
+     * 设置输出子目录
+     *
+     * @param path
+     * @return
+     */
     private CodeGenerator setOutputPath(String path) {
-        outputDir = outputDir + "/" + path;
+        baseOutputDir = baseOutputDir + "/" + path;
         return this;
     }
 
@@ -269,7 +282,6 @@ public class CodeGenerator {
      * @return
      */
     private CodeGenerator setSuffixGroupName(String name) {
-        controllerPackage = addSuffix(controllerPackage, name);
         servicePackage = addSuffix(servicePackage, name);
         serviceImplPackage = addSuffix(serviceImplPackage, name);
         mapperPackage = addSuffix(mapperPackage, name);
@@ -285,7 +297,6 @@ public class CodeGenerator {
      * @return
      */
     private CodeGenerator unsetSuffixGroupName(String name) {
-        controllerPackage = removeSuffix(controllerPackage, name);
         servicePackage = removeSuffix(servicePackage, name);
         serviceImplPackage = removeSuffix(serviceImplPackage, name);
         mapperPackage = removeSuffix(mapperPackage, name);
@@ -294,16 +305,33 @@ public class CodeGenerator {
         return this;
     }
 
+    /**
+     * 添加后缀组
+     *
+     * @param packageName
+     * @param suffix
+     * @return
+     */
     private String addSuffix(String packageName, String suffix) {
         return packageName + (StringUtils.isNotBlank(suffix) ? "." + suffix : "");
     }
 
+    /**
+     * 删除后缀组
+     *
+     * @param packageName
+     * @param suffix
+     * @return
+     */
     private String removeSuffix(String packageName, String suffix) {
         return packageName.endsWith(suffix)
                 ? packageName.substring(0, packageName.length() - ("." + suffix).length())
                 : packageName;
     }
 
+    /**
+     * 自定义生成模板引擎，控制生成文件
+     */
     class CustomFreemarkerTemplateEngine extends FreemarkerTemplateEngine {
         @Override
         public AbstractTemplateEngine batchOutput() {
@@ -331,7 +359,6 @@ public class CodeGenerator {
 
                     String entityName = tableInfo.getEntityName();
                     String controllerFile;
-
 
 
                     if (canWrite(FileWhiteList.ENTITY) && null != entityName && null != pathInfo.get("entity_path")) {
@@ -368,13 +395,6 @@ public class CodeGenerator {
                             this.writer(objectMap, this.templateFilePath(template.getServiceImpl()), controllerFile);
                         }
                     }
-
-                    if (canWrite(FileWhiteList.CONTROLLER) && null != tableInfo.getControllerName() && null != pathInfo.get("controller_path")) {
-                        controllerFile = String.format(pathInfo.get("controller_path") + File.separator + tableInfo.getControllerName() + this.suffixJavaOrKt(), entityName);
-                        if (this.isCreate(com.baomidou.mybatisplus.generator.config.rules.FileType.CONTROLLER, controllerFile)) {
-                            this.writer(objectMap, this.templateFilePath(template.getController()), controllerFile);
-                        }
-                    }
                 }
             } catch (Exception var11) {
                 AbstractTemplateEngine.logger.error("无法创建文件，请检查配置信息！", var11);
@@ -383,8 +403,14 @@ public class CodeGenerator {
             return this;
         }
 
+        /**
+         * 根据白名单判断是否要写入
+         *
+         * @param item
+         * @return
+         */
         private boolean canWrite(FileWhiteList item) {
-            if(CodeGenerator.this.whiteList == null || CodeGenerator.this.whiteList.isEmpty()) {
+            if (CodeGenerator.this.whiteList == null || CodeGenerator.this.whiteList.isEmpty()) {
                 return true;
             }
             return whiteList.contains(item);
@@ -392,6 +418,7 @@ public class CodeGenerator {
     }
 
     public enum FileWhiteList {
+        // 顾名思义
         CONTROLLER,
         SERVICE,
         SERVICE_IMPL,

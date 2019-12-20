@@ -1,28 +1,39 @@
 package com.starter.demo;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.starter.demo.support.util.BigDecimals;
 import com.starter.demo.support.util.NodeTree;
 import com.starter.demo.support.util.excel.ExcelWriter;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.http.util.Asserts;
 import org.assertj.core.util.Lists;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.data.util.Pair;
 
+import javax.sound.midi.Soundbank;
 import java.math.BigDecimal;
 import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
-import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoField.DAY_OF_MONTH;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Shoven
@@ -43,14 +54,39 @@ public class BaseTests {
         startAt = 0;
     }
 
-    @Test
-    public void testMain() throws Exception {
 
-        String[] codes = {"3", "", "11", "222"};
-        Arrays.sort(codes);
-        System.out.println(Arrays.toString(codes));
+
+
+    @Test
+    public void testParallelStreamOrdered() {
+
+
+        System.out.println();
     }
 
+    @Test
+    public void testLocalDateTime() throws Exception {
+
+        LocalDateTime startTime = YearMonth.parse("2019-10")
+                // 第一天
+                .atDay(1).atStartOfDay();
+        LocalDateTime endTime = YearMonth.parse("2019-10")
+                // 加一个月
+                .plusMonths(1)
+                // 第一天
+                .atDay(1).atStartOfDay()
+                // 减一毫秒  （减一秒 ChronoUnit.SECONDS）
+                .minus(1, ChronoUnit.MILLIS);
+
+
+        System.out.println("日初：" + startTime);
+        System.out.println("日末：" + endTime);
+        System.out.println("日初秒时间戳：" + startTime.toEpochSecond(ZoneOffset.ofHours(8)));
+        System.out.println("日末秒时间戳：" + endTime.toEpochSecond(ZoneOffset.ofHours(8)));
+        System.out.println("日末毫秒时间戳：" + endTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
+    }
+
+    @Test
     public void testTree() {
         class Menu implements NodeTree.Node<Menu> {
             String name;
@@ -111,12 +147,14 @@ public class BaseTests {
         }
         ImmutableList<A> items = ImmutableList.of(new A("aaaa", "bbbbb"));
 
-        new ExcelWriter<A>()
+        new ExcelWriter()
                 .setData(items)
                 .setHeaderName("wes")
-                .setColumn("ABC", A::getAa, ExcelWriter.ColumnType.STRING)
+                .setColumn("ABC", "aa", ExcelWriter.ColumnType.STRING)
                 .writeToFile("d:/test.xlsx");
     }
+
+
 
     private static String byte2Hex(byte[] bytes) {
         StringBuffer stringBuffer = new StringBuffer();

@@ -41,7 +41,7 @@ public class ExcelReader {
 
     /**
      * @param name 文件名称
-     * @throws IOException
+     * @throws IOException IO异常
      */
     public ExcelReader(String name) throws IOException {
         this(name, 0);
@@ -49,7 +49,7 @@ public class ExcelReader {
 
     /**
      * @param inputStream 文件输入流
-     * @throws IOException
+     * @throws IOException IO异常
      */
     public ExcelReader(InputStream inputStream) throws IOException {
         this(inputStream, 0);
@@ -58,7 +58,7 @@ public class ExcelReader {
     /**
      * @param name 文件名称
      * @param sheetIndex 工作表索引
-     * @throws IOException
+     * @throws IOException IO异常
      */
     public ExcelReader(String name, int sheetIndex) throws IOException {
         this.workbook = getWorkbook(new File(name));
@@ -69,7 +69,7 @@ public class ExcelReader {
     /**
      * @param inputStream 文件输入流
      * @param sheetIndex 工作表索引
-     * @throws IOException
+     * @throws IOException IO异常
      */
     public ExcelReader(InputStream inputStream, int sheetIndex) throws IOException {
         this.workbook = getWorkbook(inputStream);
@@ -90,7 +90,6 @@ public class ExcelReader {
      * 从起始索引到终止索引
      *
      * @param consumer 消费函数
-     * @return
      */
     public void read(Consumer<DataRow> consumer) {
         stream.forEach(dataRow -> {
@@ -112,7 +111,7 @@ public class ExcelReader {
      * n > 0 （n = 1: 起始索引是0）
      * n < 0 （n = -1: 起始索引是rowSize - 1）
      * @param n 行数
-     * @return
+     * @return ExcelReader
      */
     public ExcelReader start(int n) {
         if (n != 0) {
@@ -135,7 +134,7 @@ public class ExcelReader {
      * start(-3).length(-1):  从倒数第三行至倒数第一行
      *
      * @param n 行数
-     * @return
+     * @return ExcelReader
      */
     public ExcelReader length(int n) {
         if (n != 0) {
@@ -160,7 +159,7 @@ public class ExcelReader {
     /**
      * 下一个工作表
      *
-     * @return
+     * @return ExcelReader
      */
     public ExcelReader nextSheet() {
         switchSheetAt(workbook.getSheetIndex(sheet) + 1);
@@ -170,16 +169,16 @@ public class ExcelReader {
     /**
      * 切换工作表
      *
-     * @param sheetIndex
+     * @param index 工作表序号
      */
-    private void switchSheetAt(int sheetIndex) {
-        this.sheet = workbook.getSheetAt(sheetIndex);
+    public void switchSheetAt(int index) {
+        this.sheet = workbook.getSheetAt(index);
     }
 
     /**
      * 读取Excel测试，兼容 Excel 2003/2007/2010
      *
-     * @return
+     * @return Stream
      */
     private Stream<DataRow> createStream() {
         int rowNum = sheet.getLastRowNum();
@@ -206,20 +205,20 @@ public class ExcelReader {
     /**
      * 获取单元格地址
      *
-     * @param cell
-     * @param i
-     * @param j
-     * @return
+     * @param cell Cell
+     * @param row 行
+     * @param col 列
+     * @return 单元格地址
      */
-    private CellAddress getAddress(Cell cell, int i, int j) {
-        return cell == null ? new CellAddress(i, j) : cell.getAddress();
+    private CellAddress getAddress(Cell cell, int row, int col) {
+        return cell == null ? new CellAddress(row, col) : cell.getAddress();
     }
 
     /**
      * 获取单元格的值
      *
-     * @param cell
-     * @return
+     * @param cell Cell
+     * @return String
      */
     private String getValue(Cell cell) {
         if (cell == null) {
@@ -249,9 +248,9 @@ public class ExcelReader {
     /**
      * 获取工作薄
      *
-     * @param file
-     * @return
-     * @throws IOException
+     * @param file 文件
+     * @return Workbook
+     * @throws IOException IO异常
      */
     private Workbook getWorkbook(File file) throws IOException {
         String xls = "xls";
@@ -272,9 +271,9 @@ public class ExcelReader {
     /**
      * 获取工作薄
      *
-     * @param inputStream
-     * @return
-     * @throws IOException
+     * @param inputStream 输入流
+     * @return Workbook
+     * @throws IOException IO异常
      */
     private Workbook getWorkbook(InputStream inputStream) throws IOException {
         // 采用inputStream时不知道excel格式，逐个尝试
@@ -303,7 +302,7 @@ public class ExcelReader {
     /**
      * excel行
      */
-    public class DataRow {
+    public static class DataRow {
 
         /**
          * 单元格列名地址索引（第几个如第B列或第2列）
@@ -333,10 +332,10 @@ public class ExcelReader {
         }
 
         /**
-         * 获取第几列, 如2列：get("B") 或者第2列 get("2")
+         * 获取第几列, 如第2列：get("B") 或者get("2")
          *
-         * @param key
-         * @return
+         * @param key 列名或第几列
+         * @return String
          */
         public String get(String key) {
             if (key == null) {
@@ -349,17 +348,38 @@ public class ExcelReader {
 
         public int getInt(String key) {
             String value = get(key);
-            return value == null || value.isEmpty() ? 0 : Double.valueOf(value).intValue();
+            if (value == null || value.isEmpty()) {
+                return 0;
+            }
+            try {
+                return Double.valueOf(value).intValue();
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("值不是整数");
+            }
         }
 
         public long getLong(String key) {
             String value = get(key);
-            return value == null || value.isEmpty() ? 0L : Double.valueOf(value).longValue();
+            if (value == null || value.isEmpty()) {
+                return 0L;
+            }
+            try {
+                return Double.valueOf(value).longValue();
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("值不是整数");
+            }
         }
 
         public double getDouble(String key) {
             String value = get(key);
-            return value == null || value.isEmpty() ? 0D : Double.parseDouble(value);
+            if (value == null || value.isEmpty()) {
+                return 0D;
+            }
+            try {
+                return Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("值不是浮点数");
+            }
         }
 
         public int getRowIndex() {
