@@ -18,6 +18,7 @@ import java.util.Collection;
  */
 public interface BatchMapper<T> {
 
+    @Transactional(rollbackFor = Exception.class)
     default boolean saveBatch(Collection<T> entityList) {
         return saveBatch(entityList, 1000);
     }
@@ -39,6 +40,7 @@ public interface BatchMapper<T> {
         return true;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     default boolean updateBatchById(Collection<T> entityList) {
         return updateBatchById(entityList, 1000);
     }

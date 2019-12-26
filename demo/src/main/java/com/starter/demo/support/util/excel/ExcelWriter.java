@@ -2,7 +2,7 @@ package com.starter.demo.support.util.excel;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -32,36 +32,46 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  */
 public class ExcelWriter {
 
+    public static final Function<Object, ?> NULL_VALUE_FUNC = o -> null;
+
     /**
      * 字体名称
      */
     private static final String DEFAULT_FONT_NAME = "宋体";
+
     /**
-     * 表头高度
+     * 标题高度
      */
-    private static final int DEFAULT_HEADER_HEIGHT = 20;
+    private static final int DEFAULT_TITLE_HEIGHT = 20;
+
     /**
-     * 列名高度
+     * 列高度
      */
     private static final int DEFAULT_COLUMN_HEIGHT = 20;
+
     /**
-     * 表头字体大小
+     * 列宽度
      */
-    private static final short DEFAULT_HEADER_FONT_SIZE = 12;
+    private static final short DEFAULT_COLUMN_WIDTH = 10;
+
     /**
-     * 行字体大小
+     * 标题字体大小
+     */
+    private static final short DEFAULT_TITLE_FONT_SIZE = 12;
+    /**
+     * 数据行字体大小
      */
     private static final short DEFAULT_ROW_FONT_SIZE = 11;
 
     /**
      * 数据行位置
      */
-    private int rowIndex;
+    private int dataRowIndex;
 
     /**
-     * 表格头部索引
+     * 标题行位置
      */
-    private int headerIndex;
+    private int titleRowIndex;
 
     /**
      * 列名
@@ -71,7 +81,7 @@ public class ExcelWriter {
     /**
      * 表名
      */
-    private String headerName;
+    private String title;
 
     /**
      * 数据
@@ -81,24 +91,30 @@ public class ExcelWriter {
     /**
      * 工作薄
      */
-    private Workbook workbook;
+    private XSSFWorkbook workbook;
 
     /**
      * 工作表
      */
-    private Sheet sheet;
+    private XSSFSheet sheet;
 
     /**
      * 后置任务
      */
     private List<Runnable> postTask;
 
-    public ExcelWriter() {
+    /**
+     * 是否保存
+     */
+    private boolean saved;
 
+    public ExcelWriter() {
+        workbook = new XSSFWorkbook();
     }
 
-    public ExcelWriter(Workbook workbook) {
+    public ExcelWriter(XSSFWorkbook workbook) {
         this.workbook = workbook;
+        createSheet();
     }
 
     /**
@@ -107,100 +123,207 @@ public class ExcelWriter {
      * @param index 工作表序号
      * @return ExcelWriter
      */
-    public ExcelWriter switchSheetAt(int index) {
-        rowIndex = 0;
-        headerIndex = 0;
+    public ExcelWriter switchSheet(int index) {
+        dataRowIndex = 0;
+        titleRowIndex = 0;
         sheet = workbook.getSheetAt(index);
+        workbook.setActiveSheet(index);
+        saved = false;
+        return this;
+    }
+
+    /**
+     * 切换工作表
+     *
+     * @param name 工作表名称
+     * @return ExcelWriter
+     */
+    public ExcelWriter switchSheet(String name) {
+        dataRowIndex = 0;
+        titleRowIndex = 0;
+        sheet = workbook.getSheet(name);
+        if (sheet == null) {
+            throw new IllegalArgumentException("工作表[" + name +"]不存在");
+        }
+        workbook.setActiveSheet(workbook.getSheetIndex(sheet));
+        saved = false;
         return this;
     }
 
     /**
      * 创建工作表
      *
-     * @param index 工作表序号
      * @return ExcelWriter
      */
-    public ExcelWriter createSheetAt(int index) {
-        createSheetAt(index, null);
+    public ExcelWriter createSheet() {
+        int numberOfSheets = workbook.getNumberOfSheets();
+        String displaySheetName = "Sheet" + (numberOfSheets + 1);
+        sheet = workbook.createSheet(displaySheetName);
+        workbook.setActiveSheet(workbook.getSheetIndex(sheet));
+        saved = false;
         return this;
     }
 
     /**
      * 创建工作表
      *
-     * @param index 工作表序号
+     * @param name 工作表名称
      * @return ExcelWriter
      */
-    public ExcelWriter createSheetAt(int index, String name) {
-        workbook.removeSheetAt(2);
-        sheet = name != null ? workbook.createSheet(name) : workbook.createSheet();
+    public ExcelWriter createSheet(String name) {
+        // 删除存在的工作表
+        int sheetIndex = workbook.getSheetIndex(name);
+        if (sheetIndex != -1) {
+            workbook.removeSheetAt(sheetIndex);
+        }
+        sheet = workbook.createSheet(name);
+        workbook.setActiveSheet(workbook.getSheetIndex(name));
+        saved = false;
         return this;
     }
 
-    public ExcelWriter setColumn(String title, String key) {
-        return setColumn(title, key, ColumnType.STRING);
-    }
-
-    public ExcelWriter setColumn(String title, String key, ColumnType columnType) {
-        return setColumn(title, key, 10, columnType, null);
-    }
-
-    public ExcelWriter setColumn(String title, String key, ColumnAlign columnAlign) {
-        return setColumn(title, key, 10, ColumnType.STRING, columnAlign);
-    }
-
-    public ExcelWriter setColumn(String title, String key, int width) {
-        return setColumn(title, key, width, ColumnType.STRING, null);
-    }
-
-    public ExcelWriter setColumn(String title, String key, int width, ColumnType columnType, ColumnAlign columnAlign) {
-        Column column = new Column();
-        column.setTitle(title);
-        column.setKey(key);
-        column.setWidth(width);
-        column.setColumnType(columnType);
-        column.setColumnAlign(columnAlign);
-        return setColumn(column);
-    }
-
-    public ExcelWriter setColumn(String title, Function<?, ?> keyFunc) {
-        return setColumn(title, keyFunc, ColumnType.STRING);
-    }
-
-    public ExcelWriter setColumn(String title, Function<?, ?> keyFunc, ColumnType columnType) {
-        return setColumn(title, keyFunc, 10, columnType, null);
-    }
-
-    public ExcelWriter setColumn(String title, Function<?, ?> keyFunc, ColumnAlign columnAlign) {
-        return setColumn(title, keyFunc, 10, ColumnType.STRING, columnAlign);
-    }
-
-    public ExcelWriter setColumn(String title, Function<?, ?> keyFunc, int width) {
-        return setColumn(title, keyFunc, width, ColumnType.STRING, null);
-    }
-
-    public ExcelWriter setColumn(String title, Function<?, ?> keyFunc, int width, ColumnType columnType,
-                                 ColumnAlign columnAlign) {
-        Column column = new Column();
-        column.setTitle(title);
-        column.setKeyFunc(keyFunc);
-        column.setWidth(width);
-        column.setColumnType(columnType);
-        column.setColumnAlign(columnAlign);
-        return setColumn(column);
-    }
-
-    public ExcelWriter columnSize(int num) {
-        if (columns == null) {
-            columns = new ArrayList<>(num);
-        }
-        for (int i = 0; i < num; i++) {
-            columns.add(Column.empty());
-        }
+    /**
+     * 设置标题名称
+     *
+     * @param title 名称
+     * @return ExcelWriter
+     */
+    public ExcelWriter setTitle(String title) {
+        this.title = title;
         return this;
     }
 
-    public ExcelWriter setColumn(Column column) {
+    /**
+     * 设置数据
+     *
+     * @param data 数据集合
+     * @return ExcelWriter
+     */
+    public ExcelWriter setData(List<?> data) {
+        this.data = data;
+        return this;
+    }
+
+    /**
+     * 设置标题填充起始行
+     *
+     * @param rowIndex 行号
+     * @return ExcelWriter
+     */
+    public ExcelWriter setStartRowIndex(int rowIndex) {
+        this.titleRowIndex = rowIndex;
+        this.dataRowIndex = rowIndex;
+        return this;
+    }
+
+    public ExcelWriter addEmptyColumn(String key) {
+        return addEmptyColumn(key, ColumnType.STRING);
+    }
+
+    public ExcelWriter addEmptyColumn(String key, ColumnType columnType) {
+        return addEmptyColumn(key, DEFAULT_COLUMN_WIDTH, columnType, null);
+    }
+
+    public ExcelWriter addEmptyColumn(String key, ColumnAlign columnAlign) {
+        return addEmptyColumn(key, DEFAULT_COLUMN_WIDTH, ColumnType.STRING, columnAlign);
+    }
+
+    public ExcelWriter addEmptyColumn(String key, int width) {
+        return addEmptyColumn(key, width, ColumnType.STRING, null);
+    }
+
+    public ExcelWriter addEmptyColumn(String key, int width, ColumnType columnType, ColumnAlign columnAlign) {
+        return addColumn(null, key, width, columnType, columnAlign);
+    }
+
+    public <T> ExcelWriter addEmptyColumn(Function<? super T, ?> valueFunc) {
+        return addEmptyColumn(valueFunc, ColumnType.STRING);
+    }
+
+    public <T> ExcelWriter addEmptyColumn(Function<? super T, ?> valueFunc, ColumnType columnType) {
+        return addEmptyColumn(valueFunc, DEFAULT_COLUMN_WIDTH, columnType, null);
+    }
+
+    public <T> ExcelWriter addEmptyColumn(Function<? super T, ?> valueFunc, ColumnAlign columnAlign) {
+        return addEmptyColumn(valueFunc, DEFAULT_COLUMN_WIDTH, ColumnType.STRING, columnAlign);
+    }
+
+    public <T> ExcelWriter addEmptyColumn(Function<? super T, ?> valueFunc, int width) {
+        return addEmptyColumn(valueFunc, width, ColumnType.STRING, null);
+    }
+
+    public <T> ExcelWriter addEmptyColumn(Function<? super T, ?> valueFunc, int width, ColumnType columnType,
+                                          ColumnAlign columnAlign) {
+        return addColumn(null, valueFunc, width, columnType, columnAlign);
+    }
+
+    public ExcelWriter addColumn(String title, String key) {
+        return addColumn(title, key, ColumnType.STRING);
+    }
+
+    public ExcelWriter addColumn(String title, String key, ColumnType columnType) {
+        return addColumn(title, key, DEFAULT_COLUMN_WIDTH, columnType, null);
+    }
+
+    public ExcelWriter addColumn(String title, String key, ColumnAlign columnAlign) {
+        return addColumn(title, key, DEFAULT_COLUMN_WIDTH, ColumnType.STRING, columnAlign);
+    }
+
+    public ExcelWriter addColumn(String title, String key, int width) {
+        return addColumn(title, key, width, ColumnType.STRING, null);
+    }
+
+    public <T> ExcelWriter addColumn(String title, Function<? super T, ?> valueFunc) {
+        return addColumn(title, valueFunc, ColumnType.STRING);
+    }
+
+    public <T> ExcelWriter addColumn(String title, Function<? super T, ?> valueFunc, ColumnType columnType) {
+        return addColumn(title, valueFunc, DEFAULT_COLUMN_WIDTH, columnType, null);
+    }
+
+    public <T> ExcelWriter addColumn(String title, Function<? super T, ?> valueFunc, ColumnAlign columnAlign) {
+        return addColumn(title, valueFunc, DEFAULT_COLUMN_WIDTH, ColumnType.STRING, columnAlign);
+    }
+
+    public <T> ExcelWriter addColumn(String title, Function<? super T, ?> valueFunc, int width) {
+        return addColumn(title, valueFunc, width, ColumnType.STRING, null);
+    }
+
+    public ExcelWriter addColumn(String title, String key, int width, ColumnType columnType, ColumnAlign columnAlign) {
+        Column column = new Column().setTitle(title).setKey(key).setWidth(width)
+                .setColumnType(columnType).setColumnAlign(columnAlign);
+        return addColumn(column);
+    }
+
+    public <T> ExcelWriter addColumn(String title, Function<? super T, ?> valueFunc, int width, ColumnType columnType,
+                                     ColumnAlign columnAlign) {
+        Column column = new Column().setTitle(title).setValueFunc(valueFunc).setWidth(width)
+                .setColumnType(columnType).setColumnAlign(columnAlign);
+        return addColumn(column);
+    }
+
+    public <T> ExcelWriter addColumn(String title, String key, Consumer<XSSFCellStyle> styleFunc) {
+        return addColumn(title, key, styleFunc, DEFAULT_COLUMN_WIDTH);
+    }
+
+    public <T> ExcelWriter addColumn(String title, String key, Consumer<XSSFCellStyle> styleFunc, int width) {
+        Column column = new Column().setTitle(title).setKey(key)
+                .setStyleFunc(styleFunc).setWidth(width);
+        return addColumn(column);
+    }
+
+    public <T> ExcelWriter addColumn(String title, Function<? super T, ?> valueFunc, Consumer<XSSFCellStyle> styleFunc) {
+        return addColumn(title, valueFunc, styleFunc, DEFAULT_COLUMN_WIDTH);
+    }
+
+    public <T> ExcelWriter addColumn(String title, Function<? super T, ?> valueFunc,
+                                     Consumer<XSSFCellStyle> styleFunc, int width) {
+        Column column = new Column().setTitle(title).setValueFunc(valueFunc)
+                .setStyleFunc(styleFunc).setWidth(width);
+        return addColumn(column);
+    }
+
+    public ExcelWriter addColumn(Column column) {
         if (columns == null) {
             columns = new ArrayList<>();
         }
@@ -215,7 +338,7 @@ public class ExcelWriter {
      * @param consumer 具体逻辑
      * @return ExcelWriter
      */
-    public ExcelWriter addLine(int rowIndex, Consumer<Row> consumer) {
+    public ExcelWriter addRow(int rowIndex, Consumer<Row> consumer) {
         if (postTask == null) {
             postTask = new ArrayList<>();
         }
@@ -232,48 +355,15 @@ public class ExcelWriter {
      * @param consumer 具体逻辑
      * @return ExcelWriter
      */
-    public ExcelWriter addEndLine(BiConsumer<Workbook, Row> consumer) {
+    public ExcelWriter addEndRow(Consumer<XSSFRow> consumer) {
         if (postTask == null) {
             postTask = new ArrayList<>();
         }
         postTask.add(() -> {
-            ++rowIndex;
-            Row row = sheet.createRow(rowIndex);
-            consumer.accept(workbook, row);
+            dataRowIndex++;
+            XSSFRow row = sheet.createRow(dataRowIndex);
+            consumer.accept(row);
         });
-        return this;
-    }
-
-    /**
-     * 设置表头名
-     *
-     * @param headerName 名称
-     * @return ExcelWriter
-     */
-    public ExcelWriter setHeaderName(String headerName) {
-        this.headerName = headerName;
-        return this;
-    }
-
-    /**
-     * 设置数据
-     *
-     * @param data 数据集合
-     * @return ExcelWriter
-     */
-    public ExcelWriter setData(List<?> data) {
-        this.data = data;
-        return this;
-    }
-
-    /**
-     * 设置表格填充起始行
-     *
-     * @param rowIndex 行号
-     * @return ExcelWriter
-     */
-    public ExcelWriter setStartRowIndex(int rowIndex) {
-        this.headerIndex = this.rowIndex = rowIndex;
         return this;
     }
 
@@ -284,9 +374,7 @@ public class ExcelWriter {
      * @throws IOException Io Exception
      */
     public void write(OutputStream out) throws IOException {
-        createSheet();
-        writeDataToCurrentSheet();
-
+        save();
         workbook.write(out);
         out.flush();
         out.close();
@@ -300,20 +388,18 @@ public class ExcelWriter {
      */
     public void writeToHttpResponse(HttpServletResponse response, String fileName) throws IOException {
         if (fileName == null) {
-            fileName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHiiss"));
+            fileName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         }
         if (!fileName.endsWith(".xlsx")) {
             fileName += ".xlsx";
         }
-
-        createSheet();
-        writeDataToCurrentSheet();
 
         response.reset();
         response.setContentType("application/vnd.ms-struct;charset=utf-8");
         response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), ISO_8859_1));
 
         ServletOutputStream out = response.getOutputStream();
+        save();
         workbook.write(out);
         out.flush();
         out.close();
@@ -327,67 +413,64 @@ public class ExcelWriter {
      */
     public void writeToFile(String fileName) throws IOException {
         if (fileName == null) {
-            fileName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHiiss"));
+            fileName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         }
         if (!fileName.endsWith(".xlsx")) {
             fileName += ".xlsx";
         }
 
-        createSheet();
-        writeDataToCurrentSheet();
-
         FileOutputStream out = new FileOutputStream(fileName);
+        save();
         workbook.write(out);
         out.flush();
         out.close();
     }
 
-    /**
-     * 创建工作表
-     */
-    private void createSheet() {
-        if (workbook != null) {
-            return;
+    public ExcelWriter save() {
+        if (!saved) {
+            if (sheet == null) {
+                createSheet();
+            }
+
+            if (title != null && !title.isEmpty()) {
+                createTitleArea();
+                workbook.setSheetName(workbook.getSheetIndex(sheet), title);
+            }
+
+            if (columns != null && !columns.isEmpty()) {
+                // 创建列标题
+                createColumnArea();
+            }
+            // 创建数据单元格
+            if (data == null) {
+                throw new IllegalArgumentException("未设置单元格数据行");
+            }
+            createDataArea();
+
+            // 执行后置任务
+            if (postTask != null) {
+                postTask.forEach(Runnable::run);
+                postTask.clear();
+            }
+
+            workbook.setActiveSheet(0);
+            columns.clear();
+            data = null;
+            dataRowIndex = 0;
+            titleRowIndex = 0;
+            saved = true;
         }
-        workbook = new XSSFWorkbook();
-        // 创建第一个sheet（页）
-        this.sheet = workbook.createSheet(headerName == null ? "Sheet1" : headerName);
+        return this;
     }
 
     /**
-     *
+     * 创建标题域
      */
-    private void writeDataToCurrentSheet() {
-        if (headerName != null) {
-            // 创建表头
-            createTableHeader();
-        }
-        if (columns != null && !columns.isEmpty()) {
-            // 创建列标题
-            createColumnArea();
-        }
-        // 创建数据单元格
-        if (data == null) {
-            throw new IllegalArgumentException("未设置单元格数据行");
-        }
-        createDataArea();
-        // 执行后置任务
-        if (postTask != null) {
-            postTask.forEach(Runnable::run);
-        }
-    }
-
-    /**
-     * 创建表头
-     */
-    private void createTableHeader() {
-        Cell tableHeader = sheet.createRow(headerIndex).createCell(0);
-        int size = columns.size();
-        if (size > 1) {
-            sheet.addMergedRegion(new CellRangeAddress(headerIndex, headerIndex, 0, size - 1));
-        }
-        tableHeader.setCellValue(headerName);
-        setTableHeaderStyle(tableHeader);
+    private void createTitleArea() {
+        dataRowIndex++;
+        Cell titleCell = sheet.createRow(titleRowIndex).createCell(0);
+        titleCell.setCellValue(title);
+        setTitleStyle(titleCell);
     }
 
     /**
@@ -397,77 +480,20 @@ public class ExcelWriter {
         if (isAllEmptyColumn(columns)) {
             return;
         }
+        int maxColumnIndex = 0;
         if (maxColumnRowNum(columns) == 1) {
-            rowIndex ++;
-            Row row = sheet.createRow(rowIndex);
-            for (int i = 0, columnsSize = columns.size(); i < columnsSize; i++) {
-                Column column = columns.get(i);
-                // 创建单列
-                createColumn(row, column, i);
-            }
+            // 创建简单列
+            createSimpleColumns(columns);
+            maxColumnIndex = columns.size() - 1;
         } else {
             // 创建复合列
-            createComplexColumns(columns, 0);
+            int totalColumns = createComplexColumns(columns);
+            maxColumnIndex = totalColumns - 1;
         }
-    }
-
-    /**
-     * 创建复合列
-     *
-     * @param columns 列集合
-     * @param columnOffset 列偏移量 二级列集合从0开始遍历要加上父列列索引为偏移量
-     */
-    private void createComplexColumns(List<Column> columns, int columnOffset) {
-        int startRowIndex = rowIndex + 1;
-        int stopRowIndex = rowIndex + maxColumnRowNum(columns);
-
-        while (rowIndex < stopRowIndex) {
-            Row row = sheet.createRow(++rowIndex);
-            for (int i = 0, columnsSize = columns.size(); i < columnsSize; i++) {
-                Column column = columns.get(i);
-                int columnIndex = columnOffset + i;
-                if (column.isComplex()) {
-                    List<Column> childColumns = column.getChildColumns();
-                    // 创建父单元格
-                    createColumn(row, column, i);
-                    // 创建子单元格集合
-                    createComplexColumns(childColumns, columnIndex);
-                    // 子列集合大于1列，表格会扩充列此时从新合并父单元格和头部
-                    int size = childColumns.size();
-                    if (childColumns.size() > 1) {
-                        // 合并父单元格
-                        sheet.addMergedRegion(new CellRangeAddress(startRowIndex, startRowIndex,
-                                columnIndex, columnIndex + size + 1));
-                        // 合并表格头部
-                        if (headerName != null) {
-                            sheet.addMergedRegion(new CellRangeAddress(headerIndex, headerIndex,
-                                    0, columnIndex + size + 1));
-                        }
-                    }
-                } else {
-                    // 创建列
-                    createColumn(row, column, columnIndex);
-                    sheet.addMergedRegion(new CellRangeAddress(startRowIndex, stopRowIndex,
-                            columnIndex, columnIndex));
-                }
-            }
+        if (title != null && maxColumnIndex > 1) {
+            int beautifulIndex = Math.min(maxColumnIndex, 11);
+            sheet.addMergedRegion(new CellRangeAddress(titleRowIndex, titleRowIndex, 0, beautifulIndex));
         }
-    }
-
-    /**
-     * 创建单列
-     *
-     * @param row         行
-     * @param column      列
-     * @param columnIndex 列下标
-     */
-    private void createColumn(Row row, Column column, int columnIndex) {
-        Cell columnTitle = row.createCell(columnIndex);
-        columnTitle.setCellValue(column.getTitle());
-        //设置列宽高
-        int width = column.getWidth();
-        sheet.setColumnWidth(columnIndex, width != 0 ? 256 * width * 2 : 2560 * 2);
-        setColumnStyle(columnTitle);
     }
 
     /**
@@ -476,7 +502,7 @@ public class ExcelWriter {
     private void createDataArea() {
         // 从数据行索引起点开始 遍历数据源数据
         for (Object line : data) {
-            Row row = sheet.createRow(rowIndex++);
+            Row row = sheet.createRow(dataRowIndex++);
             for (int i = 0, columnsSize = columns.size(); i < columnsSize; i++) {
                 Column column = columns.get(i);
                 if (column.isComplex()) {
@@ -486,6 +512,119 @@ public class ExcelWriter {
                     createDataCell(line, row, i, column);
                 }
             }
+        }
+    }
+
+    /**
+     * 创建简单列
+     *
+     * @param columns 列集合
+     */
+    private void createSimpleColumns(List<Column> columns) {
+        XSSFRow row = sheet.createRow(dataRowIndex++);
+        for (int i = 0, columnsSize = columns.size(); i < columnsSize; i++) {
+            Column column = columns.get(i);
+            // 创建单列
+            createColumn(row, column, i);
+        }
+    }
+
+    /**
+     * 创建复合列
+     *
+     * @param columns 列集合
+     * @return 使用的列数
+     */
+    private int createComplexColumns(List<Column> columns) {
+        int usedColumnNum = doCreateComplexColumns(columns, 0);
+        dataRowIndex ++;
+        return usedColumnNum;
+    }
+
+    /**
+     * 创建复合列
+     *
+     * @param columns 列集合
+     * @param columnOffset 列偏移量 二级列集合从0开始遍历要加上父列列索引为偏移量
+     * @return 使用的列数
+     */
+    private int doCreateComplexColumns(List<Column> columns, int columnOffset) {
+        // 起始行 = 行索引
+        int startRowIndex = dataRowIndex++;
+        // 结束行 = 起始行 + 列“额外”（减1）占用的行数
+        int stopRowIndex = startRowIndex + maxColumnRowNum(columns) - 1 ;
+
+        // 列大小
+        int size = columns.size();
+        // 使用的列数量
+        int usedColumnNum = size;
+
+        XSSFRow row = sheet.getRow(startRowIndex);
+        if (row == null) {
+            row = sheet.createRow(startRowIndex);
+        }
+
+        for (int i = 0; i < size; i++) {
+            Column column = columns.get(i);
+            // 实际列索引（整体偏移量 + 当前列索引）
+            int columnIndex = columnOffset + i;
+
+            // 创建复合列
+            if (column.isComplex()) {
+                List<Column> childColumns = column.getChildColumns();
+                // 创建父单元格
+                createColumn(row, column, columnIndex);
+
+                // 创建子列单元格并返回子单元格使用的列数
+                int childUsedColumnNum = doCreateComplexColumns(childColumns, columnIndex);
+                dataRowIndex --;
+                // 子列单元格“额外”（减1）使用的列数
+                int addChildUsedColumnNum = childUsedColumnNum - 1;
+                columnOffset += addChildUsedColumnNum;
+                // 加上子列单元格额外使用的列数
+                usedColumnNum += addChildUsedColumnNum;
+
+                // 子列集合大于1列时，说明已经扩充了，
+                if (childColumns.size() > 1) {
+                    // 合并当前单元格成为子列单元格的父单元格
+                    // 合并列 从 起始列数 至 起始列数 + 子列单元格“额外”使用的列数
+                    sheet.addMergedRegionUnsafe(new CellRangeAddress(startRowIndex, startRowIndex,
+                            columnIndex, columnIndex + addChildUsedColumnNum));
+                }
+            } else {
+                // 创建简单列
+                createColumn(row, column, columnIndex);
+                if (startRowIndex < stopRowIndex) {
+                    // 合并行 从 起始行数 至 起始行 + 列“额外”占用的行数
+                    sheet.addMergedRegion(new CellRangeAddress(startRowIndex, stopRowIndex, columnIndex, columnIndex));
+                }
+            }
+        }
+
+        // 返回使用的列数
+        return usedColumnNum;
+    }
+
+    /**
+     * 创建单列
+     *
+     * @param row         行
+     * @param column      列
+     * @param columnIndex 列下标
+     */
+    private void createColumn(XSSFRow row, Column column, int columnIndex) {
+        XSSFCell columnTitle = row.createCell(columnIndex);
+        columnTitle.setCellValue(column.getTitle());
+        //设置列宽高
+        int width = column.getWidth();
+        sheet.setColumnWidth(columnIndex, width != 0 ? 256 * width * 2 : 2560 * 2);
+
+        setColumnStyle(columnTitle);
+
+        Consumer<XSSFCellStyle> styleFunc = column.getStyleFunc();
+        if (styleFunc != null) {
+            XSSFCellStyle cellStyle = columnTitle.getCellStyle();
+            styleFunc.accept(cellStyle);
         }
     }
 
@@ -617,13 +756,13 @@ public class ExcelWriter {
     }
 
     /**
-     * 设置头部样式
+     * 设置标题样式
      *
-     * @param tableHeader 表头
+     * @param titleCell 标题单元格
      */
-    private void setTableHeaderStyle(Cell tableHeader) {
+    private void setTitleStyle(Cell titleCell) {
         Font font = workbook.createFont();
-        font.setFontHeightInPoints(DEFAULT_HEADER_FONT_SIZE);
+        font.setFontHeightInPoints(DEFAULT_TITLE_FONT_SIZE);
         font.setFontName(DEFAULT_FONT_NAME);
 
         CellStyle cs = workbook.createCellStyle();
@@ -632,8 +771,8 @@ public class ExcelWriter {
         cs.setAlignment(HorizontalAlignment.CENTER);
         cs.setVerticalAlignment(VerticalAlignment.CENTER);
 
-        tableHeader.getRow().setHeightInPoints(DEFAULT_HEADER_HEIGHT);
-        tableHeader.setCellStyle(cs);
+        titleCell.getRow().setHeightInPoints(DEFAULT_TITLE_HEIGHT);
+        titleCell.setCellStyle(cs);
     }
 
     /**
@@ -664,15 +803,6 @@ public class ExcelWriter {
      */
     private void setCellStyle(Cell cell, Column column) {
         CellStyle cs = workbook.createCellStyle();
-        Font font = workbook.createFont();
-        font.setFontHeightInPoints(DEFAULT_ROW_FONT_SIZE);
-        font.setFontName(DEFAULT_FONT_NAME);
-
-        cs.setFont(font);
-        cs.setAlignment(HorizontalAlignment.CENTER);
-        cs.setVerticalAlignment(VerticalAlignment.CENTER);
-        cell.setCellStyle(cs);
-
         switch (column.getColumnType()) {
             case INT:
                 cs.setDataFormat(workbook.createDataFormat().getFormat("0"));
@@ -689,42 +819,50 @@ public class ExcelWriter {
                 break;
             default:
         }
+
+        Font font = workbook.createFont();
+        font.setFontHeightInPoints(DEFAULT_ROW_FONT_SIZE);
+        font.setFontName(DEFAULT_FONT_NAME);
+
+        cs.setFont(font);
+        cs.setAlignment(HorizontalAlignment.CENTER);
+        cs.setVerticalAlignment(VerticalAlignment.CENTER);
+
         ColumnAlign columnAlign = column.getColumnAlign();
         if (columnAlign != null) {
             cs.setAlignment(HorizontalAlignment.forInt(columnAlign.getCode()));
         }
+        cell.setCellStyle(cs);
     }
 
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private Object getCellValue(Object line, Column column) {
-        String fieldName = column.getKey();
-        if (line instanceof Map) {
-            if (fieldName == null) {
-                throw new IllegalArgumentException("Map数据只持者Key名称取值");
-            }
-            return ((Map) line).get(column.getKey());
+    private Object getCellValue(Object item, Column column) {
+        String keyName = column.getKey();
+        if (item instanceof Map && keyName != null) {
+            return ((Map) item).get(keyName);
         } else {
-            Function fieldFunc = column.getKeyFunc();
-            if (fieldFunc != null) {
-                return fieldFunc.apply(line);
+            Function valueFunc = column.getValueFunc();
+            if (valueFunc != null) {
+                return valueFunc.apply(item);
             }
-            if (fieldName != null) {
+            if (keyName != null) {
                 try {
-                    Field field = line.getClass().getDeclaredField(fieldName);
+                    Field field = item.getClass().getDeclaredField(keyName);
                     boolean unaccessible = !Modifier.isPublic(field.getModifiers())
                             || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
                             || Modifier.isFinal(field.getModifiers());
                     if (unaccessible && !field.isAccessible()) {
                         field.setAccessible(true);
                     }
-                    return field.get(line);
+                    return field.get(item);
                 } catch (Exception e) {
                     throw new IllegalArgumentException(
-                            String.format("类[%s]不包含字段[%s]", line.getClass().getName(), fieldName));
+                            String.format("类[%s]不包含字段[%s]", item.getClass().getName(), keyName));
                 }
             } else {
-                throw new IllegalArgumentException("未设置列取值字段名或方法");
+                String msg = String.format("列[%s]未设置取值字段名或方法", column.getTitle());
+                throw new IllegalArgumentException(msg);
             }
         }
     }
@@ -743,7 +881,7 @@ public class ExcelWriter {
     }
 
     /**
-     * 列占用的最大行数 （单列占一行，复合列没嵌套一层加一行）
+     * 列占用的最大行数 （单列占一行，复合列每嵌套一层加一行）
      *
      * @param columns 列集合
      * @return 行数
@@ -773,7 +911,7 @@ public class ExcelWriter {
         /**
          * 取值方法
          */
-        private Function<?, ?> keyFunc;
+        private Function<?, ?> valueFunc;
 
         /**
          * 列宽
@@ -791,79 +929,120 @@ public class ExcelWriter {
         private ColumnAlign columnAlign;
 
         /**
+         * 单元格格式
+         */
+        private Consumer<XSSFCellStyle> styleFunc;
+
+        /**
          * 子列（多列表头）
          */
         private List<Column> childColumns;
 
         public Column() {
+            this.columnType = ColumnType.STRING;
+            this.columnAlign = ColumnAlign.CENTER;
         }
 
-        public Column(String title, Function<?, ?> keyFunc) {
+        public Column(String title, String key) {
+            this();
             this.title = title;
-            this.keyFunc = keyFunc;
+            this.key = key;
+        }
+
+        public Column(String title, Function<?, ?> valueFunc) {
+            this();
+            this.title = title;
+            this.valueFunc = valueFunc;
+        }
+
+        public Column(String title, String key, Consumer<XSSFCellStyle> styleFunc) {
+            this(title, key);
+            this.styleFunc = styleFunc;
+        }
+
+        public Column(String title, Function<?, ?> valueFunc, Consumer<XSSFCellStyle> styleFunc) {
+            this(title, valueFunc);
+            this.styleFunc = styleFunc;
         }
 
         public String getTitle() {
             return title;
         }
 
-        public void setTitle(String title) {
+        public Column setTitle(String title) {
             this.title = title;
+            return this;
         }
 
         public String getKey() {
             return key;
         }
 
-        public void setKey(String key) {
+        public Column setKey(String key) {
             this.key = key;
+            return this;
         }
 
-        public Function<?, ?> getKeyFunc() {
-            return keyFunc;
+        public Function<?, ?> getValueFunc() {
+            return valueFunc;
         }
 
-        public void setKeyFunc(Function<?, ?> keyFunc) {
-            this.keyFunc = keyFunc;
+        public Column setValueFunc(Function<?, ?> valueFunc) {
+            this.valueFunc = valueFunc;
+            return this;
         }
 
         public int getWidth() {
             return width;
         }
 
-        public void setWidth(int width) {
+        public Column setWidth(int width) {
             this.width = width;
+            return this;
         }
 
         public ColumnType getColumnType() {
             return columnType;
         }
 
-        public void setColumnType(ColumnType columnType) {
+        public Column setColumnType(ColumnType columnType) {
             this.columnType = columnType;
+            return this;
         }
 
         public ColumnAlign getColumnAlign() {
             return columnAlign;
         }
 
-        public void setColumnAlign(ColumnAlign columnAlign) {
+        public Column setColumnAlign(ColumnAlign columnAlign) {
             this.columnAlign = columnAlign;
+            return this;
+        }
+
+        public Consumer<XSSFCellStyle> getStyleFunc() {
+            return styleFunc;
+        }
+
+        public Column setStyleFunc(Consumer<XSSFCellStyle> styleFunc) {
+            this.styleFunc = styleFunc;
+            return this;
         }
 
         public List<Column> getChildColumns() {
             return childColumns;
         }
 
-        public void setChildColumns(List<Column> childColumns) {
+        public Column setChildColumns(List<Column> childColumns) {
             this.childColumns = childColumns;
+            return this;
         }
 
-        public void addChildColumn(Column childColumn) {
+        public Column addChildColumn(Column childColumn) {
             if (this.childColumns == null) {
                 this.childColumns = new ArrayList<>();
             }
             this.childColumns.add(childColumn);
+            return this;
         }
 
         public boolean isComplex() {
@@ -875,7 +1054,9 @@ public class ExcelWriter {
                 return 1;
             }
             return 1 + childColumns.stream()
+                    // 递归查找
                     .map(Column::needRowNum)
+                    // 最大值
                     .max(Comparator.comparingInt(Integer::intValue))
                     .orElse(1);
         }
@@ -884,29 +1065,20 @@ public class ExcelWriter {
             return this.title == null;
         }
 
-        public static Column empty() {
-            Column column = new Column();
-            column.setWidth(10);
-            column.setKeyFunc(Function.identity());
-            column.setColumnType(ColumnType.STRING);
-            column.setColumnAlign(ColumnAlign.CENTER);
-            return column;
-        }
-
         @Override
         public String toString() {
-            return "Column{" +
-                    "title='" + title + '\'' +
-                    ", key='" + key + '\'' +
-                    ", keyFunc=" + keyFunc +
-                    ", width=" + width +
-                    ", columnType=" + columnType +
-                    ", columnAlign=" + columnAlign +
-                    ", childColumn=" + childColumns +
-                    '}';
+            StringBuilder sb = new StringBuilder("Column{title='" + title + '\'');
+            if (childColumns != null && !childColumns.isEmpty()) {
+                sb.append(", childColumns=").append(childColumns);
+            }
+            sb.append('}');
+            return sb.toString();
         }
     }
 
+    /**
+     * 列的值类型
+     */
     public enum ColumnType {
         /**
          * 字符串
@@ -930,6 +1102,9 @@ public class ExcelWriter {
         AMOUNT
     }
 
+    /**
+     * 列的对齐方式
+     */
     public enum ColumnAlign {
         /* 顾名思义 */
         GENERAL,

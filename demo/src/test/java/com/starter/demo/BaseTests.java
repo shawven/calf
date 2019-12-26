@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.util.Pair;
 
 import javax.sound.midi.Soundbank;
@@ -24,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,13 +56,56 @@ public class BaseTests {
         startAt = 0;
     }
 
+    @Test
+    public void test() {
 
+        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+    }
 
 
     @Test
     public void testParallelStreamOrdered() {
+        class A {
+            private String aa;
+            private String bb;
 
+            public String getAa() {
+                return aa;
+            }
 
+            public void setAa(String aa) {
+                this.aa = aa;
+            }
+
+            public String getBb() {
+                return bb;
+            }
+
+            public void setBb(String bb) {
+                this.bb = bb;
+            }
+
+            public A(String aa, String bb) {
+                this.aa = aa;
+                this.bb = bb;
+            }
+
+            @Override
+            public String toString() {
+                return "A{" +
+                        "aa='" + aa + '\'' +
+                        ", bb='" + bb + '\'' +
+                        '}';
+            }
+        }
+        A a = new A("A", "1");
+        A b = new A("B", null);
+
+        BeanUtils.copyProperties(a, b);
+
+        A a1 = new A("A", "1");
+        A b1 = new A("B", null);
+        BeanUtils.copyProperties(b1, a1);
         System.out.println();
     }
 
@@ -131,6 +176,17 @@ public class BaseTests {
         class A {
             private String aa;
             private String bb;
+            private Map<String, Object> children;
+
+            {
+                children = new HashMap<>();
+                Map<String, String> hobby = new HashMap<>();
+                hobby.put("name", "pig");
+                hobby.put("cost", "100$");
+                children.put("firstName", "hello");
+                children.put("lastName", "word");
+                children.put("hobby", hobby);
+            }
 
             public String getAa() {
                 return aa;
@@ -145,15 +201,39 @@ public class BaseTests {
                 this.bb = bb;
             }
         }
-        ImmutableList<A> items = ImmutableList.of(new A("aaaa", "bbbbb"));
+        ImmutableList<A> items = ImmutableList.of(new A("aaaa111", "bbbbb11"));
 
-        new ExcelWriter()
+        ExcelWriter.Column complexColumn = new ExcelWriter.Column();
+        complexColumn.setTitle("父单元格");
+        complexColumn.setKey("children");
+        complexColumn.setChildColumns(Lists.newArrayList(
+                new ExcelWriter.Column().setTitle("firstName").setKey("firstName"),
+                new ExcelWriter.Column().setTitle("lastName").setKey("lastName"),
+                new ExcelWriter.Column().setTitle("hobby").setKey("hobby")
+                        .setChildColumns(Lists.newArrayList(
+                            new ExcelWriter.Column().setTitle("name").setKey("name"),
+                            new ExcelWriter.Column().setTitle("cost").setKey("cost")
+                        )
+                )
+        ));
+
+        ExcelWriter excelWriter = new ExcelWriter()
                 .setData(items)
-                .setHeaderName("wes")
-                .setColumn("ABC", "aa", ExcelWriter.ColumnType.STRING)
-                .writeToFile("d:/test.xlsx");
-    }
+                .setTitle("wes1")
+                .addColumn("AA", "aa", ExcelWriter.ColumnType.STRING)
+                .addColumn("BB", "aa", ExcelWriter.ColumnType.STRING)
+                .addColumn(complexColumn)
+                .save();
 
+        excelWriter.createSheet()
+                .setData(items)
+                .setTitle("wes2")
+                .addColumn("AA", "aa", ExcelWriter.ColumnType.STRING)
+                .addColumn("BB", "bb", ExcelWriter.ColumnType.STRING);
+//                .save();
+
+        excelWriter.writeToFile("d:/test.xlsx");
+    }
 
 
     private static String byte2Hex(byte[] bytes) {
@@ -162,7 +242,7 @@ public class BaseTests {
         for (int i = 0; i < bytes.length; i++) {
             temp = Integer.toHexString(bytes[i] & 0xFF);
             if (temp.length() == 1) {
-        //得到一位的进行补0操作
+                //得到一位的进行补0操作
                 stringBuffer.append("0");
             }
             stringBuffer.append(temp);
