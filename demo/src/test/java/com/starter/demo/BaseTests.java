@@ -201,7 +201,11 @@ public class BaseTests {
                 this.bb = bb;
             }
         }
-        ImmutableList<A> items = ImmutableList.of(new A("aaaa111", "bbbbb11"));
+        ImmutableList<A> items = ImmutableList.of(
+                new A("aaaa11", "bbbbb11"),
+                new A("aaaa22", "bbbbb22"),
+                new A("aaaa33", "bbbbb33")
+        );
 
         ExcelWriter.Column complexColumn = new ExcelWriter.Column();
         complexColumn.setTitle("父单元格");
@@ -219,7 +223,7 @@ public class BaseTests {
 
         ExcelWriter excelWriter = new ExcelWriter()
                 .setData(items)
-                .setTitle("wes1")
+                .setTitle("wes111")
                 .addColumn("AA", "aa", ExcelWriter.ColumnType.STRING)
                 .addColumn("BB", "aa", ExcelWriter.ColumnType.STRING)
                 .addColumn(complexColumn)
@@ -227,10 +231,10 @@ public class BaseTests {
 
         excelWriter.createSheet()
                 .setData(items)
-                .setTitle("wes2")
+                .setTitle("wes22")
                 .addColumn("AA", "aa", ExcelWriter.ColumnType.STRING)
-                .addColumn("BB", "bb", ExcelWriter.ColumnType.STRING);
-//                .save();
+                .addColumn("BB", "bb", ExcelWriter.ColumnType.STRING)
+                .save();
 
         excelWriter.writeToFile("d:/test.xlsx");
     }

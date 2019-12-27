@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -82,6 +81,11 @@ public class ExcelWriter {
      * 表名
      */
     private String title;
+
+    /**
+     * 工作表名
+     */
+    private String sheetName;
 
     /**
      * 数据
@@ -190,6 +194,17 @@ public class ExcelWriter {
      */
     public ExcelWriter setTitle(String title) {
         this.title = title;
+        return this;
+    }
+
+    /**
+     * 工作表名称
+     *
+     * @param sheetName 名称
+     * @return ExcelWriter
+     */
+    public ExcelWriter setSheetName(String sheetName) {
+        this.sheetName = sheetName;
         return this;
     }
 
@@ -338,12 +353,12 @@ public class ExcelWriter {
      * @param consumer 具体逻辑
      * @return ExcelWriter
      */
-    public ExcelWriter addRow(int rowIndex, Consumer<Row> consumer) {
+    public ExcelWriter addRow(int rowIndex, Consumer<XSSFRow> consumer) {
         if (postTask == null) {
             postTask = new ArrayList<>();
         }
         postTask.add(() -> {
-            Row row = sheet.createRow(rowIndex);
+            XSSFRow row = sheet.createRow(rowIndex);
             consumer.accept(row);
         });
         return this;
@@ -434,7 +449,12 @@ public class ExcelWriter {
 
             if (title != null && !title.isEmpty()) {
                 createTitleArea();
-                workbook.setSheetName(workbook.getSheetIndex(sheet), title);
+            }
+            if (sheetName == null || sheetName.isEmpty()) {
+                sheetName = title;
+            }
+            if (sheetName != null && !sheetName.isEmpty()) {
+                workbook.setSheetName(workbook.getSheetIndex(sheet), sheetName);
             }
 
             if (columns != null && !columns.isEmpty()) {
@@ -454,10 +474,13 @@ public class ExcelWriter {
             }
 
             workbook.setActiveSheet(0);
-            columns.clear();
-            data = null;
             dataRowIndex = 0;
             titleRowIndex = 0;
+            title = null;
+            sheetName = null;
+            columns.clear();
+            data = null;
+            postTask = null;
             saved = true;
         }
         return this;
@@ -480,19 +503,20 @@ public class ExcelWriter {
         if (isAllEmptyColumn(columns)) {
             return;
         }
-        int maxColumnIndex = 0;
+        int maxColumnNum;
         if (maxColumnRowNum(columns) == 1) {
             // 创建简单列
             createSimpleColumns(columns);
-            maxColumnIndex = columns.size() - 1;
+            maxColumnNum = columns.size();
         } else {
             // 创建复合列
-            int totalColumns = createComplexColumns(columns);
-            maxColumnIndex = totalColumns - 1;
+            maxColumnNum = createComplexColumns(columns);
         }
-        if (title != null && maxColumnIndex > 1) {
-            int beautifulIndex = Math.min(maxColumnIndex, 11);
-            sheet.addMergedRegion(new CellRangeAddress(titleRowIndex, titleRowIndex, 0, beautifulIndex));
+        if (title != null && maxColumnNum > 1) {
+            // 保证最大列的索引最大值在屏幕右侧，合并后标题保证在当前屏幕中，
+            // 不会因为有很多列时标题不在首次打开excel的可视区中
+            int visibleMaxIndex = Math.min(maxColumnNum - 1, 10);
+            sheet.addMergedRegion(new CellRangeAddress(titleRowIndex, titleRowIndex, 0, visibleMaxIndex));
         }
     }
 
@@ -506,7 +530,7 @@ public class ExcelWriter {
             for (int i = 0, columnsSize = columns.size(); i < columnsSize; i++) {
                 Column column = columns.get(i);
                 if (column.isComplex()) {
-                    Object childLine = getCellValue(line, column);
+                    Object childLine = getDataCellValue(line, column);
                     createDataCellsOfComplexColumn(childLine, row, column.getChildColumns(), i);
                 } else {
                     createDataCell(line, row, i, column);
@@ -536,8 +560,13 @@ public class ExcelWriter {
      * @return 使用的列数
      */
     private int createComplexColumns(List<Column> columns) {
+        // 创建复合列
         int usedColumnNum = doCreateComplexColumns(columns, 0);
-        dataRowIndex ++;
+        // 此处行索引为创建复合列之前的行索引 + 1,（如：创建列之前是1现在是2）
+        // 实际数据写入的行索引应为最末级子列的下一个（如：复合列有3层）
+        // 所以增量最大层数 - 1，（即：实际数据行索引为 2 + (3 - 1) = 4）
+        dataRowIndex += maxColumnRowNum(columns) - 1;
+        // 返回创建列使用的列数
         return usedColumnNum;
     }
 
@@ -550,7 +579,7 @@ public class ExcelWriter {
      */
     private int doCreateComplexColumns(List<Column> columns, int columnOffset) {
         // 起始行 = 行索引
-        int startRowIndex = dataRowIndex++;
+        int startRowIndex = dataRowIndex;
         // 结束行 = 起始行 + 列“额外”（减1）占用的行数
         int stopRowIndex = startRowIndex + maxColumnRowNum(columns) - 1 ;
 
@@ -559,11 +588,14 @@ public class ExcelWriter {
         // 使用的列数量
         int usedColumnNum = size;
 
+        // 不存在才创建（比例上下来回跳跃时创建新行覆盖旧行导致之前写入数据丢失）
         XSSFRow row = sheet.getRow(startRowIndex);
         if (row == null) {
             row = sheet.createRow(startRowIndex);
         }
-
+        // 行索引自增
+        dataRowIndex ++;
+        // 遍历每一列
         for (int i = 0; i < size; i++) {
             Column column = columns.get(i);
             // 实际列索引（整体偏移量 + 当前列索引）
@@ -571,22 +603,24 @@ public class ExcelWriter {
 
             // 创建复合列
             if (column.isComplex()) {
+                // 获取所有的子列
                 List<Column> childColumns = column.getChildColumns();
-                // 创建父单元格
+                // 创建“当前”单元格
                 createColumn(row, column, columnIndex);
-
                 // 创建子列单元格并返回子单元格使用的列数
                 int childUsedColumnNum = doCreateComplexColumns(childColumns, columnIndex);
+                // 子列构建完成后行索引自增
                 dataRowIndex --;
                 // 子列单元格“额外”（减1）使用的列数
                 int addChildUsedColumnNum = childUsedColumnNum - 1;
+                // 列偏移量 加上子列单元格额外使用的列数
                 columnOffset += addChildUsedColumnNum;
-                // 加上子列单元格额外使用的列数
+                // 使用数统计 加上子列单元格额外使用的列数
                 usedColumnNum += addChildUsedColumnNum;
 
                 // 子列集合大于1列时，说明已经扩充了，
                 if (childColumns.size() > 1) {
-                    // 合并当前单元格成为子列单元格的父单元格
+                    // 合并“当前”单元格成为子列单元格的父单元格
                     // 合并列 从 起始列数 至 起始列数 + 子列单元格“额外”使用的列数
                     sheet.addMergedRegionUnsafe(new CellRangeAddress(startRowIndex, startRowIndex,
                             columnIndex, columnIndex + addChildUsedColumnNum));
@@ -641,7 +675,7 @@ public class ExcelWriter {
             Column column = columns.get(i);
             int columnIndex = columnOffset + i;
             if (column.isComplex()) {
-                Object childLine = getCellValue(line, column);
+                Object childLine = getDataCellValue(line, column);
                 createDataCellsOfComplexColumn(childLine, row, column.getChildColumns(), columnIndex);
             } else {
                 createDataCell(line, row, columnIndex, column);
@@ -659,19 +693,19 @@ public class ExcelWriter {
      */
     private void createDataCell(Object line, Row row, int columnIndex, Column column) {
         Cell cell = row.createCell(columnIndex);
-        Object cellValue = getCellValue(line, column);
-        setCellData(cell, column, cellValue);
-        setCellStyle(cell, column);
+        Object cellValue = getDataCellValue(line, column);
+        setDataCellValue(cell, column, cellValue);
+        setDataStyle(cell, column);
     }
 
     /**
-     * 设置单元格数据
+     * 设置数据值
      *
      * @param cell   单元格
      * @param column 列类型
      * @param value  单元格值
      */
-    private void setCellData(Cell cell, Column column, Object value) {
+    private void setDataCellValue(Cell cell, Column column, Object value) {
         switch (column.getColumnType()) {
             case INT:
                 if (value != null) {
@@ -755,6 +789,37 @@ public class ExcelWriter {
         }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private Object getDataCellValue(Object item, Column column) {
+        String keyName = column.getKey();
+        if (item instanceof Map && keyName != null) {
+            return ((Map) item).get(keyName);
+        } else {
+            Function valueFunc = column.getValueFunc();
+            if (valueFunc != null) {
+                return valueFunc.apply(item);
+            }
+            if (keyName != null) {
+                try {
+                    Field field = item.getClass().getDeclaredField(keyName);
+                    boolean unaccessible = !Modifier.isPublic(field.getModifiers())
+                            || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
+                            || Modifier.isFinal(field.getModifiers());
+                    if (unaccessible && !field.isAccessible()) {
+                        field.setAccessible(true);
+                    }
+                    return field.get(item);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(
+                            String.format("类[%s]不包含字段[%s]", item.getClass().getName(), keyName));
+                }
+            } else {
+                String msg = String.format("列[%s]未设置取值字段名或方法", column.getTitle());
+                throw new IllegalArgumentException(msg);
+            }
+        }
+    }
+
     /**
      * 设置标题样式
      *
@@ -796,12 +861,12 @@ public class ExcelWriter {
     }
 
     /**
-     * 设置单元格样式
+     * 设置数据样式
      *
      * @param cell   单元格
      * @param column 列类型
      */
-    private void setCellStyle(Cell cell, Column column) {
+    private void setDataStyle(Cell cell, Column column) {
         CellStyle cs = workbook.createCellStyle();
         switch (column.getColumnType()) {
             case INT:
@@ -835,37 +900,6 @@ public class ExcelWriter {
         cell.setCellStyle(cs);
     }
 
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private Object getCellValue(Object item, Column column) {
-        String keyName = column.getKey();
-        if (item instanceof Map && keyName != null) {
-            return ((Map) item).get(keyName);
-        } else {
-            Function valueFunc = column.getValueFunc();
-            if (valueFunc != null) {
-                return valueFunc.apply(item);
-            }
-            if (keyName != null) {
-                try {
-                    Field field = item.getClass().getDeclaredField(keyName);
-                    boolean unaccessible = !Modifier.isPublic(field.getModifiers())
-                            || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
-                            || Modifier.isFinal(field.getModifiers());
-                    if (unaccessible && !field.isAccessible()) {
-                        field.setAccessible(true);
-                    }
-                    return field.get(item);
-                } catch (Exception e) {
-                    throw new IllegalArgumentException(
-                            String.format("类[%s]不包含字段[%s]", item.getClass().getName(), keyName));
-                }
-            } else {
-                String msg = String.format("列[%s]未设置取值字段名或方法", column.getTitle());
-                throw new IllegalArgumentException(msg);
-            }
-        }
-    }
 
     /**
      * 列占用的最大行数 （单列占一行，复合列没嵌套一层加一行）
