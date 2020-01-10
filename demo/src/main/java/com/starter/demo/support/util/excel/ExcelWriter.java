@@ -118,7 +118,6 @@ public class ExcelWriter {
 
     public ExcelWriter(XSSFWorkbook workbook) {
         this.workbook = workbook;
-        createSheet();
     }
 
     /**

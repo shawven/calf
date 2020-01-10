@@ -87,9 +87,7 @@ public class NodeTree {
             while (!queue.isEmpty()) {
                 // 先添加（形成一条最终链）在判断
                 N elem = queue.pop();
-                N clone = clone(elem);
-                clone.setChildren(null);
-                link.add(clone);
+                link.add(elem);
 
                 List<N> children = elem.getChildren();
                 if (children != null && !children.isEmpty()) {
@@ -132,14 +130,13 @@ public class NodeTree {
         if (nodes == null || nodes.isEmpty()) {
             return emptyList();
         }
-        LinkedList<N> linkedList = nodes.parallelStream().map(NodeTree::clone).collect(toCollection(LinkedList::new));
+        LinkedList<N> linkedList = new LinkedList<>(nodes);
         List<N> list = new ArrayList<>();
 
         while (!linkedList.isEmpty()) {
             N node = linkedList.pop();
             List<N> children = node.getChildren();
             // 清除子节点指针
-            node.setChildren(null);
             list.add(node);
             if (children != null && !children.isEmpty()) {
                 // 添加到队列头
@@ -148,28 +145,6 @@ public class NodeTree {
         }
         return list;
     }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Serializable> T clone(T object) {
-        if (object == null) {
-            return null;
-        }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-        try (ObjectOutputStream out = new ObjectOutputStream(baos)){
-            out.writeObject(object);
-        } catch (IOException ex) {
-            throw new SerializationException(ex);
-        }
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        try (ObjectInputStream in = new ObjectInputStream(bais)) {
-            return (T) in.readObject();
-        } catch (ClassNotFoundException ex) {
-            throw new SerializationException("ClassNotFoundException while reading cloned object data", ex);
-        } catch (IOException ex) {
-            throw new SerializationException("IOException while reading or closing cloned object data", ex);
-        }
-    }
-
 
     public static class TreeBuilder<T, R extends Node<R>> {
 
@@ -237,7 +212,11 @@ public class NodeTree {
 
             Objects.requireNonNull(rootFilter, "父节点选择器不能为空");
             Objects.requireNonNull(childFilter, "孩子节点选择器不能为空");
-            Objects.requireNonNull(nodeConvert, "节点转换器不能为空");
+            if (data.iterator().next() instanceof Node) {
+                nodeConvert = n -> (R)n;
+            } else {
+                Objects.requireNonNull(nodeConvert, "节点转换器不能为空");
+            }
 
             Map<Boolean, List<T>> map = data.parallelStream().collect(groupingBy(o -> rootFilter.test(o)));
             // 根节点列表

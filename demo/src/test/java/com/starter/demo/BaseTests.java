@@ -1,41 +1,30 @@
 package com.starter.demo;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonObject;
-import com.starter.demo.support.util.BigDecimals;
 import com.starter.demo.support.util.NodeTree;
+import com.starter.demo.support.util.excel.ExcelReader;
 import com.starter.demo.support.util.excel.ExcelWriter;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.http.util.Asserts;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.*;
 import org.assertj.core.util.Lists;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.util.Pair;
 
-import javax.sound.midi.Soundbank;
-import java.math.BigDecimal;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.Security;
-import java.text.SimpleDateFormat;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.*;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import static java.time.temporal.ChronoField.DAY_OF_MONTH;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Shoven
@@ -59,7 +48,7 @@ public class BaseTests {
     @Test
     public void test() {
 
-        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+        System.out.println(Arrays.toString(StringUtils.split("", ",")));
     }
 
 
@@ -132,7 +121,7 @@ public class BaseTests {
     }
 
     @Test
-    public void testTree() {
+    public void testNodeTree() {
         class Menu implements NodeTree.Node<Menu> {
             String name;
             String id;
@@ -165,14 +154,20 @@ public class BaseTests {
         List<Menu> tree = NodeTree.<Menu, Menu>from(menus)
                 .rootFilter(menu -> menu.id.length() == 1)
                 .childFilter((parent, child) -> parent.id.concat("1").equals(child.id))
-                .map(menu -> menu)
                 .build();
 
         System.out.println(tree);
     }
 
     @Test
-    public void testClass() throws Exception {
+    public void testExcelReader() throws Exception {
+        ExcelReader excelReader = new ExcelReader("d:/03.xls");
+        excelReader = new ExcelReader("d:/07.xlsx");
+        excelReader.stream();
+    }
+
+    @Test
+    public void testExcelWriter() throws Exception {
         class A {
             private String aa;
             private String bb;
@@ -239,6 +234,50 @@ public class BaseTests {
         excelWriter.writeToFile("d:/test.xlsx");
     }
 
+    @Test
+    public void testLockedExcelWriter() throws IOException {
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("sheet名称");
+
+        XSSFCellStyle lockstyle = wb.createCellStyle();
+        lockstyle.setLocked(true);//设置锁定
+
+        lockstyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        byte [] rgb = {(byte)240, (byte)240, (byte)240};
+        lockstyle.setFillForegroundColor(new XSSFColor(rgb, new DefaultIndexedColorMap()));
+
+        lockstyle.setBorderTop(BorderStyle.THIN);
+        lockstyle.setBorderLeft(BorderStyle.THIN);
+        lockstyle.setBorderRight(BorderStyle.THIN);
+        lockstyle.setBorderBottom(BorderStyle.THIN);
+        lockstyle.setBottomBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        lockstyle.setLeftBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        lockstyle.setRightBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        lockstyle.setTopBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+
+        XSSFCellStyle unlockStyle=wb.createCellStyle();
+        unlockStyle.setLocked(false);//设置未锁定
+
+
+        for(int i=0;i<10;i++){
+            XSSFRow row = sheet.createRow(i);
+            for (int j = 0; j < 10; j++) {
+                XSSFCell cell = row.createCell(j);
+                cell.setCellStyle(unlockStyle);//默认是锁定状态；将所有单元格设置为：未锁定；然后再对需要上锁的单元格单独锁定
+                if(j==1){//这里可以根据需要进行判断;我这就将第2列上锁了
+                    cell.setCellStyle(lockstyle);//将需要上锁的单元格进行锁定
+                    cell.setCellValue("上锁了");
+                }else{
+                    cell.setCellValue("没上锁了");
+                }
+            }
+        }
+        //sheet添加保护，这个一定要否则光锁定还是可以编辑的
+        sheet.protectSheet("123456");
+        FileOutputStream os = new FileOutputStream("D:\\" + System.currentTimeMillis() +".xlsx");
+        wb.write(os);
+        os.close();
+    }
 
     private static String byte2Hex(byte[] bytes) {
         StringBuffer stringBuffer = new StringBuffer();
