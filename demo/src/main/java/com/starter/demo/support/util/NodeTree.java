@@ -18,6 +18,14 @@ import static java.util.stream.Collectors.toCollection;
  */
 public class NodeTree {
 
+    /**
+     * 返回节点树构造器
+     *
+     * @param data 数据集合
+     * @param <T> 输入类型
+     * @param <R> 返回类型
+     * @return TreeBuilder
+     */
     public static <T, R extends Node<R>> TreeBuilder<T, R> from(List<T> data) {
         return new TreeBuilder<>(data);
     }
@@ -136,7 +144,6 @@ public class NodeTree {
         while (!linkedList.isEmpty()) {
             N node = linkedList.pop();
             List<N> children = node.getChildren();
-            // 清除子节点指针
             list.add(node);
             if (children != null && !children.isEmpty()) {
                 // 添加到队列头
@@ -212,6 +219,8 @@ public class NodeTree {
 
             Objects.requireNonNull(rootFilter, "父节点选择器不能为空");
             Objects.requireNonNull(childFilter, "孩子节点选择器不能为空");
+
+            // 输入和返回都实现了Node，则无需转换
             if (data.iterator().next() instanceof Node) {
                 nodeConvert = n -> (R)n;
             } else {

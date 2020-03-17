@@ -8,11 +8,10 @@ import com.starter.log.core.Recordable;
  * @author Shoven
  * @date 2019-07-26 16:30
  */
-public class DefaultRecordBuilder implements RecordBuilder {
+public class DefaultRecordBuilder implements RecordBuilder<DefaultRecordMeta> {
 
     @Override
-    public Recordable build(RecordMeta recordMeta) {
-        DefaultRecordMeta meta = (DefaultRecordMeta) recordMeta;
+    public Recordable build(DefaultRecordMeta meta) {
         DefaultRecord record = new DefaultRecord();
         record.setCost(meta.getCost());
         record.setError(meta.getCause().getMessage());

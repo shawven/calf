@@ -11,50 +11,37 @@ import java.util.List;
  */
 public class DefaultLogTaskCreator implements LogTaskCreator {
 
-    private JoinPointExtractor extractor;
-
     private List<LogRepository> repositories;
 
-    private RecordBuilder recordBuilder;
+    private RecordBuilder<DefaultRecordMeta> recordBuilder;
 
-    public DefaultLogTaskCreator(JoinPointExtractor extractor,
-                                 List<LogRepository> repositories,
-                                 RecordBuilder recordBuilder) {
-        this.extractor = extractor;
+    public DefaultLogTaskCreator(List<LogRepository> repositories,
+                                 RecordBuilder<DefaultRecordMeta> recordBuilder) {
         this.repositories = repositories;
         this.recordBuilder = recordBuilder;
     }
 
     @Override
-    public LogTask create(JoinPoint jp, Object value, Throwable cause, long cost) {
-        DefaultLogTask logTask = new DefaultLogTask(extractor, repositories, recordBuilder, jp);
-        logTask.setCause(cause);
+    public LogTask create(JoinPoint jp, Object value, long cost) {
+        DefaultLogTask logTask = new DefaultLogTask(getRepositories(), getRecordBuilder(), jp);
+        logTask.setValue(value);
         logTask.setCost(cost);
         return logTask;
     }
 
-    public JoinPointExtractor getExtractor() {
-        return extractor;
-    }
-
-    public void setExtractor(JoinPointExtractor extractor) {
-        this.extractor = extractor;
+    @Override
+    public LogTask create(JoinPoint jp, Throwable cause, long cost) {
+        DefaultLogTask logTask = new DefaultLogTask(getRepositories(), getRecordBuilder(), jp);
+        logTask.setCause(cause);
+        logTask.setCost(cost);
+        return logTask;
     }
 
     public List<LogRepository> getRepositories() {
         return repositories;
     }
 
-    public void setRepositories(List<LogRepository> repositories) {
-        this.repositories = repositories;
-    }
-
-    public RecordBuilder getRecordBuilder() {
+    public RecordBuilder<DefaultRecordMeta> getRecordBuilder() {
         return recordBuilder;
     }
-
-    public void setRecordBuilder(RecordBuilder recordBuilder) {
-        this.recordBuilder = recordBuilder;
-    }
-
 }

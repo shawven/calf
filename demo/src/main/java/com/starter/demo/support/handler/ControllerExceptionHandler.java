@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +41,7 @@ public class ControllerExceptionHandler {
     @Value("${spring.profiles.active}")
     private String active;
 
-    private String[] ignoredProfiles = {"dev", "test"};
+    private String[] ignoredProfiles = {"local", "dev", "test"};
 
     /**
      * 处理数据绑定校验异常
@@ -60,21 +62,8 @@ public class ControllerExceptionHandler {
         msg = fieldErrors.size() > 0
                 ? msg.substring(0, msg.length() - 2)
                 : "请求的参数有误！";
-        logger.warn(msg, e);
+        logger.debug(msg, e);
         return Response.badRequest(msg);
-    }
-
-
-    /**
-     * HTTP方法不匹配
-     *
-     * @param e MethodNotSupportedException
-     * @return
-     */
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        logger.warn(e.getMessage(), e);
-        return Response.badRequest(e.getMessage());
     }
 
     /**
@@ -99,9 +88,8 @@ public class ControllerExceptionHandler {
         return Response.unprocesable(getErrorMessage(last));
     }
 
-
     /**
-     * 处理系统级异常，必须记入日志系统，不应该将信息展示给用户
+     * 处理系统级异常，不应该将信息展示给用户
      *
      * @param e Exception
      * @return
@@ -114,14 +102,17 @@ public class ControllerExceptionHandler {
             Throwable throwable = ExceptionUtils.getThrowableList(e).get(index);
             return handleBizException((BizException)throwable);
         }
-
-        if (!request.getParameterMap().isEmpty()) {
-            Map<String, String> params = request.getParameterMap().entrySet().stream()
+        String requestDesc;
+        Map<String, String[]> parameterMap = new HashMap<>(request.getParameterMap());
+        parameterMap.remove("t");
+        if (!parameterMap.isEmpty()) {
+            Map<String, String> params = parameterMap.entrySet().stream()
                     .collect(toMap(Map.Entry::getKey, entry -> Arrays.toString(entry.getValue())));
-            logger.error("请求参数：{}", params);
+            requestDesc = String.format("URL[%s], Params[%s]", request.getRequestURL(), params);
+        } else {
+            requestDesc = String.format("URL[%s]", request.getRequestURL());
         }
-
-        logger.error(e.getMessage(), e);
+        logger.error(requestDesc + ":" + e.getMessage(), e);
         if (withDetail()) {
             if (e instanceof NullPointerException) {
                 StackTraceElement rootTrace = ExceptionUtils.getRootCause(e).getStackTrace()[0];
@@ -131,6 +122,59 @@ public class ControllerExceptionHandler {
             return Response.error(e.getMessage());
         }
         return Response.error(DEFAULT_MESSAGE);
+    }
+
+    /**
+     * 处理上传限制异常
+     *
+     * @param e Exception
+     * @return
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseBody
+    public ResponseEntity handleMaxUploadSizeExceededException(HttpServletRequest request,
+                                                               MaxUploadSizeExceededException e) {
+        long b = e.getMaxUploadSize();
+        String size;
+        if (b == 0) {
+            size = "0B";
+        } else if (b < 1024) {
+            size = b +"B";
+        } else if (b > 1024 && b < 1048576) {
+            size = b / 1024 + "KB";
+        } else {
+            size = b / 1048576 + "MB";
+        }
+        String errorMsg = "上传的文件大小超过 " + size;
+        String logErrorMsg = String.format("URL[%s] %s", request.getRequestURL(), errorMsg);
+        logger.error(logErrorMsg, e);
+        return Response.error(errorMsg);
+    }
+
+    /**
+     * HTTP方法不匹配
+     *
+     * @param e MethodNotSupportedException
+     * @return
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        logger.debug(e.getMessage(), e);
+        return Response.methodNotAllowed(e.getMessage());
+    }
+
+    /**
+     * 处理身份认证异常
+     * redis 缓存没了
+     *
+     * @param e BizException
+     * @return
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseBody
+    public ResponseEntity handleUnauthorized(BizException e) {
+        logger.debug(e.getMessage(), e);
+        return Response.unauthorized(e.getMessage());
     }
 
     /**
@@ -147,30 +191,9 @@ public class ControllerExceptionHandler {
     }
 
     /**
-     * 处理上传限制异常
-     *
-     * @param e Exception
+     * @param e
      * @return
      */
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    @ResponseBody
-    public ResponseEntity handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
-        long b = e.getMaxUploadSize();
-        String size;
-        if (b == 0) {
-            size = "0B";
-        } else if (b < 1024) {
-            size = b +"B";
-        } else if (b > 1024 && b < 1024 * 1024) {
-            size = b / 1024 + "KB";
-        } else {
-            size = b / 1024 * 1024 + "MB";
-        }
-        String errorMsg = "上传的文件大小超过 " + size;
-        logger.error(errorMsg, e);
-        return Response.error(errorMsg);
-    }
-
     private String getErrorMessage(Exception e) {
         return e.getMessage() != null ? e.getMessage() : DEFAULT_MESSAGE;
     }

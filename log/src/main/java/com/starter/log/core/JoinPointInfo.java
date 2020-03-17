@@ -1,7 +1,8 @@
 package com.starter.log.core;
 
 import com.starter.log.annotation.Log;
-import com.starter.log.emun.LogType;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
 
 import java.lang.reflect.Method;
 
@@ -12,43 +13,21 @@ import java.lang.reflect.Method;
 
 public class JoinPointInfo {
 
-    private LogType logType;
+    private JoinPoint joinPoint;
 
-    private Log logAnnotation;
-
-    private Class typeClass;
-
-    private Method method;
-
-    public LogType getLogType() {
-        return logType;
+    public JoinPointInfo(JoinPoint joinPoint) {
+        this.joinPoint = joinPoint;
     }
 
-    public void setLogType(LogType logType) {
-        this.logType = logType;
+    public Log getLog() {
+        return LogAnnotationUtils.getMethodLogAnnotation(getMethod(), Log.class);
     }
 
-    public Log getLogAnnotation() {
-        return logAnnotation;
-    }
-
-    public void setLogAnnotation(Log logAnnotation) {
-        this.logAnnotation = logAnnotation;
-    }
-
-    public Class getTypeClass() {
-        return typeClass;
-    }
-
-    public void setTypeClass(Class typeClass) {
-        this.typeClass = typeClass;
+    public Class<?> getTypeClass() {
+        return joinPoint.getTarget().getClass();
     }
 
     public Method getMethod() {
-        return method;
-    }
-
-    public void setMethod(Method method) {
-        this.method = method;
+        return ((MethodSignature) joinPoint.getSignature()).getMethod();
     }
 }

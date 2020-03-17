@@ -9,40 +9,20 @@ import java.util.List;
  * @author Shoven
  * @date 2019-07-27 17:52
  */
-public class DefaultLogTask extends AbstractLogTask {
+public class DefaultLogTask extends AbstractLogTask<DefaultRecordMeta> {
 
-    private Throwable cause;
-
-    private long cost;
-
-    public DefaultLogTask(JoinPointExtractor joinPointExtractor,
-                          List<LogRepository> repositories,
-                          RecordBuilder recordBuilder,
+    public DefaultLogTask(List<LogRepository> repositories,
+                          RecordBuilder<DefaultRecordMeta> recordBuilder,
                           JoinPoint joinPoint) {
-        super(joinPointExtractor, repositories, recordBuilder, joinPoint);
+        super(repositories, recordBuilder, joinPoint);
     }
 
     @Override
-    protected RecordMeta makeRecordMeta(JoinPointInfo joinPointInfo) {
+    protected DefaultRecordMeta makeRecordMeta(JoinPointInfo joinPointInfo) {
         DefaultRecordMeta defaultRecordMeta = new DefaultRecordMeta(joinPointInfo);
-        defaultRecordMeta.setCause(cause);
-        defaultRecordMeta.setCost(cost);
+        defaultRecordMeta.setCause(getCause());
+        defaultRecordMeta.setValue(getValue());
+        defaultRecordMeta.setCost(getCost());
         return defaultRecordMeta;
-    }
-
-    public Throwable getCause() {
-        return cause;
-    }
-
-    public void setCause(Throwable cause) {
-        this.cause = cause;
-    }
-
-    public long getCost() {
-        return cost;
-    }
-
-    public void setCost(long cost) {
-        this.cost = cost;
     }
 }

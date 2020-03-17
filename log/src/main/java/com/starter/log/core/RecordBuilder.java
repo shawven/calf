@@ -4,7 +4,7 @@ package com.starter.log.core;
  * @author Shoven
  * @date 2019-07-26 16:22
  */
-public interface RecordBuilder {
+public interface RecordBuilder<T extends RecordMeta> {
 
-    Recordable build(RecordMeta recordMeta);
+    Recordable build(T meta);
 }

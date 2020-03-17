@@ -1,6 +1,5 @@
 package com.starter.log.core;
 
-import com.starter.log.annotation.Log;
 import com.starter.log.emun.LogAttribute;
 import com.starter.log.emun.LogType;
 import org.aspectj.lang.JoinPoint;
@@ -17,23 +16,25 @@ import java.util.Map;
  * @author Shoven
  * @date 2019-07-25 18:26
  */
-public abstract class AbstractLogTask implements LogTask {
+public abstract class AbstractLogTask<T extends RecordMeta> implements LogTask {
 
     private static Logger logger = LoggerFactory.getLogger(LogLogAspect.class);
 
-    private JoinPointExtractor joinPointExtractor;
-
     private List<LogRepository> repositories;
 
-    private RecordBuilder recordBuilder;
+    private RecordBuilder<T> recordBuilder;
 
     private JoinPoint joinPoint;
 
-    public AbstractLogTask(JoinPointExtractor joinPointExtractor,
-                           List<LogRepository> repositories,
-                           RecordBuilder recordBuilder,
+    private Throwable cause;
+
+    private Object value;
+
+    private long cost;
+
+    public AbstractLogTask(List<LogRepository> repositories,
+                           RecordBuilder<T> recordBuilder,
                            JoinPoint joinPoint) {
-        this.joinPointExtractor = joinPointExtractor;
         this.repositories = repositories;
         this.recordBuilder = recordBuilder;
         this.joinPoint = joinPoint;
@@ -43,13 +44,13 @@ public abstract class AbstractLogTask implements LogTask {
     public void run() {
         try {
             // 提取切入点信息
-            JoinPointInfo joinPointInfo = joinPointExtractor.extract(joinPoint);
+            JoinPointInfo joinPointInfo = new JoinPointInfo(joinPoint);
             // 生成日志元数据
-            RecordMeta recordMeta = makeRecordMeta(joinPointInfo);
+            T recordMeta = makeRecordMeta(joinPointInfo);
             // 生成日志
             Recordable record = makeRecord(recordMeta);
             // 写入
-            write(record, recordMeta.getJoinPointInfo().getLogAnnotation());
+            write(record, joinPointInfo);
         } catch (LogException e) {
             logger.warn(e.getMessage(), e);
         } catch (Exception e) {
@@ -57,10 +58,10 @@ public abstract class AbstractLogTask implements LogTask {
         }
     }
 
-    protected Recordable makeRecord(RecordMeta recordMeta) {
+    protected Recordable makeRecord(T recordMeta) {
         JoinPointInfo joinPointInfo = recordMeta.getJoinPointInfo();
-        Class<? extends Annotation> aClass = joinPointInfo.getLogAnnotation().getClass();
-        Class typeClass = joinPointInfo.getTypeClass();
+        Class<? extends Annotation> aClass = joinPointInfo.getLog().getClass();
+        Class<?> typeClass = joinPointInfo.getTypeClass();
         Method method = joinPointInfo.getMethod();
 
         Map<LogAttribute, Object> attributes= LogAnnotationUtils.getAnnotationAttributes(typeClass, method, aClass);
@@ -73,12 +74,12 @@ public abstract class AbstractLogTask implements LogTask {
     }
 
     @Override
-    public void write(Recordable record, Log annotation) {
+    public void write(Recordable record, JoinPointInfo joinPointInfo) {
         int repositoriesSize = repositories.size();
         Map<String, Exception> exceptions = new HashMap<>(repositoriesSize);
 
         for (LogRepository repository : repositories) {
-            if (repository.isSupport(annotation)) {
+            if (repository.isSupport(joinPointInfo)) {
                 try {
                     repository.write(record);
                 } catch (Exception e) {
@@ -102,37 +103,41 @@ public abstract class AbstractLogTask implements LogTask {
         }
     }
 
-    protected abstract RecordMeta makeRecordMeta(JoinPointInfo joinPointInfo);
-
-    public JoinPointExtractor getJoinPointExtractor() {
-        return joinPointExtractor;
-    }
-
-    public void setJoinPointExtractor(JoinPointExtractor joinPointExtractor) {
-        this.joinPointExtractor = joinPointExtractor;
-    }
+    protected abstract T makeRecordMeta(JoinPointInfo joinPointInfo);
 
     public List<LogRepository> getRepositories() {
         return repositories;
     }
 
-    public void setRepositories(List<LogRepository> repositories) {
-        this.repositories = repositories;
-    }
-
-    public RecordBuilder getRecordBuilder() {
+    public RecordBuilder<T> getRecordBuilder() {
         return recordBuilder;
-    }
-
-    public void setRecordBuilder(RecordBuilder recordBuilder) {
-        this.recordBuilder = recordBuilder;
     }
 
     public JoinPoint getJoinPoint() {
         return joinPoint;
     }
 
-    public void setJoinPoint(JoinPoint joinPoint) {
-        this.joinPoint = joinPoint;
+    public Throwable getCause() {
+        return cause;
+    }
+
+    public void setCause(Throwable cause) {
+        this.cause = cause;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    public long getCost() {
+        return cost;
+    }
+
+    public void setCost(long cost) {
+        this.cost = cost;
     }
 }

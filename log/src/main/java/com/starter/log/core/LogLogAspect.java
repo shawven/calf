@@ -55,16 +55,16 @@ public class LogLogAspect extends LogPointcutConfiguration {
     }
 
     private LogTask createNormalLog(JoinPoint jp, Object value, long cost) {
-        return createTask(jp, value, null, cost);
+        try {
+            return logTaskCreator.create(jp, value, cost);
+        } catch (Exception e) {
+            throw new LogException(String.format("创建日志任务失败： %s", e.getMessage()), e);
+        }
     }
 
     private LogTask createExceptionalLog(JoinPoint jp, Throwable cause, long cost) {
-        return createTask(jp, null, cause, cost);
-    }
-
-    private LogTask createTask(JoinPoint jp, Object value, Throwable cause, long cost) {
         try {
-            return logTaskCreator.create(jp, value, cause, cost);
+            return logTaskCreator.create(jp, cause, cost);
         } catch (Exception e) {
             throw new LogException(String.format("创建日志任务失败： %s", e.getMessage()), e);
         }

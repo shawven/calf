@@ -13,6 +13,8 @@ public class DefaultRecordMeta implements RecordMeta {
 
     private Throwable cause;
 
+    private Object value;
+
     private long cost;
 
     public DefaultRecordMeta(JoinPointInfo joinPointInfo) {
@@ -24,10 +26,6 @@ public class DefaultRecordMeta implements RecordMeta {
         return joinPointInfo;
     }
 
-    public void setJoinPointInfo(JoinPointInfo joinPointInfo) {
-        this.joinPointInfo = joinPointInfo;
-    }
-
     @Override
     public Throwable getCause() {
         return cause;
@@ -35,6 +33,14 @@ public class DefaultRecordMeta implements RecordMeta {
 
     public void setCause(Throwable cause) {
         this.cause = cause;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
     }
 
     public long getCost() {

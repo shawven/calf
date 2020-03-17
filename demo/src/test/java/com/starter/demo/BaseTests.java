@@ -1,30 +1,50 @@
 package com.starter.demo;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeMap;
+import com.google.common.collect.TreeRangeMap;
 import com.starter.demo.support.util.NodeTree;
 import com.starter.demo.support.util.excel.ExcelReader;
 import com.starter.demo.support.util.excel.ExcelWriter;
+import com.sun.xml.internal.ws.encoding.RootOnlyCodec;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.*;
 import org.assertj.core.util.Lists;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.SAXWriter;
+import org.dom4j.io.XMLWriter;
+import org.dom4j.tree.DefaultDocumentType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.BeanUtils;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InterfaceAddress;
 import java.security.Security;
 import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.time.ZoneOffset;
+import java.text.SimpleDateFormat;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Shoven
@@ -47,13 +67,15 @@ public class BaseTests {
 
     @Test
     public void test() {
-
-        System.out.println(Arrays.toString(StringUtils.split("", ",")));
+        List<Boolean> booleans = Stream.of(true, false, true, false)
+                .sorted(Comparator.comparing(Boolean::booleanValue).reversed())
+                .collect(toList());
+        System.out.println(booleans);
     }
 
 
     @Test
-    public void testParallelStreamOrdered() {
+    public void testCopyProperties() {
         class A {
             private String aa;
             private String bb;
@@ -120,6 +142,48 @@ public class BaseTests {
         System.out.println("日末毫秒时间戳：" + endTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
     }
 
+    @Test
+    public  void testXml() throws Exception {
+        SAXReader reader = new SAXReader();
+        Document document = reader.read(new File("E:/转换工具/树立水.xml"));
+
+        FileWriter fileWriter = new FileWriter("E:/转换工具/树立水_美化.xml");
+        OutputFormat format = OutputFormat.createPrettyPrint();
+        format.setTrimText(false);
+        XMLWriter writer = new XMLWriter(fileWriter, format);
+        writer.write(document);
+        writer.close();
+    }
+
+
+    @Test
+    public void testRangeMap() {
+        RangeMap<Integer, String> rangeMap = TreeRangeMap.create();
+        rangeMap.put(Range.greaterThan(1), "1");
+        rangeMap.put(Range.greaterThan(2), "2");
+        rangeMap.put(Range.greaterThan(3), "3");
+        rangeMap.put(Range.greaterThan(4), "4");
+        rangeMap.put(Range.greaterThan(5), "5");
+
+        rangeMap.get(3);
+    }
+
+    @Test
+    public void testNodeTree2() {
+        class Menu implements NodeTree.Node<Menu> {
+
+            @Override
+            public List<Menu> getChildren() {
+                return null;
+            }
+
+            @Override
+            public void setChildren(List<Menu> children) {
+
+            }
+        }
+
+    }
     @Test
     public void testNodeTree() {
         class Menu implements NodeTree.Node<Menu> {
@@ -210,10 +274,10 @@ public class BaseTests {
                 new ExcelWriter.Column().setTitle("lastName").setKey("lastName"),
                 new ExcelWriter.Column().setTitle("hobby").setKey("hobby")
                         .setChildColumns(Lists.newArrayList(
-                            new ExcelWriter.Column().setTitle("name").setKey("name"),
-                            new ExcelWriter.Column().setTitle("cost").setKey("cost")
+                                new ExcelWriter.Column().setTitle("name").setKey("name"),
+                                new ExcelWriter.Column().setTitle("cost").setKey("cost")
+                                )
                         )
-                )
         ));
 
         ExcelWriter excelWriter = new ExcelWriter()
@@ -243,7 +307,7 @@ public class BaseTests {
         lockstyle.setLocked(true);//设置锁定
 
         lockstyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        byte [] rgb = {(byte)240, (byte)240, (byte)240};
+        byte[] rgb = {(byte) 240, (byte) 240, (byte) 240};
         lockstyle.setFillForegroundColor(new XSSFColor(rgb, new DefaultIndexedColorMap()));
 
         lockstyle.setBorderTop(BorderStyle.THIN);
@@ -255,26 +319,26 @@ public class BaseTests {
         lockstyle.setRightBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
         lockstyle.setTopBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
 
-        XSSFCellStyle unlockStyle=wb.createCellStyle();
+        XSSFCellStyle unlockStyle = wb.createCellStyle();
         unlockStyle.setLocked(false);//设置未锁定
 
 
-        for(int i=0;i<10;i++){
+        for (int i = 0; i < 10; i++) {
             XSSFRow row = sheet.createRow(i);
             for (int j = 0; j < 10; j++) {
                 XSSFCell cell = row.createCell(j);
                 cell.setCellStyle(unlockStyle);//默认是锁定状态；将所有单元格设置为：未锁定；然后再对需要上锁的单元格单独锁定
-                if(j==1){//这里可以根据需要进行判断;我这就将第2列上锁了
+                if (j == 1) {//这里可以根据需要进行判断;我这就将第2列上锁了
                     cell.setCellStyle(lockstyle);//将需要上锁的单元格进行锁定
                     cell.setCellValue("上锁了");
-                }else{
+                } else {
                     cell.setCellValue("没上锁了");
                 }
             }
         }
         //sheet添加保护，这个一定要否则光锁定还是可以编辑的
         sheet.protectSheet("123456");
-        FileOutputStream os = new FileOutputStream("D:\\" + System.currentTimeMillis() +".xlsx");
+        FileOutputStream os = new FileOutputStream("D:\\" + System.currentTimeMillis() + ".xlsx");
         wb.write(os);
         os.close();
     }
@@ -293,12 +357,6 @@ public class BaseTests {
         return stringBuffer.toString();
     }
 
-
-    @Test
-    public void testSpringData() throws Exception {
-
-        System.out.println(Arrays.toString(Security.getProviders()));
-    }
 
     private Class class1() {
         return ApplicationTests.class;
