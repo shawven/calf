@@ -33,13 +33,13 @@ public class LogConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public LogBuilder<RequestLogMeta> recordBuilder() {
+    public LogBuilder<RequestLogMeta> logBuilder() {
         return new RequestLogBuilder();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public LogMetaCreator logTaskCreator() {
+    public LogMetaCreator<RequestLogMeta> logMetaCreator() {
         return new RequestLogMetaCreator();
     }
 }

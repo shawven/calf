@@ -8,7 +8,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -28,10 +27,10 @@ public class LogAspect extends LogPointcutConfiguration {
     private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired
-    private LogMetaCreator<?> logMetaCreator;
+    private List<LogRepository> repositories;
 
     @Autowired
-    private List<LogRepository> repositories;
+    private LogMetaCreator<LogMeta> logMetaCreator;
 
     @Autowired
     private LogBuilder<LogMeta> logBuilder;
