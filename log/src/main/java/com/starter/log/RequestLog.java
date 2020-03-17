@@ -13,7 +13,7 @@ import java.util.Date;
  */
 @Getter
 @Setter
-public class RequestRecord extends DefaultRecord {
+public class RequestLog extends DefaultLog {
     /**
      * 主键ID
      */

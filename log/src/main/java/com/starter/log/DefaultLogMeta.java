@@ -1,15 +1,15 @@
 package com.starter.log;
 
-import com.starter.log.core.JoinPointInfo;
-import com.starter.log.core.RecordMeta;
+import com.starter.log.core.LogMeta;
+import org.aspectj.lang.JoinPoint;
 
 /**
  * @author Shoven
  * @date 2019-07-26 9:47
  */
-public class DefaultRecordMeta implements RecordMeta {
+public class DefaultLogMeta implements LogMeta {
 
-    private JoinPointInfo joinPointInfo;
+    private JoinPoint joinPoint;
 
     private Throwable cause;
 
@@ -17,16 +17,15 @@ public class DefaultRecordMeta implements RecordMeta {
 
     private long cost;
 
-    public DefaultRecordMeta(JoinPointInfo joinPointInfo) {
-        this.joinPointInfo = joinPointInfo;
+    public DefaultLogMeta(JoinPoint joinPoint) {
+        this.joinPoint = joinPoint;
     }
 
     @Override
-    public JoinPointInfo getJoinPointInfo() {
-        return joinPointInfo;
+    public JoinPoint getJoinPoint() {
+        return joinPoint;
     }
 
-    @Override
     public Throwable getCause() {
         return cause;
     }

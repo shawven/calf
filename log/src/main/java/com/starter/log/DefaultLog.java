@@ -7,7 +7,7 @@ import com.starter.log.emun.LogType;
  * @author Shoven
  * @date 2019-07-26 16:27
  */
-public class DefaultRecord implements Recordable {
+public class DefaultLog implements Recordable {
 
     private String module;
 

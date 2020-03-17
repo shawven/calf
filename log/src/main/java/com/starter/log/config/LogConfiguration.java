@@ -1,18 +1,16 @@
 package com.starter.log.config;
 
-import com.starter.log.RequestLogTaskCreator;
-import com.starter.log.RequestRecordMeta;
+import com.starter.log.RequestLogMetaCreator;
+import com.starter.log.RequestLogMeta;
 import com.starter.log.repository.DatabaseRepository;
 import com.starter.log.repository.Slf4jRepository;
-import com.starter.log.RequestRecordBuilder;
+import com.starter.log.RequestLogBuilder;
 import com.starter.log.core.LogRepository;
-import com.starter.log.core.RecordBuilder;
-import com.starter.log.core.LogTaskCreator;
+import com.starter.log.core.LogBuilder;
+import com.starter.log.core.LogMetaCreator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
 
 /**
  * @author Shoven
@@ -35,14 +33,13 @@ public class LogConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RecordBuilder<RequestRecordMeta> recordBuilder() {
-        return new RequestRecordBuilder();
+    public LogBuilder<RequestLogMeta> recordBuilder() {
+        return new RequestLogBuilder();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public LogTaskCreator logTaskCreator(List<LogRepository> repositories,
-                                         RecordBuilder<RequestRecordMeta> recordBuilder) {
-        return new RequestLogTaskCreator(repositories, recordBuilder);
+    public LogMetaCreator logTaskCreator() {
+        return new RequestLogMetaCreator();
     }
 }

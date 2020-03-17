@@ -12,22 +12,29 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author Shoven
  * @date 2019-07-25 17:04
  */
 @Aspect
 @Component
-public class LogLogAspect extends LogPointcutConfiguration {
+public class LogAspect extends LogPointcutConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(LogLogAspect.class);
-
-    @Autowired
-    @Qualifier("taskExecutor")
-    private ThreadPoolTaskExecutor executor;
+    private static final Logger logger = LoggerFactory.getLogger(LogAspect.class);
 
     @Autowired
-    private LogTaskCreator logTaskCreator;
+    private ThreadPoolTaskExecutor taskExecutor;
+
+    @Autowired
+    private LogMetaCreator<?> logMetaCreator;
+
+    @Autowired
+    private List<LogRepository> repositories;
+
+    @Autowired
+    private LogBuilder<LogMeta> logBuilder;
 
     @Around("logPointcut()")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
@@ -46,25 +53,29 @@ public class LogLogAspect extends LogPointcutConfiguration {
             // 记录耗时
             long cost = System.currentTimeMillis() - startTime;
             // 创建日志任务
-            LogTask logTask = cause == null
+            LogMeta logMeta = cause == null
                     ? createNormalLog(pjp, result, cost)
                     : createExceptionalLog(pjp, cause, cost);
             // 异步执行
-            executeTask(logTask);
+            executeTask(newTask(logMeta));
         }
     }
 
-    private LogTask createNormalLog(JoinPoint jp, Object value, long cost) {
+    private LogTask newTask(LogMeta logMeta) {
+        return new LogTask(repositories, logBuilder, logMeta);
+    }
+
+    private LogMeta createNormalLog(JoinPoint jp, Object value, long cost) {
         try {
-            return logTaskCreator.create(jp, value, cost);
+            return logMetaCreator.create(jp, value, cost);
         } catch (Exception e) {
             throw new LogException(String.format("创建日志任务失败： %s", e.getMessage()), e);
         }
     }
 
-    private LogTask createExceptionalLog(JoinPoint jp, Throwable cause, long cost) {
+    private LogMeta createExceptionalLog(JoinPoint jp, Throwable cause, long cost) {
         try {
-            return logTaskCreator.create(jp, cause, cost);
+            return logMetaCreator.create(jp, cause, cost);
         } catch (Exception e) {
             throw new LogException(String.format("创建日志任务失败： %s", e.getMessage()), e);
         }
@@ -72,7 +83,7 @@ public class LogLogAspect extends LogPointcutConfiguration {
 
     private void executeTask(LogTask task) {
         try {
-            executor.execute(task);
+            taskExecutor.execute(task);
         } catch (LogException e) {
             logger.warn("执行日志任务失败：{}", e.getMessage());
         } catch (Exception e) {

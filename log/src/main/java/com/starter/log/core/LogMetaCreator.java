@@ -6,7 +6,7 @@ import org.aspectj.lang.JoinPoint;
  * @author Shoven
  * @date 2019-07-26 11:12
  */
-public interface LogTaskCreator {
+public interface LogMetaCreator<T extends LogMeta> {
 
     /**
      * 创建日志任务
@@ -16,7 +16,7 @@ public interface LogTaskCreator {
      * @param cost 花费时间
      * @return
      */
-    LogTask create(JoinPoint jp, Object value, long cost);
+    T create(JoinPoint jp, Object value, long cost);
 
     /**
      * 创建日志任务
@@ -26,5 +26,5 @@ public interface LogTaskCreator {
      * @param cost 花费时间
      * @return
      */
-    LogTask create(JoinPoint jp, Throwable cause, long cost);
+    T create(JoinPoint jp, Throwable cause, long cost);
 }

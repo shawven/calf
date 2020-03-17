@@ -1,18 +1,17 @@
 package com.starter.log;
 
-import com.starter.log.core.JoinPointInfo;
+import org.aspectj.lang.JoinPoint;
 
 /**
  * @author Shoven
  * @date 2019-07-26 9:45
  */
-public class RequestRecordMeta extends DefaultRecordMeta {
+public class RequestLogMeta extends DefaultLogMeta {
 
     private RequestInfo requestInfo;
 
-
-    public RequestRecordMeta(JoinPointInfo joinPointInfo, RequestInfo requestInfo) {
-        super(joinPointInfo);
+    public RequestLogMeta(JoinPoint joinPoint, RequestInfo requestInfo) {
+        super(joinPoint);
         this.requestInfo = requestInfo;
     }
 
