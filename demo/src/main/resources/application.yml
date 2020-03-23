@@ -19,9 +19,13 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
 
   cache:
-    type: caffeine
-    caffeine:
-      spec: initialCapacity=10,maximumSize=500,expireAfterAccess=86400s
+#    type: caffeine
+#    caffeine:
+#      spec: initialCapacity=10,maximumSize=500,expireAfterAccess=3600s
+    type: redis
+    redis:
+      # 全局spring cache缓存失效时间2小时
+      time-to-live: 3600000
 
   redis:
     port: 6379
@@ -35,6 +39,7 @@ spring:
     multipart:
       max-request-size: 10MB
       max-file-size: 10MB
+
   freemarker:
     template-loader-path: classpath:/template/
   mvc:
@@ -45,30 +50,16 @@ spring:
 
 #MyBatisPlus配置
 mybatis-plus:
-  # java目录: classpath:/com/yourpackage/*/mapper/*Mapper.xml
-  # resource目录: classpath:/mapper/*Mapper.xml
-  mapper-locations: classpath:/mapper/*Mapper.xml
+  # xml扫描路径
+  mapper-locations: classpath*:/mapper/**/*Mapper.xml
   # 别名包扫描路径
-  typeAliasesPackage: com.starter.app.domain
+  typeAliasesPackage: com.starter.demo.**.domain
   # MyBatis-Plus 全局策略配置
   global-config:
     # DB策略配置
     db-config:
-      # 全局默认主键类型 :
-      # INPUT 用户输入ID
-      # ID_WORKER 全局唯一ID，Long类型的主键
-      # ID_WORKER_STR 字符串全局唯一IDs
-      # UUID 全局唯一ID，UUID类型的主键
-      # NONE 该类型为未设置主键类型
+      # 全局默认主键类型自动递增
       id-type: AUTO
-      # 字段策略
-      field-strategy: not_null
-      # 表名是否使用下划线命名
-      table-underline: true
-      # 逻辑已删除值
-      logic-delete-value: 1
-      # 逻辑未删除值
-      logic-not-delete-value: 0
 
   #原生MyBatis配置
   configuration:
@@ -80,53 +71,165 @@ mybatis-plus:
     jdbc-type-for-null: 'null'
 
 ---
-# 开发环境
+
+# 本地环境特殊化
 spring:
-  profiles: dev
+  profiles: local
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
-    username: root
-    password: root
+    url: jdbc:mysql://${mysql.host:127.0.0.1}:3306/wqb_jz?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: ${mysql.username:root}
+    password: ${mysql.password:root}
   redis:
-    host: 127.0.0.1
-  data:
-    elasticsearch:
-      cluster-nodes: 192.168.1.165:9300
-      cluster-name: docker-cluster
+    host: ${redis.host:127.0.0.1}
+    password: ${redis.password:}
+    database: 1
 
 mybatis-plus:
   configuration:
     cache-enabled: false
+# 应用配置
+app:
+  # 是否允许公共API请求 （在权限判断时是否让用户访问没有配置到权限表的请求）
+  allow-public-api-request: true
 
-logging:
-  level:
-    root: info
-    com:
-      test: debug
-#    org:
-#      springframework:
-#        security: debug
+  # Spring Security框架配置
+  #
+  # 用户名/手机号 + 密码登录 /oauth/token
+  # 手机号 + 短信验证码登陆 /oauth/phone
+  # 第三方登录 /oauth/connect/{provider}
+  security:
+    # 白名单 （未登录用户可访问）
+    whitelist: /user/register,/user/password
+    # 验证码配置
+    verification:
+      #图片验证码配置项
+      captcha:
+        length: 4
+        width: 60
+        height: 30
+        expire-in: 3600
+        # 配置需要图形验证码验证的url, 两个验证码如果配的url中相同部分则短信优先级要高
+        url:
+      #短信验证码配置项
+      sms:
+        # 短信验证码登录处理的url
+        login-processing-url: /oauth/phone
+        length: 6
+        expire-in: 120
+        # 配置需要短信验证码验证的url
+        url: /user/register,/user/phone,/user/password
+    connect:
+      #社交登录功能拦截的url
+      filter-processes-url: /oauth/connect
+      #QQ登录配置
+      qq:
+        app-id:
+        app-secret:
+        provider-id: qq
+      #微信登录配置
+      weixin:
+        app-id: wxd99431bbff8305a0
+        app-secret: 60f78681d063590a469f1b297feff3c4
+        provider-id: weixin
+    #认证服务器注册的第三方应用配置项
+    oauth2:
+      # 客户端配置
+      clients:
+        - client-id: app
+          access-token-validate-seconds: 2592000
+          refresh-token-validate-seconds: 2592000
+        - client-id: web_app
+          access-token-validate-seconds: 2592000
+          refresh-token-validate-seconds: 2592000
+      #OAuth2认证服务器的tokenStore的类型
+      token-store: jwt
+      jwt:
+        #使用jwt时为token签名的秘钥
+        signing-key: aXo3t%12_Ao
+
 ---
 
-# 生产环境
+# 开发环境特殊化
 spring:
-  profiles: prod
+  profiles: dev
   datasource:
-    url: jdbc:mysql://${mysql.host:}:3306/test?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
-    username: ${mysql.username:}
-    password: ${mysql.password:}
-
+    url: jdbc:mysql://${mysql.host}:3306/test?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: ${mysql.username}
+    password: ${mysql.password}
   redis:
-    host: ${redis.host:}
+    host: ${redis.host}
     password: ${redis.password:}
+    database: 1
+
+mybatis-plus:
+  configuration:
+    cache-enabled: false
+---
+
+# 测试环境尽可能的和生产环境接近
+
+# 测试环境特殊化
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:mysql://${mysql.host}:3306/wqb_jz_test?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: ${mysql.username}
+    password: ${mysql.password}
+  redis:
+    host: ${redis.host}
+    password: ${redis.password}
+    database: 1
 
 mybatis-plus:
   configuration:
     cache-enabled: true
 
-logging:
-  level:
-    root: info
-  path: ./logs/
+app:
+  security:
+    oauth2:
+      clients:
+        - client-id: app
+          access-token-validate-seconds: 3600
+          refresh-token-validate-seconds: 2592000
+        - client-id: web_app
+          access-token-validate-seconds: 3600
+          refresh-token-validate-seconds: 2592000
+      jwt:
+        #使用jwt时签名的证书
+        key-store: classpath:/demo.jks
+        key-alias: wqb
+        key-store-password: wqbol.com
+---
 
+# 生产环境特殊化
+spring:
+  profiles: prod
+  datasource:
+    url: jdbc:mysql://${mysql.host}:3306/test?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: ${mysql.username}
+    password: ${mysql.password}
+
+  redis:
+    host: ${redis.host}
+    password: ${redis.password}
+
+mybatis-plus:
+  configuration:
+    cache-enabled: true
+
+app:
+  security:
+    oauth2:
+      clients:
+        - client-id: app
+          access-token-validate-seconds: 3600
+          refresh-token-validate-seconds: 2592000
+        - client-id: web_app
+          access-token-validate-seconds: 3600
+          refresh-token-validate-seconds: 2592000
+      jwt:
+        #使用jwt时签名的证书
+        key-store: classpath:/demo.jks
+        key-alias: wqb
+        key-store-password: wqbol.com
 ---

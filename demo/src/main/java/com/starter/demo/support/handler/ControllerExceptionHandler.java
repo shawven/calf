@@ -1,7 +1,8 @@
 package com.starter.demo.support.handler;
 
-import com.starter.demo.common.Response;
+import com.starter.demo.support.Response;
 import com.starter.demo.support.exception.BizException;
+import com.starter.demo.support.exception.ArgumentException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
+
 
 /**
  * 控制器层全局异常处理器，业务异常BizException属于业务逻辑反馈(DEBUG输出)
@@ -51,7 +53,7 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(BindException.class)
     @ResponseBody
-    public ResponseEntity handleBindException(BindException e){
+    public ResponseEntity<Response> handleBindException(BindException e){
         List<FieldError> fieldErrors = e.getFieldErrors();
         StringBuilder sb = new StringBuilder();
         for (FieldError fielderror : fieldErrors) {
@@ -67,6 +69,19 @@ public class ControllerExceptionHandler {
     }
 
     /**
+     * 处理参数异常
+     *
+     * @param e BizException
+     * @return
+     */
+    @ExceptionHandler(BizException.class)
+    @ResponseBody
+    public ResponseEntity<Response> handleArgumentException(ArgumentException e) {
+        logger.debug(e.getMessage(), e);
+        return Response.badRequest(e.getMessage());
+    }
+
+    /**
      * 处理业务异常
      *
      * @param e BizException
@@ -74,7 +89,7 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(BizException.class)
     @ResponseBody
-    public ResponseEntity handleBizException(BizException e) {
+    public ResponseEntity<Response> handleBizException(BizException e) {
         logger.debug(e.getMessage(), e);
         BizException last = e;
         List<Throwable> throwableList = ExceptionUtils.getThrowableList(e);
@@ -96,7 +111,7 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public ResponseEntity handleException(HttpServletRequest request, Exception e) {
+    public ResponseEntity<Response> handleException(HttpServletRequest request, Exception e) {
         int index;
         if ((index = ExceptionUtils.indexOfType(e, BizException.class)) != - 1) {
             Throwable throwable = ExceptionUtils.getThrowableList(e).get(index);
@@ -125,30 +140,17 @@ public class ControllerExceptionHandler {
     }
 
     /**
-     * 处理上传限制异常
+     * 处理身份认证异常
+     * redis 缓存没了
      *
-     * @param e Exception
+     * @param e BizException
      * @return
      */
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ExceptionHandler(AuthenticationException.class)
     @ResponseBody
-    public ResponseEntity handleMaxUploadSizeExceededException(HttpServletRequest request,
-                                                               MaxUploadSizeExceededException e) {
-        long b = e.getMaxUploadSize();
-        String size;
-        if (b == 0) {
-            size = "0B";
-        } else if (b < 1024) {
-            size = b +"B";
-        } else if (b > 1024 && b < 1048576) {
-            size = b / 1024 + "KB";
-        } else {
-            size = b / 1048576 + "MB";
-        }
-        String errorMsg = "上传的文件大小超过 " + size;
-        String logErrorMsg = String.format("URL[%s] %s", request.getRequestURL(), errorMsg);
-        logger.error(logErrorMsg, e);
-        return Response.error(errorMsg);
+    public ResponseEntity<Response> handleUnauthorized(BizException e) {
+        logger.debug(e.getMessage(), e);
+        return Response.unauthorized(e.getMessage());
     }
 
     /**
@@ -158,23 +160,9 @@ public class ControllerExceptionHandler {
      * @return
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+    public ResponseEntity<Response> handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         logger.debug(e.getMessage(), e);
         return Response.methodNotAllowed(e.getMessage());
-    }
-
-    /**
-     * 处理身份认证异常
-     * redis 缓存没了
-     *
-     * @param e BizException
-     * @return
-     */
-    @ExceptionHandler(AuthenticationException.class)
-    @ResponseBody
-    public ResponseEntity handleUnauthorized(BizException e) {
-        logger.debug(e.getMessage(), e);
-        return Response.unauthorized(e.getMessage());
     }
 
     /**
@@ -185,15 +173,38 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseBody
-    public ResponseEntity handleNoHandlerException(NoHandlerFoundException e) {
+    public ResponseEntity<Response> handleNoHandlerException(NoHandlerFoundException e) {
         logger.warn(e.getMessage(), e);
         return Response.notFound(e.getRequestURL());
     }
 
     /**
-     * @param e
+     * 处理上传限制异常
+     *
+     * @param e Exception
      * @return
      */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseBody
+    public ResponseEntity<Response> handleMaxUploadSizeExceededException(HttpServletRequest request,
+                                                               MaxUploadSizeExceededException e) {
+        long b = e.getMaxUploadSize();
+        String size;
+        if (b == 0) {
+            size = "0B";
+        } else if (b < 1024) {
+            size = b +"B";
+        } else if (b > 1024 && b < 1024 * 1024) {
+            size = b / 1024 + "KB";
+        } else {
+            size = b / (1024 * 1024) + "MB";
+        }
+        String errorMsg = "上传的文件大小超过 " + size;
+        String logErrorMsg = String.format("URL[%s] %s", request.getRequestURL(), errorMsg);
+        logger.error(logErrorMsg, e);
+        return Response.error(errorMsg);
+    }
+
     private String getErrorMessage(Exception e) {
         return e.getMessage() != null ? e.getMessage() : DEFAULT_MESSAGE;
     }

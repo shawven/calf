@@ -1,7 +1,7 @@
 package com.starter.demo.controller;
 
 import com.google.common.collect.ImmutableMap;
-import com.starter.demo.common.Response;
+import com.starter.demo.support.Response;
 import com.starter.payment.PaymentManager;
 import com.starter.payment.domain.*;
 import com.starter.payment.provider.PaymentProviderEnum;

@@ -1,6 +1,6 @@
 package com.starter.demo.controller;
 
-import com.starter.demo.common.Response;
+import com.starter.demo.support.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

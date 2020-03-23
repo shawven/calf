@@ -67,10 +67,21 @@ public class BaseTests {
 
     @Test
     public void test() {
-        List<Boolean> booleans = Stream.of(true, false, true, false)
-                .sorted(Comparator.comparing(Boolean::booleanValue).reversed())
-                .collect(toList());
-        System.out.println(booleans);
+        Stream<Boolean> stream = Stream.of(true, false, true, false);
+
+//        List<Boolean> booleans = booleanStream
+//                .sorted(Comparator.comparing(Boolean::booleanValue).reversed())
+//                .collect(toList());
+//
+//
+//        System.out.println(booleans);
+        stream = stream.peek(System.out::println);
+        stream = stream.peek(System.out::println);
+        stream = stream.peek(System.out::println);
+//        System.out.println(booleanStream.anyMatch(aBoolean -> !aBoolean));
+
+        stream.collect(Collectors.toSet());
+
     }
 
 

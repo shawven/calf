@@ -10,10 +10,7 @@ import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.AbstractTemplateEngine;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
-import com.starter.demo.controller.base.BaseController;
 import com.starter.demo.mapper.base.BaseMapper;
-import com.starter.demo.service.base.BaseService;
-import com.starter.demo.service.base.BaseServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -29,9 +26,9 @@ import java.util.function.Consumer;
 public class CodeGenerator {
 
     /**
-     * 基本输出目录
+     * 输出目录
      */
-    private String baseOutputDir = System.getProperty("user.dir");
+    private String outputDir = System.getProperty("user.dir");
 
     /**
      * 模板包路径（classpath下）
@@ -51,7 +48,7 @@ public class CodeGenerator {
     /**
      * 需要继承的基类设置
      */
-    private Class<?> superMapper = BaseMapper.class;
+    private Class superMapper = BaseMapper.class;
 
     private List<FileWhiteList> whiteList = new ArrayList<>();
 
@@ -71,33 +68,7 @@ public class CodeGenerator {
 
     public static void main(String[] args) {
         new CodeGenerator()
-                .setOutputPath("generator/src/test/java")
-                .prefixGroup("system", that -> {
-//                    that.
-//                            .generate("User", "user", IdType.AUTO)
-//                            .generate("UserCooperation", "user_cooperation", IdType.AUTO)
-//                            .generate("Account", "account", IdType.AUTO)
-//                            .generate("AccountCompany", "account_company", IdType.INPUT)
-//
-//                            .generate("RbacPermission", "rbac_permission", IdType.AUTO)
-//                            .generate("RbacAccountRole", "rbac_role", IdType.AUTO)
-//                            .generate("RbacUserRole", "rbac_user_role", IdType.NONE)
-//                            .generate("RbacUserAccount", "user_account", IdType.NONE)
-//
-//                            .generate("Subject", "subject", IdType.AUTO)
-//                            .generate("SubjectRecord", "subject_record", IdType.AUTO)
-//
-
-
-                })
-                .prefixGroup("service", that -> {
-//                    that
-//                            .generate("SubjectLedger", "subject_ledger", IdType.INPUT)
-//                            .generate("ForeignCurrency", "foreign_currency", IdType.AUTO)
-//                            .generate("SubjectAuxiliaryItem","subject_auxiliary_item", IdType.NONE)
-//                            .generate("SubjectAuxiliaryLedger","subject_auxiliary_ledger", IdType.AUTO)
-                    ;
-                });
+                .setOutputPath("generator/src/test/java");
     }
 
     /**
@@ -111,7 +82,7 @@ public class CodeGenerator {
 
         // 全局配置
         GlobalConfig globalConfig = new GlobalConfig()
-                .setOutputDir(baseOutputDir)
+                .setOutputDir(outputDir)
                 .setServiceName(entity + "Service")
                 .setServiceImplName(entity + "ServiceImpl")
                 .setMapperName(entity + "Mapper")
@@ -174,7 +145,7 @@ public class CodeGenerator {
     }
 
     /**
-     * 前缀分组生成，生成的代码在配置的（parentPackage + 组名 + 具体的包）构成在二级包下
+     * 前缀分组生成，生成的代码在配置的（组名 + 包）构成在二级包下
      *
      * @param name
      * @param generatorFunction
@@ -189,7 +160,7 @@ public class CodeGenerator {
     }
 
     /**
-     * 后缀分组生成，生成的代码在配置的（parentPackage + 具体的包 + 组名）构成在二级包下
+     * 后缀分组生成，生成的代码在配置的（包 + 组名）构成在二级包下
      *
      * @param name
      * @param generatorFunction
@@ -232,24 +203,13 @@ public class CodeGenerator {
         return this;
     }
 
-    /**
-     * 包含基础数据访问层
-     *
-     * @return
-     */
     public CodeGenerator includeEntityAndMapper() {
         Collections.addAll(this.whiteList, FileWhiteList.ENTITY, FileWhiteList.MAPPER, FileWhiteList.XML);
         return this;
     }
 
-    /**
-     * 设置输出子目录
-     *
-     * @param path
-     * @return
-     */
     private CodeGenerator setOutputPath(String path) {
-        baseOutputDir = baseOutputDir + "/" + path;
+        outputDir = outputDir + "/" + path;
         return this;
     }
 
@@ -305,33 +265,16 @@ public class CodeGenerator {
         return this;
     }
 
-    /**
-     * 添加后缀组
-     *
-     * @param packageName
-     * @param suffix
-     * @return
-     */
     private String addSuffix(String packageName, String suffix) {
         return packageName + (StringUtils.isNotBlank(suffix) ? "." + suffix : "");
     }
 
-    /**
-     * 删除后缀组
-     *
-     * @param packageName
-     * @param suffix
-     * @return
-     */
     private String removeSuffix(String packageName, String suffix) {
         return packageName.endsWith(suffix)
                 ? packageName.substring(0, packageName.length() - ("." + suffix).length())
                 : packageName;
     }
 
-    /**
-     * 自定义生成模板引擎，控制生成文件
-     */
     class CustomFreemarkerTemplateEngine extends FreemarkerTemplateEngine {
         @Override
         public AbstractTemplateEngine batchOutput() {
@@ -403,12 +346,6 @@ public class CodeGenerator {
             return this;
         }
 
-        /**
-         * 根据白名单判断是否要写入
-         *
-         * @param item
-         * @return
-         */
         private boolean canWrite(FileWhiteList item) {
             if (CodeGenerator.this.whiteList == null || CodeGenerator.this.whiteList.isEmpty()) {
                 return true;

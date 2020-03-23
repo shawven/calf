@@ -11,11 +11,7 @@ import java.util.Map;
  * @author Shoven
  * @date 2019-03-15 11:13
  */
-public interface BaseMapper<T> extends com.baomidou.mybatisplus.core.mapper.BaseMapper<T> {
-
-    default int update(T entity, T condition) {
-        return update(entity, new UpdateWrapper<>(condition));
-    }
+public interface BaseMapper<T> extends com.baomidou.mybatisplus.core.mapper.BaseMapper<T>, BatchMapper<T> {
 
     default T selectOne(T entity) {
         return selectOne(new QueryWrapper<>(entity));
@@ -37,11 +33,19 @@ public interface BaseMapper<T> extends com.baomidou.mybatisplus.core.mapper.Base
         return selectObjs(new QueryWrapper<>(entity));
     }
 
-    default IPage selectPage(IPage<T> page, T entity) {
+    default IPage<T> selectPage(IPage<T> page, T entity) {
         return selectPage(page, new QueryWrapper<>(entity));
     }
 
-    default IPage<Map<String, Object>> selectMapsPage(IPage<T> page, T entity) {
-        return selectMapsPage(page, new QueryWrapper<>(entity));
+    default IPage<Map<String, Object>> selectMapsPage(IPage<Map<String, Object>> page, T entity) {
+        return selectMapsPage(page,new QueryWrapper<>(entity));
+    }
+
+    default int update(T entity, T condition) {
+        return update(entity, new UpdateWrapper<>(condition));
+    }
+
+    default int delete(T condition) {
+        return delete(new QueryWrapper<>(condition));
     }
 }

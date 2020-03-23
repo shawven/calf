@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.9.RELEASE</version>
+        <version>2.2.5.RELEASE</version>
     </parent>
 
     <groupId>com.stater</groupId>
@@ -44,17 +44,22 @@
         <dependency>
             <groupId>com.github.shawven</groupId>
             <artifactId>security-app-spring-boot-starter</artifactId>
-            <version>2.0.0</version>
+            <version>2.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.shawven</groupId>
             <artifactId>security-verification-spring-boot-starter</artifactId>
-            <version>2.0.0</version>
+            <version>2.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.shawven</groupId>
             <artifactId>security-oauth2-autoconfigure</artifactId>
-            <version>2.0.0</version>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.shawven</groupId>
+            <artifactId>security-connect-autoconfigure</artifactId>
+            <version>2.1.0</version>
         </dependency>
 
 
@@ -110,12 +115,12 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.1.1</version>
+            <version>3.3.1</version>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-generator</artifactId>
-            <version>3.1.1</version>
+            <version>3.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis.generator</groupId>
