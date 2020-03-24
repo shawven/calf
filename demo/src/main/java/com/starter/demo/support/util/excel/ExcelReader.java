@@ -2,6 +2,7 @@ package com.starter.demo.support.util.excel;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -97,7 +98,7 @@ public class ExcelReader {
                 consumer.accept(dataRow);
             } catch (Exception e) {
                 if (dataRow != null) {
-                    CellAddress address = dataRow.getCurrentAddress();
+                    CellAddress address = dataRow.getAddress();
                     throw new RuntimeException(String.format("第 %s 行 %s 列 %s 单元格：%s",address.getRow() + 1,
                             address.getColumn() + 1, address.toString(), e.getMessage()));
                 }
@@ -108,6 +109,8 @@ public class ExcelReader {
 
     /**
      * 从多少行开始, n的取值范围[-rowSize，rowSize]
+     * start(2): 从第二行开始读取至末尾
+     *
      * n > 0 （n = 1: 起始索引是0）
      * n < 0 （n = -1: 起始索引是rowSize - 1）
      * @param n 行数
@@ -129,9 +132,10 @@ public class ExcelReader {
 
     /**
      * 从开始位置往后多少行结束，n的取值范围[-rowSize，rowSize]
+     * start(-3).length(-1):  从倒数第三行读取至倒数第一行
+     *
      * n > 0 （n = 2: 终点索引位置是1）
      * n < 0 （n = -2: 终点索引是 rowSize - 2）
-     * start(-3).length(-1):  从倒数第三行至倒数第一行
      *
      * @param n 行数
      * @return ExcelReader
@@ -176,6 +180,20 @@ public class ExcelReader {
     }
 
     /**
+     * 获取数据行
+     *
+     * @param i 行号
+     * @return
+     */
+    public DataRow getDataRow(int i) {
+        int rowNum = sheet.getLastRowNum();
+        if (i < 0 || i >= rowNum) {
+            throw new IndexOutOfBoundsException("数据行号有误");
+        }
+        return getDataRow(sheet, i);
+    }
+
+    /**
      * 读取Excel测试，兼容 Excel 2003/2007/2010
      *
      * @return Stream
@@ -184,22 +202,32 @@ public class ExcelReader {
         int rowNum = sheet.getLastRowNum();
         List<DataRow> dataRows = new ArrayList<>(rowNum);
         for (int i = 0; i <= rowNum; i++) {
-            Row row = sheet.getRow(i);
-            Map<CellAddress, String> line;
-            // 行没有数据
-            if (row == null) {
-                line = emptyMap();
-            } else {
-                int cellSize = row.getLastCellNum();
-                line = new LinkedHashMap<>(cellSize);
-                for (int j = 0; j < cellSize; j++) {
-                    Cell cell = row.getCell(j);
-                    line.put(getAddress(cell, i, j), getValue(cell));
-                }
-            }
-            dataRows.add(new DataRow(i, line));
+            dataRows.add(getDataRow(sheet, i));
         }
         return dataRows.stream();
+    }
+
+    /**
+     * 获取数据行
+     *
+     * @param sheet 工作表
+     * @param i 行号
+     * @return DataRow
+     */
+    private DataRow getDataRow(Sheet sheet, int i) {
+        Row row = sheet.getRow(i);
+        Map<CellAddress, String> line;
+        if (row == null) {
+            line = emptyMap();
+        } else {
+            int cellSize = row.getLastCellNum();
+            line = new LinkedHashMap<>(cellSize);
+            for (int j = 0; j < cellSize; j++) {
+                Cell cell = row.getCell(j);
+                line.put(getAddress(cell, i, j), getValue(cell));
+            }
+        }
+        return new DataRow(i, line);
     }
 
     /**
@@ -224,7 +252,7 @@ public class ExcelReader {
         if (cell == null) {
             return "";
         }
-        Object value = "";
+        Object value ;
         switch (cell.getCellType()) {
             case NUMERIC:
                 value = cell.getNumericCellValue();
@@ -240,6 +268,7 @@ public class ExcelReader {
                 break;
             case BLANK:
             default:
+                value = "";
         }
         return String.valueOf(value);
     }
@@ -267,7 +296,6 @@ public class ExcelReader {
         return getWorkbook(new FileInputStream(file));
     }
 
-
     /**
      * 获取工作薄
      *
@@ -277,8 +305,10 @@ public class ExcelReader {
      */
     private Workbook getWorkbook(InputStream inputStream) throws IOException {
         // 采用inputStream时不知道excel格式，逐个尝试
-        // 但直接使用inputStream 创建workbook会污染inputStream导致不能后续尝试，所以每次尝试构造一个新的inputStream
+        // 但直接使用inputStream 创建workbook会污染inputStream导致不能后续尝试，所以尝试构造一个新的inputStream
         InputStream is = newByteArrayInputStream(inputStream);
+        // 延迟解析比率
+        ZipSecureFile.setMinInflateRatio(-1.0d);
         Workbook wb;
         try {
             // Excel 2007
@@ -312,7 +342,7 @@ public class ExcelReader {
         /**
          * 单元格数据映射（地址对应数据）
          */
-        private Map<CellAddress, ?> row;
+        private Map<CellAddress, String> row;
 
         private int rowIndex;
 
@@ -321,7 +351,7 @@ public class ExcelReader {
          */
         private CellAddress currentAddress;
 
-        private DataRow(int rowIndex, Map<CellAddress, ?> row) {
+        private DataRow(int rowIndex, Map<CellAddress, String> row) {
             this.rowIndex = rowIndex;
             this.row = row;
             this.indexes = new HashMap<>();
@@ -332,18 +362,17 @@ public class ExcelReader {
         }
 
         /**
-         * 获取第几列, 如第2列：get("B") 或者get("2")
+         * 获取第几列, 如第4列：get("D") 或者get("3")
          *
          * @param key 列名或第几列
          * @return String
          */
         public String get(String key) {
-            if (key == null) {
-                return null;
+            if (key == null || key.isEmpty()) {
+                throw new IllegalArgumentException("key不能为空");
             }
             this.currentAddress = indexes.get(key);
-            Object value = row.get(currentAddress);
-            return value == null ? null : value.toString().trim();
+            return row.get(currentAddress);
         }
 
         public int getInt(String key) {
@@ -351,11 +380,7 @@ public class ExcelReader {
             if (value == null || value.isEmpty()) {
                 return 0;
             }
-            try {
-                return Double.valueOf(value).intValue();
-            } catch (NumberFormatException e) {
-                throw new RuntimeException("值不是整数");
-            }
+            return Double.valueOf(value).intValue();
         }
 
         public long getLong(String key) {
@@ -363,11 +388,7 @@ public class ExcelReader {
             if (value == null || value.isEmpty()) {
                 return 0L;
             }
-            try {
-                return Double.valueOf(value).longValue();
-            } catch (NumberFormatException e) {
-                throw new RuntimeException("值不是整数");
-            }
+            return Double.valueOf(value).longValue();
         }
 
         public double getDouble(String key) {
@@ -375,19 +396,19 @@ public class ExcelReader {
             if (value == null || value.isEmpty()) {
                 return 0D;
             }
-            try {
-                return Double.parseDouble(value);
-            } catch (NumberFormatException e) {
-                throw new RuntimeException("值不是浮点数");
-            }
+            return Double.parseDouble(value);
         }
 
         public int getRowIndex() {
             return rowIndex;
         }
 
-        public CellAddress getCurrentAddress() {
+        public CellAddress getAddress() {
             return currentAddress;
+        }
+
+        public Collection<String> getValues() {
+            return row.values();
         }
 
         @Override
