@@ -1,5 +1,6 @@
 package com.starter.payment.config;
 
+import com.starter.payment.PaymentManager;
 import com.starter.payment.PaymentManagerImpl;
 import com.starter.payment.PaymentOperations;
 import com.starter.payment.properties.GlobalProperties;
@@ -28,7 +29,7 @@ public class GlobalConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PaymentManagerImpl paymentProviderManager() {
+    public PaymentManager paymentManager() {
         return new PaymentManagerImpl(providers, globalProperties);
     }
 }

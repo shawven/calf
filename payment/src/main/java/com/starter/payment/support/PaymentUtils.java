@@ -192,7 +192,7 @@ public class PaymentUtils {
         }
     }
 
-    public abstract static class FutureRunnable implements Runnable {
+    public abstract static class ScheduledTask implements Runnable {
 
         private Future<?> future;
 
@@ -201,10 +201,11 @@ public class PaymentUtils {
         /**
          * 取消任务
          *
-         * @return
          */
-        protected boolean cancel() {
-            return future.isCancelled() || future.cancel(false);
+        protected void cancel() {
+            if (!future.isCancelled()) {
+                future.cancel(false);
+            }
         }
 
         /**
@@ -215,9 +216,8 @@ public class PaymentUtils {
                 return;
             }
             try {
-                long milliseconds = this.timeout - System.currentTimeMillis();
-                TimeUnit.MILLISECONDS.sleep(milliseconds);
-            } catch (Exception ignored) {
+                future.get(timeout, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
             } finally {
                 if (!future.isCancelled()) {
                     future.cancel(false);
@@ -230,9 +230,7 @@ public class PaymentUtils {
         }
 
         private void setTimeout(int timeout) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, timeout);
-            this.timeout = calendar.getTime().getTime();
+            this.timeout = timeout;
         }
     }
 
@@ -244,9 +242,9 @@ public class PaymentUtils {
      * @param timeout 超时时间
      * @return 执行命令
      */
-    public static FutureRunnable runningUntilSuccess(FutureRunnable command, int period, int timeout) {
+    public static ScheduledTask runningUntilSuccess(ScheduledTask command, int period, int timeout) {
         ScheduledExecutorService executor = ScheduledExecutor.getInstance();
-        ScheduledFuture future = executor.scheduleWithFixedDelay(command, 0, period, TimeUnit.SECONDS);
+        ScheduledFuture<?> future = executor.scheduleWithFixedDelay(command, 0, period, TimeUnit.SECONDS);
         command.setTimeout(timeout);
         command.setFuture(future);
         return command;

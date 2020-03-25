@@ -9,16 +9,12 @@ import com.starter.payment.properties.GlobalProperties;
 import com.starter.payment.support.HttpUtil;
 import com.starter.payment.support.PaymentLogger;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.starter.payment.support.PaymentUtils.isBlankString;
 import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 /**
  * @author Shoven
@@ -198,7 +194,7 @@ public class PaymentManagerImpl implements PaymentManager {
     private PaymentOperations getProvider(PaymentRequest paymentRequest) {
         PaymentProviderEnum provider = paymentRequest.getPaymentProvider();
         PaymentClientTypeEnum clientType = paymentRequest.getPaymentClientType();
-        Map<PaymentClientTypeEnum, PaymentOperations> clientTypes = this.providers.get(provider);
+        Map<PaymentClientTypeEnum, PaymentOperations> clientTypes = providers.get(provider);
 
         if (providers == null || providers.isEmpty()) {
             throw new PaymentException("未配置[" + provider.getName() + "]提供商");
@@ -244,7 +240,7 @@ public class PaymentManagerImpl implements PaymentManager {
                     }
                     return true;
                 })
-                .collect(groupingBy(PaymentOperations::getProvider, toSet()))
+                .collect(groupingBy(PaymentOperations::getProvider, toCollection(LinkedHashSet::new)))
                 .forEach((provider, operationsSet) -> {
                     StringBuilder loaded = new StringBuilder();
                     for (PaymentOperations operations : operationsSet) {

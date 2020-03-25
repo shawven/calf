@@ -40,6 +40,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,22 +67,22 @@ public class BaseTests {
     }
 
     @Test
-    public void test() {
-        Stream<Boolean> stream = Stream.of(true, false, true, false);
+    public void test() throws Exception {
+        ScheduledExecutorService instance =
+                Executors.newScheduledThreadPool(1, Executors.defaultThreadFactory());
+        ScheduledFuture<?> future = instance.scheduleAtFixedRate(() -> {
+            System.out.println(System.currentTimeMillis());
+        }, 0, 2, TimeUnit.SECONDS);
 
-//        List<Boolean> booleans = booleanStream
-//                .sorted(Comparator.comparing(Boolean::booleanValue).reversed())
-//                .collect(toList());
-//
-//
-//        System.out.println(booleans);
-        stream = stream.peek(System.out::println);
-        stream = stream.peek(System.out::println);
-        stream = stream.peek(System.out::println);
-//        System.out.println(booleanStream.anyMatch(aBoolean -> !aBoolean));
-
-        stream.collect(Collectors.toSet());
-
+        try {
+            future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+           System.out.println("结束");
+        } finally {
+            if (!future.isCancelled()) {
+                future.cancel(false);
+            }
+        }
     }
 
 

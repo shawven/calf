@@ -11,8 +11,6 @@ import com.starter.payment.support.PaymentLogger;
  */
 public abstract class AbstractPaymentTemplate implements PaymentOperations {
 
-    private GlobalProperties globalProperties;
-
     protected PaymentLogger logger = PaymentLogger.getLogger(getClass());
 
     public GlobalProperties getGlobalProperties() {

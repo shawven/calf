@@ -524,7 +524,7 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
 
         protected void queryTradeIfFailed(PaymentTradeRequest request, PaymentTradeResponse response) {
             AtomicReference<PaymentTradeQueryResponse> reference = new AtomicReference<>(new PaymentTradeQueryResponse());
-            PaymentUtils.runningUntilSuccess(new PaymentUtils.FutureRunnable() {
+            PaymentUtils.runningUntilSuccess(new PaymentUtils.ScheduledTask() {
                 @Override
                 public void run() {
                     PaymentTradeQueryRequest queryRequest = new PaymentTradeQueryRequest(request);
