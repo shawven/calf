@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
-@MapperScan("com.starter.app.mapper")
+@MapperScan("com.starter.demo.mapper")
 @ComponentScan(excludeFilters = @Filter(type = FilterType.REGEX, pattern = {"com.starter.app.websocket.*"}))
 @EnableAsync
 @EnableAspectJAutoProxy

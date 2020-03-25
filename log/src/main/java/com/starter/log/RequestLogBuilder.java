@@ -18,7 +18,6 @@ public class RequestLogBuilder implements LogBuilder<RequestLogMeta> {
         RequestInfo requestInfo = meta.getRequestInfo();
 
         RequestLog log = new RequestLog();
-        log.setType(LogType.valueOf(log.getTypeName()).getType());
         log.setIp(requestInfo.getIp());
         log.setAddress("");
 

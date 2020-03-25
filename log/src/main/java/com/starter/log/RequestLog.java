@@ -1,18 +1,12 @@
 package com.starter.log;
 
 
-import com.starter.log.emun.LogType;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.Date;
 
 /**
  * @author Shoven
  * @date 2019-07-26 17:20
  */
-@Getter
-@Setter
 public class RequestLog extends DefaultLog {
     /**
      * 主键ID
@@ -24,11 +18,6 @@ public class RequestLog extends DefaultLog {
      * 操作模块
      */
     private String module;
-
-    /**
-     * 操作类型
-     */
-    private Integer type;
 
     /**
      * 操作类型名称
@@ -85,9 +74,115 @@ public class RequestLog extends DefaultLog {
      */
     private Date createTime;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Override
-    public void setLogType(LogType type) {
-        this.type = type.getType();
-        this.typeName = type.getTypeName();
+    public String getModule() {
+        return module;
+    }
+
+    @Override
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    @Override
+    public String getTypeName() {
+        return typeName;
+    }
+
+    @Override
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
+    @Override
+    public String getDesc() {
+        return desc;
+    }
+
+    @Override
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public String getRequestMethod() {
+        return requestMethod;
+    }
+
+    public void setRequestMethod(String requestMethod) {
+        this.requestMethod = requestMethod;
+    }
+
+    public String getRequestUrl() {
+        return requestUrl;
+    }
+
+    public void setRequestUrl(String requestUrl) {
+        this.requestUrl = requestUrl;
+    }
+
+    public String getRequestHeaders() {
+        return requestHeaders;
+    }
+
+    public void setRequestHeaders(String requestHeaders) {
+        this.requestHeaders = requestHeaders;
+    }
+
+    public String getRequestParams() {
+        return requestParams;
+    }
+
+    public void setRequestParams(String requestParams) {
+        this.requestParams = requestParams;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public Long getCost() {
+        return cost;
+    }
+
+    @Override
+    public void setCost(Long cost) {
+        this.cost = cost;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 }

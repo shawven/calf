@@ -2,21 +2,22 @@ package com.starter.demo.support.handler;
 
 import com.starter.demo.support.Response;
 import com.starter.demo.support.exception.BizException;
-import com.starter.demo.support.exception.ArgumentException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -34,7 +35,7 @@ import static java.util.stream.Collectors.toMap;
  * @date  2018-11-09
  */
 @ControllerAdvice
-public class ControllerExceptionHandler {
+public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     private final static Logger logger = LoggerFactory.getLogger(ControllerExceptionHandler.class);
 
@@ -45,15 +46,32 @@ public class ControllerExceptionHandler {
 
     private String[] ignoredProfiles = {"local", "dev", "test"};
 
+    @Override
+    @SuppressWarnings({"unchecked", "NullableProblems", "rawtypes"})
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex,
+                                                             Object body,
+                                                             HttpHeaders headers,
+                                                             HttpStatus status,
+                                                             WebRequest request) {
+        ResponseEntity<Response> rsp = Response.build(status, status.value(), ex.getMessage());
+        return (ResponseEntity<Object>)(ResponseEntity)rsp;
+    }
+
     /**
      * 处理数据绑定校验异常
      *
-     * @param e BindException
+     * @param e
+     * @param headers
+     * @param status
+     * @param request
      * @return
      */
-    @ExceptionHandler(BindException.class)
-    @ResponseBody
-    public ResponseEntity<Response> handleBindException(BindException e){
+    @Override
+    @SuppressWarnings({"unchecked", "NullableProblems", "rawtypes"})
+    protected ResponseEntity<Object> handleBindException(BindException e,
+                                                         HttpHeaders headers,
+                                                         HttpStatus status,
+                                                         WebRequest request) {
         List<FieldError> fieldErrors = e.getFieldErrors();
         StringBuilder sb = new StringBuilder();
         for (FieldError fielderror : fieldErrors) {
@@ -64,21 +82,7 @@ public class ControllerExceptionHandler {
         msg = fieldErrors.size() > 0
                 ? msg.substring(0, msg.length() - 2)
                 : "请求的参数有误！";
-        logger.debug(msg, e);
-        return Response.badRequest(msg);
-    }
-
-    /**
-     * 处理参数异常
-     *
-     * @param e BizException
-     * @return
-     */
-    @ExceptionHandler(BizException.class)
-    @ResponseBody
-    public ResponseEntity<Response> handleArgumentException(ArgumentException e) {
-        logger.debug(e.getMessage(), e);
-        return Response.badRequest(e.getMessage());
+        return (ResponseEntity<Object>)(ResponseEntity)Response.badRequest(msg);
     }
 
     /**
@@ -89,7 +93,7 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(BizException.class)
     @ResponseBody
-    public ResponseEntity<Response> handleBizException(BizException e) {
+    public ResponseEntity handleBizException(BizException e) {
         logger.debug(e.getMessage(), e);
         BizException last = e;
         List<Throwable> throwableList = ExceptionUtils.getThrowableList(e);
@@ -111,7 +115,7 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public ResponseEntity<Response> handleException(HttpServletRequest request, Exception e) {
+    public ResponseEntity handleException(HttpServletRequest request, Exception e) {
         int index;
         if ((index = ExceptionUtils.indexOfType(e, BizException.class)) != - 1) {
             Throwable throwable = ExceptionUtils.getThrowableList(e).get(index);
@@ -148,35 +152,11 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(AuthenticationException.class)
     @ResponseBody
-    public ResponseEntity<Response> handleUnauthorized(BizException e) {
+    public ResponseEntity handleUnauthorized(BizException e) {
         logger.debug(e.getMessage(), e);
         return Response.unauthorized(e.getMessage());
     }
 
-    /**
-     * HTTP方法不匹配
-     *
-     * @param e MethodNotSupportedException
-     * @return
-     */
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<Response> handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        logger.debug(e.getMessage(), e);
-        return Response.methodNotAllowed(e.getMessage());
-    }
-
-    /**
-     * 处理url未匹配
-     *
-     * @param e Exception
-     * @return
-     */
-    @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseBody
-    public ResponseEntity<Response> handleNoHandlerException(NoHandlerFoundException e) {
-        logger.warn(e.getMessage(), e);
-        return Response.notFound(e.getRequestURL());
-    }
 
     /**
      * 处理上传限制异常
@@ -186,7 +166,7 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     @ResponseBody
-    public ResponseEntity<Response> handleMaxUploadSizeExceededException(HttpServletRequest request,
+    public ResponseEntity handleMaxUploadSizeExceededException(HttpServletRequest request,
                                                                MaxUploadSizeExceededException e) {
         long b = e.getMaxUploadSize();
         String size;
