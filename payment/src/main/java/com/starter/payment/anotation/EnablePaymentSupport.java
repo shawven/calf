@@ -1,6 +1,6 @@
 package com.starter.payment.anotation;
 
-import com.starter.payment.config.GlobalConfiguration;
+import com.starter.payment.config.AppConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -12,6 +12,6 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(GlobalConfiguration.class)
+@Import(AppConfiguration.class)
 public @interface EnablePaymentSupport {
 }

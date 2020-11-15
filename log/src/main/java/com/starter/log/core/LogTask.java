@@ -5,8 +5,6 @@ import com.starter.log.emun.LogType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +15,13 @@ import java.util.Map;
  */
 public class LogTask implements Runnable {
 
-    private static Logger logger = LoggerFactory.getLogger(LogAspect.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogAspect.class);
 
-    private List<LogRepository> repositories;
+    private final List<LogRepository> repositories;
 
-    private LogBuilder<LogMeta> logBuilder;
+    private final LogBuilder<LogMeta> logBuilder;
 
-    private LogMeta logMeta;
+    private final LogMeta logMeta;
 
     public LogTask(List<LogRepository> repositories,
                    LogBuilder<LogMeta> logBuilder,
@@ -50,11 +48,7 @@ public class LogTask implements Runnable {
     }
 
     protected Recordable makeRecord(LogMeta logMeta, JoinPointInfo joinPointInfo) {
-        Class<? extends Annotation> aClass = joinPointInfo.getLog().getClass();
-        Class<?> typeClass = joinPointInfo.getTypeClass();
-        Method method = joinPointInfo.getMethod();
-        Map<LogAttribute, Object> attributes= LogAnnotationUtils.getAnnotationAttributes(typeClass, method, aClass);
-
+        Map<LogAttribute, Object> attributes = joinPointInfo.extractAnnotationAttributes();
         Recordable log = logBuilder.build(logMeta, joinPointInfo);
         log.setModule(String.valueOf(attributes.get(LogAttribute.MODULE)));
         log.setDesc(String.valueOf(attributes.get(LogAttribute.VALUE)));

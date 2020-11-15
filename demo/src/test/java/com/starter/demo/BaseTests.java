@@ -4,48 +4,37 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
+import com.google.common.primitives.Ints;
 import com.starter.demo.support.util.NodeTree;
 import com.starter.demo.support.util.excel.ExcelReader;
 import com.starter.demo.support.util.excel.ExcelWriter;
-import com.sun.xml.internal.ws.encoding.RootOnlyCodec;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
+import lombok.Data;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.*;
 import org.assertj.core.util.Lists;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
-import org.dom4j.io.SAXWriter;
 import org.dom4j.io.XMLWriter;
-import org.dom4j.tree.DefaultDocumentType;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.BeanUtils;
 
+import javax.annotation.CheckForNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.InterfaceAddress;
-import java.security.Security;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Shoven
@@ -66,23 +55,118 @@ public class BaseTests {
         startAt = 0;
     }
 
-    @Test
-    public void test() throws Exception {
-        ScheduledExecutorService instance =
-                Executors.newScheduledThreadPool(1, Executors.defaultThreadFactory());
-        ScheduledFuture<?> future = instance.scheduleAtFixedRate(() -> {
-            System.out.println(System.currentTimeMillis());
-        }, 0, 2, TimeUnit.SECONDS);
+    static Semaphore lock = new Semaphore(-1, true);
 
-        try {
-            future.get(5, TimeUnit.SECONDS);
-        } catch (Exception e) {
-           System.out.println("结束");
-        } finally {
-            if (!future.isCancelled()) {
-                future.cancel(false);
+
+    @Data
+    static class task  {
+
+        int a = 1;
+        int b = 2;
+        int c = 3;
+        int d = 4;
+
+        private  void write() {
+            a = 11;
+            b = 22;
+            c = 33;
+            synchronized (this) {
+                d = 44;
             }
         }
+
+        private void read() {
+            int dd = 0;
+            synchronized (this) {
+                dd = d;
+            }
+            int aa = a;
+            int bb = b;
+            int cc = c;
+            if (dd == 44 ) {
+                if (aa != 11 || bb !=22 || cc != 33) {
+                    throw new RuntimeException( " " + aa + " " + bb + " " + cc + " " + dd);
+                }
+
+            }
+
+        }
+    };
+
+
+    @Test
+    public void testSync() throws InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(6);
+
+        for (int i = 0; i < 10000000; i++) {
+            task task = new task();
+            executor.execute(() -> {
+                task.write();
+            });
+            executor.execute(() -> {
+                task.read();
+            });
+        }
+
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+            TimeUnit.SECONDS.sleep(1);
+        }
+        System.out.println(executor.isTerminated());
+    }
+
+    @Test
+    public void testBitmap() {
+        Integer i = null;
+
+        try {
+            i.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            checkNotNull(i).toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Test
+    public void testString() {
+        String s = new String("code");
+        changeString(s);
+        Assert.assertEquals("code", s);
+    }
+
+    public void changeString(String s) {
+        s = "123";
+    }
+
+    @Test
+    public void test() throws Exception {
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        for (int i = 0; i < 9; i++) {
+            executor.submit(() -> {
+                try {
+                    lock.acquire();
+                    try {
+                        System.out.println(Thread.currentThread().getName() + " acquire");
+                        TimeUnit.SECONDS.sleep(2);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    System.out.println(Thread.currentThread().getName() + " release");
+                    lock.release();
+                }
+            });
+        }
+        executor.shutdown();
+        while (!executor.isTerminated());
     }
 
 
@@ -237,9 +321,24 @@ public class BaseTests {
 
     @Test
     public void testExcelReader() throws Exception {
-        ExcelReader excelReader = new ExcelReader("d:/03.xls");
-        excelReader = new ExcelReader("d:/07.xlsx");
-        excelReader.stream();
+        ExcelReader excelReader = new ExcelReader("C:\\Users\\XW\\Documents\\WeChat Files\\vivid44165\\FileStorage\\File\\2020-07\\中国银行HISXLS-20200401-20200430-08605054(1).xls");
+
+        excelReader.firstSheet().read(dataRow -> {
+            System.out.println(dataRow);
+        });
+
+        excelReader.allSheetRead(sheetName -> {
+            if (sheetName.endsWith("多账户查询业务处理结果")) {
+                return dataRow -> {
+                    System.out.println(dataRow);
+                };
+            } else if (sheetName.endsWith("多账")) {
+                return dataRow -> {
+                    System.out.println(dataRow);
+                };
+            }
+            return null;
+        });
     }
 
     @Test

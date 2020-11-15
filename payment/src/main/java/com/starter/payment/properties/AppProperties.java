@@ -13,7 +13,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 @Configuration
 @PropertySource("classpath:payment.properties")
-public class GlobalProperties {
+public class AppProperties {
 
     /**
      * 服务器地址

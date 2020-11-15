@@ -3,7 +3,7 @@ package com.starter.payment.config;
 import com.starter.payment.PaymentManager;
 import com.starter.payment.PaymentManagerImpl;
 import com.starter.payment.PaymentOperations;
-import com.starter.payment.properties.GlobalProperties;
+import com.starter.payment.properties.AppProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -17,12 +17,11 @@ import java.util.List;
  * @date 2019-08-28
  */
 @Configuration
-@Import({GlobalProperties.class, AlipayConfiguration.class,
-        WechatConfiguration.class, UnionpayConfiguration.class})
-public class GlobalConfiguration {
+@Import({AppProperties.class, AlipayConfiguration.class, WechatConfiguration.class, UnionpayConfiguration.class})
+public class AppConfiguration {
 
     @Autowired
-    private GlobalProperties globalProperties;
+    private AppProperties appProperties;
 
     @Autowired
     private List<PaymentOperations> providers;
@@ -30,6 +29,6 @@ public class GlobalConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PaymentManager paymentManager() {
-        return new PaymentManagerImpl(providers, globalProperties);
+        return new PaymentManagerImpl(providers, appProperties);
     }
 }

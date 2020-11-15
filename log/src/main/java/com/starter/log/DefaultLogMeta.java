@@ -9,7 +9,7 @@ import org.aspectj.lang.JoinPoint;
  */
 public class DefaultLogMeta implements LogMeta {
 
-    private JoinPoint joinPoint;
+    private final JoinPoint joinPoint;
 
     private Throwable cause;
 

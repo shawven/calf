@@ -1,6 +1,6 @@
 package com.starter.payment.support;
 
-import com.starter.payment.properties.GlobalProperties;
+import com.starter.payment.properties.AppProperties;
 
 /**
  * @author Shoven
@@ -8,16 +8,16 @@ import com.starter.payment.properties.GlobalProperties;
  */
 public class PaymentContextHolder {
 
-    private static GlobalProperties globalProperties;
+    private static AppProperties appProperties;
 
     private static HttpUtil http;
 
-    public static GlobalProperties getGlobalProperties() {
-        return globalProperties;
+    public static AppProperties getAppProperties() {
+        return appProperties;
     }
 
-    public static void setGlobalProperties(GlobalProperties globalProperties) {
-        PaymentContextHolder.globalProperties = globalProperties;
+    public static void setAppProperties(AppProperties appProperties) {
+        PaymentContextHolder.appProperties = appProperties;
     }
 
     public static HttpUtil getHttp() {

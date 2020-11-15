@@ -394,7 +394,7 @@ public abstract class AlipayTemplate extends AbstractPaymentTemplate {
             payModel.setTotalAmount(CurrencyTools.toYuan(request.getAmount()));
             payModel.setSubject(request.getSubject());
             payModel.setBody(request.getBody());
-            payModel.setQuitUrl(getGlobalProperties().getServerDomain());
+            payModel.setQuitUrl(getAppProperties().getServerDomain());
             payModel.setProductCode(AlipayConstants.WAP_PRODUCT_CODE);
 
             AlipayTradeWapPayRequest payRequest = new AlipayTradeWapPayRequest();

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Slf4jRepository implements LogRepository {
 
-    private Logger logger = LoggerFactory.getLogger(Slf4jRepository.class);
+    private static final Logger logger = LoggerFactory.getLogger(Slf4jRepository.class);
 
     @Override
     public boolean isSupport(JoinPointInfo joinPointInfo) {

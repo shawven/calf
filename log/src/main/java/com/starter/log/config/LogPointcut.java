@@ -6,7 +6,7 @@ import org.aspectj.lang.annotation.Pointcut;
  * @author Shoven
  * @date 2019-07-05 18:21
  */
-public class LogPointcutConfiguration {
+public class LogPointcut {
 
     @Pointcut("@annotation(com.starter.log.annotation.Log)")
     public void methodsExistLog(){}

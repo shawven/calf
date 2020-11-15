@@ -7,6 +7,7 @@ import com.starter.demo.domain.UserUpdateRequest;
 import com.starter.demo.service.UserService;
 import com.starter.demo.support.Response;
 import com.starter.demo.support.Context;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
  */
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserController {
 
     @Autowired

@@ -8,7 +8,7 @@ import org.aspectj.lang.JoinPoint;
  */
 public class RequestLogMeta extends DefaultLogMeta {
 
-    private RequestInfo requestInfo;
+    private final RequestInfo requestInfo;
 
     public RequestLogMeta(JoinPoint joinPoint, RequestInfo requestInfo) {
         super(joinPoint);

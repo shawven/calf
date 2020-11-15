@@ -1,7 +1,6 @@
 package com.starter.log.core;
 
-import com.starter.log.config.LogPointcutConfiguration;
-import org.aspectj.lang.JoinPoint;
+import com.starter.log.config.LogPointcut;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -19,7 +18,7 @@ import java.util.List;
  */
 @Aspect
 @Component
-public class LogAspect extends LogPointcutConfiguration {
+public class LogAspect extends LogPointcut {
 
     private static final Logger logger = LoggerFactory.getLogger(LogAspect.class);
 
@@ -53,40 +52,16 @@ public class LogAspect extends LogPointcutConfiguration {
             long cost = System.currentTimeMillis() - startTime;
             // 创建日志任务
             LogMeta logMeta = cause == null
-                    ? createNormalLog(pjp, result, cost)
-                    : createExceptionalLog(pjp, cause, cost);
-            // 异步执行
-            executeTask(newTask(logMeta));
-        }
-    }
-
-    private LogTask newTask(LogMeta logMeta) {
-        return new LogTask(repositories, logBuilder, logMeta);
-    }
-
-    private LogMeta createNormalLog(JoinPoint jp, Object value, long cost) {
-        try {
-            return logMetaCreator.create(jp, value, cost);
-        } catch (Exception e) {
-            throw new LogException(String.format("创建日志任务失败： %s", e.getMessage()), e);
-        }
-    }
-
-    private LogMeta createExceptionalLog(JoinPoint jp, Throwable cause, long cost) {
-        try {
-            return logMetaCreator.create(jp, cause, cost);
-        } catch (Exception e) {
-            throw new LogException(String.format("创建日志任务失败： %s", e.getMessage()), e);
-        }
-    }
-
-    private void executeTask(LogTask task) {
-        try {
-            taskExecutor.execute(task);
-        } catch (LogException e) {
-            logger.warn("执行日志任务失败：{}", e.getMessage());
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+                    ? logMetaCreator.create(pjp, result, cost)
+                    : logMetaCreator.create(pjp, cause, cost);
+            try {
+                // 异步执行
+                taskExecutor.execute(new LogTask(repositories, logBuilder, logMeta));
+            } catch (LogException e) {
+                logger.warn("执行日志任务失败：{}", e.getMessage());
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
         }
     }
 }

@@ -13,9 +13,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -63,8 +65,6 @@ public class ExcelReader {
      */
     public ExcelReader(String name, int sheetIndex) throws IOException {
         this.workbook = getWorkbook(new File(name));
-        switchSheetAt(sheetIndex);
-        this.stream = createStream();
     }
 
     /**
@@ -74,16 +74,6 @@ public class ExcelReader {
      */
     public ExcelReader(InputStream inputStream, int sheetIndex) throws IOException {
         this.workbook = getWorkbook(inputStream);
-        switchSheetAt(sheetIndex);
-        this.stream = createStream();
-    }
-
-
-    /**
-     * @return Stream
-     */
-    public Stream<DataRow> stream() {
-        return stream;
     }
 
     /**
@@ -93,7 +83,29 @@ public class ExcelReader {
      * @param consumer 消费函数
      */
     public void read(Consumer<DataRow> consumer) {
-        stream.forEach(dataRow -> {
+        ensureSelectSheet();
+        stream.forEach(wrapConsumer(consumer));
+    }
+
+    public Stream<DataRow> stream() {
+        return stream;
+    }
+
+    public void allSheetRead(Function<String, Consumer<DataRow>> function) {
+        int numberOfSheets = workbook.getNumberOfSheets();
+        for (int i = 0; i < numberOfSheets; i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            createStream(sheet).forEach(dataRow -> {
+                Consumer<DataRow> consumer = function.apply(sheet.getSheetName());
+                if (consumer != null) {
+                    wrapConsumer(consumer).accept(dataRow);
+                }
+            });
+        }
+    }
+
+    private Consumer<DataRow> wrapConsumer(Consumer<DataRow> consumer) {
+        return dataRow -> {
             try {
                 consumer.accept(dataRow);
             } catch (Exception e) {
@@ -104,69 +116,29 @@ public class ExcelReader {
                 }
                 throw e;
             }
-        });
+        };
     }
 
-    /**
-     * 从多少行开始, n的取值范围[-rowSize，rowSize]
-     * start(2): 从第二行开始读取至末尾
-     *
-     * n > 0 （n = 1: 起始索引是0）
-     * n < 0 （n = -1: 起始索引是rowSize - 1）
-     * @param n 行数
-     * @return ExcelReader
-     */
-    public ExcelReader start(int n) {
-        if (n != 0) {
-            int rowSize = sheet.getLastRowNum();
-            int skip = n > 0
-                    // 限制起始索引最大不超过rowSize
-                    ? Math.min(n, rowSize)
-                    // 限制起始索引最小为0
-                    : Math.max(0, rowSize + n);
-            stream = stream.skip(skip);
+    public Map<String, Stream<DataRow>> allSheetStream() {
+        int numberOfSheets = workbook.getNumberOfSheets();
+        Map<String, Stream<DataRow>> map = new HashMap<>();
+        for (int i = 0; i < numberOfSheets; i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            Stream<DataRow> stream = createStream(sheet);
+            map.put(sheet.getSheetName(), stream);
         }
+        return map;
+    }
 
+    public ExcelReader firstSheet() {
+        sheet = workbook.getSheetAt(0);
+        stream = createStream(sheet);
         return this;
     }
 
-    /**
-     * 从开始位置往后多少行结束，n的取值范围[-rowSize，rowSize]
-     * start(-3).length(-1):  从倒数第三行读取至倒数第一行
-     *
-     * n > 0 （n = 2: 终点索引位置是1）
-     * n < 0 （n = -2: 终点索引是 rowSize - 2）
-     *
-     * @param n 行数
-     * @return ExcelReader
-     */
-    public ExcelReader length(int n) {
-        if (n != 0) {
-            int rowSize = sheet.getLastRowNum();
-            // 获取终止索引位置
-            // 终止位置大于等于0 向后截取, 终止位置小于0 向前截取(加非负数)
-            int limit =  n > 0
-                    // 限制终止索引最大不超过 rowSize
-                    ? Math.min(n, rowSize)
-                    // 限制起始索引最小为起始索引
-                    : Math.max(0, rowSize + n);
-            stream = stream.limit(limit);
-        }
-        return this;
-    }
-
-    public ExcelReader filter(Predicate<DataRow> lineFilter) {
-        stream = stream.filter(lineFilter);
-        return this;
-    }
-
-    /**
-     * 下一个工作表
-     *
-     * @return ExcelReader
-     */
-    public ExcelReader nextSheet() {
-        switchSheetAt(workbook.getSheetIndex(sheet) + 1);
+    public ExcelReader endSheet() {
+        sheet = workbook.getSheetAt((workbook.getNumberOfSheets() - 1));
+        stream = createStream(sheet);
         return this;
     }
 
@@ -175,8 +147,10 @@ public class ExcelReader {
      *
      * @param index 工作表序号
      */
-    public void switchSheetAt(int index) {
-        this.sheet = workbook.getSheetAt(index);
+    public ExcelReader sheetAt(int index) {
+        sheet = workbook.getSheetAt(index);
+        stream = createStream(sheet);
+        return this;
     }
 
     /**
@@ -186,6 +160,7 @@ public class ExcelReader {
      * @return
      */
     public DataRow getDataRow(int i) {
+        ensureSelectSheet();
         int rowNum = sheet.getLastRowNum();
         if (i < 0 || i >= rowNum) {
             throw new IndexOutOfBoundsException("数据行号有误");
@@ -194,11 +169,20 @@ public class ExcelReader {
     }
 
     /**
+     * 确保选择sheet
+     */
+    private void ensureSelectSheet() {
+        if (stream == null) {
+            throw new RuntimeException("未选择Sheet");
+        }
+    }
+
+    /**
      * 读取Excel测试，兼容 Excel 2003/2007/2010
      *
      * @return Stream
      */
-    private Stream<DataRow> createStream() {
+    private Stream<DataRow> createStream(Sheet sheet) {
         int rowNum = sheet.getLastRowNum();
         List<DataRow> dataRows = new ArrayList<>(rowNum);
         for (int i = 0; i <= rowNum; i++) {
@@ -217,10 +201,10 @@ public class ExcelReader {
     private DataRow getDataRow(Sheet sheet, int i) {
         Row row = sheet.getRow(i);
         Map<CellAddress, String> line;
-        if (row == null) {
+        int cellSize;
+        if (row == null || (cellSize = Math.max(row.getLastCellNum(), 0)) == 0) {
             line = emptyMap();
         } else {
-            int cellSize = row.getLastCellNum();
             line = new LinkedHashMap<>(cellSize);
             for (int j = 0; j < cellSize; j++) {
                 Cell cell = row.getCell(j);
@@ -431,9 +415,7 @@ public class ExcelReader {
 
         @Override
         public String toString() {
-            return "Line{" +
-                    "row=" + row.values() +
-                    '}';
+            return String.valueOf(row.values());
         }
     }
 }

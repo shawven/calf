@@ -5,7 +5,7 @@ import com.starter.payment.support.CurrencyTools;
 import com.starter.payment.support.PaymentContextHolder;
 import com.starter.payment.client.PaymentClientTypeEnum;
 import com.starter.payment.domain.*;
-import com.starter.payment.properties.GlobalProperties;
+import com.starter.payment.properties.AppProperties;
 import com.starter.payment.support.HttpUtil;
 import com.starter.payment.support.PaymentLogger;
 
@@ -22,28 +22,28 @@ import static java.util.stream.Collectors.*;
  */
 public class PaymentManagerImpl implements PaymentManager {
 
-    private PaymentLogger logger = PaymentLogger.getLogger(PaymentManagerImpl.class);
+    private static final PaymentLogger logger = PaymentLogger.getLogger(PaymentManagerImpl.class);
 
-    private Map<PaymentProviderEnum, Map<PaymentClientTypeEnum, PaymentOperations>> providers;
+    private final Map<PaymentProviderEnum, Map<PaymentClientTypeEnum, PaymentOperations>> providers;
 
-    public PaymentManagerImpl(List<PaymentOperations> providers, GlobalProperties globalProperties) {
+    public PaymentManagerImpl(List<PaymentOperations> providers, AppProperties appProperties) {
         this.providers = index(providers);
-        init(globalProperties);
+        init(appProperties);
     }
 
-    private void init(GlobalProperties globalProperties) {
+    private void init(AppProperties appProperties) {
         // 配置http工具
         HttpUtil httpUtil = HttpUtil.builder()
-                .setConnectTimeout(globalProperties.getConnectTimeout())
-                .setReadTimeout(globalProperties.getReadTimeout())
-                .setMaxTotal(globalProperties.getMaxTotal())
-                .setMaxPerRoute(globalProperties.getMaxPerRoute())
-                .setConnectionTimeToLive(globalProperties.getConnectionTimeToLive())
+                .setConnectTimeout(appProperties.getConnectTimeout())
+                .setReadTimeout(appProperties.getReadTimeout())
+                .setMaxTotal(appProperties.getMaxTotal())
+                .setMaxPerRoute(appProperties.getMaxPerRoute())
+                .setConnectionTimeToLive(appProperties.getConnectionTimeToLive())
                 .build();
 
         PaymentContextHolder.setHttp(httpUtil);
-        PaymentContextHolder.setGlobalProperties(globalProperties);
-        CurrencyTools.setUnitOfCents(globalProperties.getCurrencyCents());
+        PaymentContextHolder.setAppProperties(appProperties);
+        CurrencyTools.setUnitOfCents(appProperties.getCurrencyCents());
     }
 
     @Override

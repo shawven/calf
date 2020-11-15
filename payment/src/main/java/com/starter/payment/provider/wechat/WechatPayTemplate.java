@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.starter.payment.client.*;
 import com.starter.payment.domain.*;
+import com.starter.payment.properties.AppProperties;
 import com.starter.payment.provider.wechat.sdk.WXPayConstants;
 import com.starter.payment.properties.WechatPayProperties;
 import com.starter.payment.provider.AbstractPaymentTemplate;
@@ -385,11 +386,12 @@ public abstract class WechatPayTemplate extends AbstractPaymentTemplate {
         }
 
         protected String getSceneInfo() {
+            AppProperties appProperties = getAppProperties();
             return new StringBuilder("{")
                     .append("\"h5_info\":{")
                     .append("\"type\":\"").append("Wap").append("\"")
-                    .append("\"wap_url\":\"").append(getGlobalProperties().getServerDomain()).append("\"")
-                    .append("\"wap_name\":\"").append(getGlobalProperties().getAppName()).append("\"")
+                    .append("\"wap_url\":\"").append(appProperties.getServerDomain()).append("\"")
+                    .append("\"wap_name\":\"").append(appProperties.getAppName()).append("\"")
                     .append("}}")
                     .toString();
         }
