@@ -965,8 +965,6 @@ public class ExcelWriter {
 
     public static class Column {
 
-        private static final Function<Object, ?> NULL_VALUE_FUNC = o -> null;
-
         /**
          * 列标题
          */
@@ -980,7 +978,7 @@ public class ExcelWriter {
         /**
          * 取值方法
          */
-        private Function<?, ?> valueFunc = NULL_VALUE_FUNC;
+        private Function<?, ?> valueFunc;
 
         /**
          * 列宽

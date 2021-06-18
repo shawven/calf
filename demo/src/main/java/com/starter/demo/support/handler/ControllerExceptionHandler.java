@@ -1,7 +1,10 @@
 package com.starter.demo.support.handler;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.starter.demo.support.Response;
 import com.starter.demo.support.exception.BizException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,9 +12,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,10 +28,9 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.validation.ConstraintViolationException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -40,6 +47,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     private final static Logger logger = LoggerFactory.getLogger(ControllerExceptionHandler.class);
 
     private final static String DEFAULT_MESSAGE = "系统发生错误，请稍后再试！";
+
+    private final static String PARAM_ERROR = "参数有误";
 
     @Value("${spring.profiles.active}")
     private String active;
@@ -66,23 +75,101 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
      * @param request
      * @return
      */
-    @Override
-    @SuppressWarnings({"unchecked", "NullableProblems", "rawtypes"})
-    protected ResponseEntity<Object> handleBindException(BindException e,
-                                                         HttpHeaders headers,
-                                                         HttpStatus status,
-                                                         WebRequest request) {
-        List<FieldError> fieldErrors = e.getFieldErrors();
-        StringBuilder sb = new StringBuilder();
-        for (FieldError fielderror : fieldErrors) {
-            sb.append("[").append(fielderror.getField()).append("]")
-                    .append(fielderror.getDefaultMessage()).append(", ");
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public ResponseEntity handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        // 获取错误字段集合
+        String msg = buildErrorTips(e.getBindingResult());
+        logger.debug("handleMethodArgumentNotValidException: " + msg, e);
+        return Response.badRequest(msg);
+    }
+
+    @ExceptionHandler(BindException.class)
+    @ResponseBody
+    public ResponseEntity handleBindException(BindException e) {
+        // 获取错误字段集合
+        String msg = buildErrorTips(e.getBindingResult());
+        logger.debug("handleBindException: " + msg, e);
+        return Response.badRequest(msg);
+    }
+
+    private String buildErrorTips(BindingResult bindingResult) {
+        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+        String msg = fieldErrors.stream()
+                .sorted(Comparator.comparing(FieldError::getField))
+                .map(f -> "[" + f.getField() + "]" + f.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        msg = fieldErrors.size() > 0 ? msg : PARAM_ERROR;
+        return msg;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseBody
+    public ResponseEntity handleConstraintViolationException(ConstraintViolationException e) {
+        String msg = e.getConstraintViolations().stream()
+                .sorted(Comparator.comparing(c -> c.getPropertyPath().toString()))
+                .map(c -> "[" + c.getPropertyPath().toString() + "]" + c.getMessage())
+                .collect(Collectors.joining(", "));
+        logger.debug("handleConstraintViolationException: " + msg, e);
+        return Response.badRequest(msg);
+    }
+
+    /**
+     * HTTP方法不匹配
+     *
+     * @param e MethodNotSupportedException
+     * @return
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseBody
+    public ResponseEntity handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        logger.debug("handleMethodNotSupportedException: " + e.getMessage(), e);
+        return Response.methodNotAllowed(e.getMessage());
+    }
+
+    /**
+     * json解析失败
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseBody
+    public ResponseEntity handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        Throwable cause = e.getCause();
+        if (cause instanceof MismatchedInputException) {
+            MismatchedInputException exception = (MismatchedInputException) cause;
+            String error = exception.getPath().stream()
+                    .map(JsonMappingException.Reference::getFieldName)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining(", "));
+            if (StringUtils.isNotBlank(error)) {
+                logger.warn(e.getMessage(), e);
+                String msg = PARAM_ERROR +"[" + error +"]";
+                return Response.badRequest(msg);
+            }
         }
-        String msg = sb.toString();
-        msg = fieldErrors.size() > 0
-                ? msg.substring(0, msg.length() - 2)
-                : "请求的参数有误！";
-        return (ResponseEntity<Object>)(ResponseEntity)Response.badRequest(msg);
+        logger.warn("handleHttpMessageNotReadableException: " + e.getMessage(), e);
+        return Response.badRequest(PARAM_ERROR);
+    }
+
+    /**
+     * 参数缺少
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseBody
+    public ResponseEntity handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        String msg;
+        if (StringUtils.contains(e.getMessage(), "is not present")) {
+            msg = "参数[" + e.getParameterName() + "]" +  "缺失";
+        } else {
+            msg = e.getMessage();
+        }
+        logger.warn("handleMissingServletRequestParameterException: " + msg, e);
+        return  Response.badRequest(msg);
     }
 
     /**

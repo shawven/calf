@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.starter.demo.support.CtxDataAccessor;
+import com.starter.demo.support.JacksonHttpMessageConverter;
 import com.starter.demo.support.RememberMeAccessor;
 import com.starter.demo.support.ContextInterceptor;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * @author Shoven
@@ -111,17 +113,13 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      */
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        JacksonHttpMessageConverter converter = new JacksonHttpMessageConverter();
         ObjectMapper objectMapper = converter.getObjectMapper();
-        //属性为NULL不序列化
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        // 时间格式化
-        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        objectMapper.setTimeZone(TimeZone.getDefault());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         // long转字符串
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
-        simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
         objectMapper.registerModule(simpleModule);
         converter.setObjectMapper(objectMapper);
         converters.add(0, converter);
