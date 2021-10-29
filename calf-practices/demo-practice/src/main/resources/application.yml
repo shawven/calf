@@ -1,0 +1,13 @@
+# 基本配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# debug模式
+debug: false
+
+# spring配置
+spring:
+  profiles:
+    active: dev

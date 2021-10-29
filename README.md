@@ -1,2 +1,2 @@
-# starter
-springboot starter
+# calf
+For Java projects

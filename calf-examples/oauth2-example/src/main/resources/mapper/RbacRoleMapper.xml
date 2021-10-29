@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.shawven.calf.demo.mapper.RbacRoleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.github.shawven.calf.demo.domain.RbacRole">
+        <id column="id" property="id" />
+        <result column="enterprise_id" property="enterpriseId" />
+        <result column="name" property="name" />
+        <result column="permission_ids" property="permissionIds" />
+        <result column="is_disabled" property="isDisabled" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id, name, permission_ids, is_disabled, create_time, update_time
+    </sql>
+
+    <select id="selectEnabledRolesByIds" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from rbac_role
+        where is_disabled = 0 and id in (
+        <foreach collection="list" item="item" separator=",">
+            #{item}
+        </foreach>
+        )
+    </select>
+
+    <select id="selectAccountOwnedRoleIds" resultType="java.lang.String">
+        select ci.role_ids
+        from rbac_cooperation c
+                 join rbac_cooperation_item ci on c.id = ci.cooperation_id
+        where c.user_id = #{userId} and ci.account_id = #{accountId}
+    </select>
+</mapper>
