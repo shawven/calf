@@ -12,9 +12,26 @@
     <groupId>com.github.shawven.calf</groupId>
     <artifactId>calf-oplog</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <name>calf-oplog</name>
     <description>Demo project for Spring Boot</description>
+
+    <modules>
+        <module>calf-oplog-base</module>
+        <module>calf-oplog-client</module>
+        <module>calf-oplog-client-rabbit</module>
+        <module>calf-oplog-server</module>
+        <module>calf-oplog-server-rabbit</module>
+        <module>calf-oplog-extension</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -70,15 +87,12 @@
             <version>1.18.22</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+
 
 </project>
