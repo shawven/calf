@@ -1,12 +1,11 @@
-package com.github.shawven.calf.oplog;
+package com.github.shawven.calf.oplog.server;
 
 import com.github.shawven.calf.extension.ClientDataSource;
-import com.github.shawven.calf.extension.ConfigDataSource;
+import com.github.shawven.calf.extension.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.core.DistributorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -25,7 +24,7 @@ public class BinLogApplicationRunner implements ApplicationRunner {
     private ClientDataSource clientDataSource;
 
     @Autowired
-    private ConfigDataSource configDataSource;
+    private NodeConfigDataSource nodeConfigDataSource;
 
     @Override
     public void run(ApplicationArguments applicationArguments) {

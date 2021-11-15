@@ -1,4 +1,4 @@
-package com.github.shawven.calf.oplog.server.rabbit;
+package com.github.shawven.calf.oplog.client.rabbit;
 
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.AmqpTemplate;

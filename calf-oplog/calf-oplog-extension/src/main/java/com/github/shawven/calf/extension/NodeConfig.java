@@ -3,7 +3,7 @@ package com.github.shawven.calf.extension;
 /**
  * @author T-lih
  */
-public class BinaryLogConfig {
+public class NodeConfig {
 
     private String namespace;
     private String host;

@@ -1,8 +1,8 @@
 package com.github.shawven.calf.oplog.server.core;
 
-import com.github.shawven.calf.extension.BinaryLogConfig;
+import com.github.shawven.calf.extension.NodeConfig;
 import com.github.shawven.calf.extension.ClientDataSource;
-import com.github.shawven.calf.extension.ConfigDataSource;
+import com.github.shawven.calf.extension.NodeConfigDataSource;
 import com.github.shawven.calf.base.BinLogCommand;
 import com.github.shawven.calf.base.BinLogCommandType;
 import com.github.shawven.calf.base.ServiceStatus;
@@ -23,19 +23,19 @@ public abstract class AbstractDistributorService implements DistributorService{
     protected ScheduledExecutorService scheduledExecutorService;
 
     @Autowired
-    protected ConfigDataSource dataSource;
+    protected NodeConfigDataSource dataSource;
 
     @Autowired
     protected ClientDataSource clientDataSource;
 
     @Override
-    public List<BinaryLogConfig> getAllConfigs() {
+    public List<NodeConfig> getAllConfigs() {
 
         return dataSource.getAll();
     }
 
     @Override
-    public boolean persistDatasourceConfig(BinaryLogConfig config) {
+    public boolean persistDatasourceConfig(NodeConfig config) {
 
         boolean res = dataSource.create(config);
         if(!res) {
@@ -47,7 +47,7 @@ public abstract class AbstractDistributorService implements DistributorService{
     @Override
     public boolean removeDatasourceConfig(String namespace) {
 
-        BinaryLogConfig removedConfig = dataSource.remove(namespace);
+        NodeConfig removedConfig = dataSource.remove(namespace);
         if(removedConfig == null) {
             return false;
         }

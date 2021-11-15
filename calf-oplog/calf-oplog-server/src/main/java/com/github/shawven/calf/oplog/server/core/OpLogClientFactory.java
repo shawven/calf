@@ -1,9 +1,9 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.extension.BinaryLogConfig;
+import com.github.shawven.calf.extension.NodeConfig;
 import com.github.shawven.calf.extension.ClientDataSource;
-import com.github.shawven.calf.extension.ConfigDataSource;
+import com.github.shawven.calf.extension.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.DataPublisher;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -31,7 +31,7 @@ public class OpLogClientFactory {
 
     private final DataPublisher dataPublisher;
 
-    private final ConfigDataSource configDataSource;
+    private final NodeConfigDataSource nodeConfigDataSource;
     private final ClientDataSource clientDataSource;
 
 
@@ -67,28 +67,28 @@ public class OpLogClientFactory {
 
     public OpLogClientFactory(RedissonClient redissonClient,
                               @Qualifier("opLogDataPublisher") DataPublisher dataPublisher,
-                              ConfigDataSource configDataSource,
+                              NodeConfigDataSource nodeConfigDataSource,
                               ClientDataSource clientDataSource) {
         this.redissonClient = redissonClient;
         this.dataPublisher = dataPublisher;
-        this.configDataSource = configDataSource;
+        this.nodeConfigDataSource = nodeConfigDataSource;
         this.clientDataSource = clientDataSource;
     }
 
-    public OplogClient initClient(BinaryLogConfig binaryLogConfig) {
+    public OplogClient initClient(NodeConfig nodeConfig) {
 
-        String namespace = binaryLogConfig.getNamespace();
+        String namespace = nodeConfig.getNamespace();
 
-        MongoClient mongoClient = this.getMongoClient(binaryLogConfig);
-        OpLogEventContext context = new OpLogEventContext(mongoClient, binaryLogConfig, dataPublisher);
+        MongoClient mongoClient = this.getMongoClient(nodeConfig);
+        OpLogEventContext context = new OpLogEventContext(mongoClient, nodeConfig, dataPublisher);
 
         OpLogEventHandlerFactory opLogEventHandlerFactory = new OpLogEventHandlerFactory(context);
 
         OplogClient client = new OplogClient(mongoClient, opLogEventHandlerFactory);
         // 配置当前位置
-        configOpLogStatus(client, binaryLogConfig);
+        configOpLogStatus(client, nodeConfig);
         // 启动Client列表数据监听
-        registerMetaDataWatcher(binaryLogConfig, opLogEventHandlerFactory);
+        registerMetaDataWatcher(nodeConfig, opLogEventHandlerFactory);
         return client;
     }
 
@@ -96,10 +96,10 @@ public class OpLogClientFactory {
      * 配置当前binlog位置
      *
      * @param oplogClient
-     * @param binaryLogConfig
+     * @param nodeConfig
      */
-    private void configOpLogStatus(OplogClient oplogClient, BinaryLogConfig binaryLogConfig) {
-        Map<String, String> binLogStatus = clientDataSource.getBinaryLogStatus(binaryLogConfig);
+    private void configOpLogStatus(OplogClient oplogClient, NodeConfig nodeConfig) {
+        Map<String, String> binLogStatus = clientDataSource.getBinaryLogStatus(nodeConfig);
         if (binLogStatus != null) {
             int seconds = Integer.parseInt(binLogStatus.get("binlogFilename"));
             int inc = Integer.parseInt(binLogStatus.get("binlogPosition"));
@@ -107,11 +107,11 @@ public class OpLogClientFactory {
         }
     }
 
-    private MongoClient getMongoClient(BinaryLogConfig binaryLogConfig) {
-        return new MongoClient(new MongoClientURI(binaryLogConfig.getDataSourceUrl()));
+    private MongoClient getMongoClient(NodeConfig nodeConfig) {
+        return new MongoClient(new MongoClientURI(nodeConfig.getDataSourceUrl()));
     }
 
-    private void registerMetaDataWatcher(BinaryLogConfig binaryLogConfig, OpLogEventHandlerFactory opLogEventHandlerFactory) {
+    private void registerMetaDataWatcher(NodeConfig nodeConfig, OpLogEventHandlerFactory opLogEventHandlerFactory) {
     }
 
 
@@ -124,11 +124,11 @@ public class OpLogClientFactory {
             e.printStackTrace();
             return true;
         }
-        BinaryLogConfig binaryLogConfig = configDataSource.getByNamespace(namespace);
+        NodeConfig nodeConfig = nodeConfigDataSource.getByNamespace(namespace);
         try {
-            while (binaryLogConfig.isActive()) {
+            while (nodeConfig.isActive()) {
                 TimeUnit.SECONDS.sleep(1);
-                binaryLogConfig = configDataSource.getByNamespace(namespace);
+                nodeConfig = nodeConfigDataSource.getByNamespace(namespace);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

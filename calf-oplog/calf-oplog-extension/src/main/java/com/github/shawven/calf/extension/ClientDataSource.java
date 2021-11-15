@@ -15,7 +15,7 @@ public interface ClientDataSource {
 
     boolean sendBinLogCommand(BinLogCommand binLogCommand);
 
-    void updateBinLogStatus(String binlogFilename, long binlogPosition, BinaryLogConfig binaryLogConfig, long timestamp);
+    void updateBinLogStatus(String binlogFilename, long binlogPosition, NodeConfig nodeConfig, long timestamp);
 
     List<Map<String, Object>> listBinLogStatus();
 
@@ -25,9 +25,9 @@ public interface ClientDataSource {
 
     void removeBinLogConsumerClient(ClientInfo clientInfo);
 
-    List<ClientInfo> listBinLogConsumerClient(BinaryLogConfig binaryLogConfig);
+    List<ClientInfo> listBinLogConsumerClient(NodeConfig nodeConfig);
 
-    Map<String, String> getBinaryLogStatus(BinaryLogConfig binaryLogConfig);
+    Map<String, String> getBinaryLogStatus(NodeConfig nodeConfig);
 
     List<ClientInfo> listBinLogConsumerClientByKey(String clientInfoKey);
 

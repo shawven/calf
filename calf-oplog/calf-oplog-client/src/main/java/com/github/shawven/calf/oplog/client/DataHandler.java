@@ -1,11 +1,10 @@
-package com.github.shawven.calf.oplog.server;
+package com.github.shawven.calf.oplog.client;
 
 
 import com.github.shawven.calf.base.Constants;
 import com.github.shawven.calf.base.EventBaseDTO;
 import com.github.shawven.calf.base.EventBaseErrDTO;
 import com.github.shawven.calf.base.LockLevel;
-import com.github.shawven.calf.oplog.client.DatabaseEventHandlerManager;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
 import org.redisson.api.RLock;
@@ -21,6 +20,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,7 +39,7 @@ public class DataHandler implements Runnable {
     private static String noneLock = LockLevel.NONE.name();
     private String dataKey;
     private String clientId;
-    private DatabaseEventHandlerManager databaseEventHandlerManager;
+    private Function<String, DatabaseEventHandler> handlerFunction;
     private RedissonClient redissonClient;
     private String errMapKey;
     private String dataKeyLock;
@@ -58,14 +58,18 @@ public class DataHandler implements Runnable {
      */
     public transient static Set<String> DATA_KEY_IN_PROCESS = new ConcurrentHashMap<String, String>().keySet("");
 
-    public DataHandler(String dataKey, String clientId, DatabaseEventHandlerManager databaseEventHandlerManager, RedissonClient redissonClient, ConnectionFactory connectionFactory) {
+    public DataHandler(String dataKey,
+                       String clientId,
+                       RedissonClient redissonClient,
+                       ConnectionFactory connectionFactory,
+                       Function<String, DatabaseEventHandler> handlerFunction) {
         this.dataKey = dataKey;
         this.clientId = clientId;
-        this.databaseEventHandlerManager = databaseEventHandlerManager;
         this.redissonClient = redissonClient;
         this.connectionFactory = connectionFactory;
         this.errMapKey = Constants.REDIS_PREFIX.concat("BIN-LOG-ERR-MAP-").concat(clientId);
         this.dataKeyLock = dataKey.concat("-Lock");
+        this.handlerFunction = handlerFunction;
     }
 
     @Override
@@ -149,7 +153,7 @@ public class DataHandler implements Runnable {
      */
     private void doHandleWithoutLock(EventBaseDTO dto, int leftRetryTimes) {
         try {
-            databaseEventHandlerManager.handle(dto);
+            handle(dto);
         } catch (Exception e) {
             log.severe(e.toString());
             e.printStackTrace();
@@ -176,7 +180,7 @@ public class DataHandler implements Runnable {
      */
     private boolean doHandleWithLock(final EventBaseDTO dto, Integer retryTimes) {
         try {
-            databaseEventHandlerManager.handle(dto);
+            handle(dto);
             //如果之前有异常，恢复正常，那就处理
             if (retryTimes != 0) {
                 RMap<String, EventBaseErrDTO> errMap = redissonClient.getMap(errMapKey, new JsonJacksonCodec());
@@ -198,5 +202,19 @@ public class DataHandler implements Runnable {
             }
             return doHandleWithLock(dto, retryTimes);
         }
+    }
+
+    public void handle(EventBaseDTO dto) {
+        String key = getKey(dto);
+        DatabaseEventHandler eventHandler = handlerFunction.apply(key);
+        if (eventHandler != null) {
+            eventHandler.handle(dto);
+        } else {
+            log.warning("no " + key + " handler");
+        }
+    }
+
+    private String getKey(EventBaseDTO dto) {
+        return dto.getNamespace() + dto.getDatabase() + dto.getTable() + dto.getEventType();
     }
 }

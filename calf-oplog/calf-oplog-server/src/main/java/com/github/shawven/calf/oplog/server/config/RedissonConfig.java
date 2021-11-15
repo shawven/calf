@@ -1,4 +1,4 @@
-package com.github.shawven.calf.oplog.config;
+package com.github.shawven.calf.oplog.server.config;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.redisson.Redisson;

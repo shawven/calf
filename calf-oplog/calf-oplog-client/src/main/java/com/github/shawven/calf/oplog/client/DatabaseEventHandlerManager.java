@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
  * @Ddate Created in 2018/18/01/2018/7:20 PM
  * @modified by
  */
-public class BinLogDistributorManager {
-    private final static Logger log = Logger.getLogger(BinLogDistributorManager.class.toString());
+public class DatabaseEventHandlerManager {
+    private final static Logger log = Logger.getLogger(DatabaseEventHandlerManager.class.toString());
     private Set<Class<? extends DatabaseEventHandler>> handlers = new HashSet<>();
 
     public final static Map<String, DatabaseEventHandler> HANDLER_MAP = new ConcurrentHashMap<>();
@@ -24,18 +24,18 @@ public class BinLogDistributorManager {
     private String clientId;
     private DataSubscriber dataSubscriber;
 
-    public BinLogDistributorManager(String clientId, DataSubscriber dataSubscriber) {
+    public DatabaseEventHandlerManager(String clientId, DataSubscriber dataSubscriber) {
         this.clientId = clientId;
         this.dataSubscriber = dataSubscriber;
     }
 
-    public BinLogDistributorManager(String serverUrl, String clientId, DataSubscriber dataSubscriber) {
+    public DatabaseEventHandlerManager(String serverUrl, String clientId, DataSubscriber dataSubscriber) {
         this.serverUrl = serverUrl;
         this.clientId = clientId;
         this.dataSubscriber = dataSubscriber;
     }
 
-    public BinLogDistributorManager(String serverUrl, String queueType, String clientId, DataSubscriber dataSubscriber) {
+    public DatabaseEventHandlerManager(String serverUrl, String queueType, String clientId, DataSubscriber dataSubscriber) {
         this.serverUrl = serverUrl;
         this.queueType = queueType;
         this.clientId = clientId;
@@ -46,7 +46,7 @@ public class BinLogDistributorManager {
         return serverUrl;
     }
 
-    public BinLogDistributorManager setServerUrl(String serverUrl) {
+    public DatabaseEventHandlerManager setServerUrl(String serverUrl) {
         this.serverUrl = serverUrl;
         return this;
     }
@@ -55,7 +55,7 @@ public class BinLogDistributorManager {
         return queueType;
     }
 
-    public BinLogDistributorManager setQueueType(String queueType) {
+    public DatabaseEventHandlerManager setQueueType(String queueType) {
         this.queueType = queueType;
         return this;
     }
@@ -64,7 +64,7 @@ public class BinLogDistributorManager {
         return clientId;
     }
 
-    public BinLogDistributorManager setClientId(String clientId) {
+    public DatabaseEventHandlerManager setClientId(String clientId) {
         this.clientId = clientId;
         return this;
     }
@@ -74,7 +74,7 @@ public class BinLogDistributorManager {
      *
      * @return
      */
-    public BinLogDistributorManager autoScanHandler() {
+    public DatabaseEventHandlerManager autoScanHandler() {
         //初始化handler
 
         return this;
@@ -86,9 +86,9 @@ public class BinLogDistributorManager {
      * @param handler
      * @return
      */
-    public BinLogDistributorManager registerHandler(DatabaseEventHandler handler) {
+    public DatabaseEventHandlerManager registerHandler(DatabaseEventHandler handler) {
         List<String> keys = addHandler(handler.getClazz());
-        keys.stream().forEach(k -> HANDLER_MAP.put(k, handler));
+        keys.forEach(k -> HANDLER_MAP.put(k, handler));
         return this;
     }
 
@@ -112,7 +112,7 @@ public class BinLogDistributorManager {
      *
      * @return
      */
-    public BinLogDistributorManager autoRegisterClient() {
+    public DatabaseEventHandlerManager autoRegisterClient() {
         try {
             if (serverUrl != null && handlers.size() > 0) {
 
@@ -129,23 +129,7 @@ public class BinLogDistributorManager {
      * 执行监听
      */
     public void start() {
-        dataSubscriber.subscribe(clientId, this);
-    }
-
-    /**
-     * 处理信息
-     *
-     * @param dto
-     */
-    public void handle(EventBaseDTO dto) {
-
-        String key = dto.getNamespace() + dto.getDatabase() + dto.getTable() + dto.getEventType();
-        DatabaseEventHandler eventHandler = HANDLER_MAP.get(key);
-        if (eventHandler != null) {
-            eventHandler.handle(dto);
-        } else {
-            log.warning("no " + key + " handler");
-        }
+        dataSubscriber.subscribe(clientId, HANDLER_MAP::get);
     }
 
 }

@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.extension.BinaryLogConfig;
+import com.github.shawven.calf.extension.NodeConfig;
 import com.github.shawven.calf.oplog.server.DataPublisher;
 import com.mongodb.MongoClient;
 
@@ -14,13 +14,13 @@ public class OpLogEventContext {
     private MongoClient  mongoClient;
 
 
-    private BinaryLogConfig binaryLogConfig;
+    private NodeConfig nodeConfig;
 
     private DataPublisher dataPublisher;
 
-    public OpLogEventContext(MongoClient mongoClient,  BinaryLogConfig binaryLogConfig, DataPublisher dataPublisher) {
+    public OpLogEventContext(MongoClient mongoClient, NodeConfig nodeConfig, DataPublisher dataPublisher) {
         this.mongoClient = mongoClient;
-        this.binaryLogConfig = binaryLogConfig;
+        this.nodeConfig = nodeConfig;
         this.dataPublisher = dataPublisher;
     }
 
@@ -32,8 +32,8 @@ public class OpLogEventContext {
         this.mongoClient = mongoClient;
     }
 
-    public BinaryLogConfig getBinaryLogConfig() {
-        return binaryLogConfig;
+    public NodeConfig getBinaryLogConfig() {
+        return nodeConfig;
     }
 
     public DataPublisher getDataPublisher() {

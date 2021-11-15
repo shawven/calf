@@ -1,4 +1,4 @@
-package com.github.shawven.calf.oplog.server.rabbit;
+package com.github.shawven.calf.oplog.server.pub.rabbit;
 
 import com.github.shawven.calf.base.EventBaseDTO;
 import org.slf4j.Logger;

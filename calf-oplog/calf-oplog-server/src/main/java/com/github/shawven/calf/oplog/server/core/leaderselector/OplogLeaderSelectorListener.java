@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.core.leaderselector;
 
-import com.github.shawven.calf.extension.BinaryLogConfig;
-import com.github.shawven.calf.extension.ConfigDataSource;
+import com.github.shawven.calf.extension.NodeConfig;
+import com.github.shawven.calf.extension.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.core.OpLogClientFactory;
 import com.github.shawven.calf.oplog.server.core.OpLogEventHandler;
 import com.github.shawven.calf.oplog.server.core.OplogClient;
@@ -22,22 +22,22 @@ public class OplogLeaderSelectorListener implements LeaderSelectorListener {
 
     private OpLogClientFactory opLogClientFactory;
     private OplogClient oplogClient;
-    private BinaryLogConfig binaryLogConfig;
-    private ConfigDataSource configDataSource;
+    private NodeConfig nodeConfig;
+    private NodeConfigDataSource nodeConfigDataSource;
     private Disposable disposable;
 
     public OplogLeaderSelectorListener(OpLogClientFactory opLogClientFactory,
-                                       BinaryLogConfig binaryLogConfig,
-                                       ConfigDataSource configDataSource) {
+                                       NodeConfig nodeConfig,
+                                       NodeConfigDataSource nodeConfigDataSource) {
         this.opLogClientFactory = opLogClientFactory;
-        this.binaryLogConfig = binaryLogConfig;
-        this.configDataSource = configDataSource;
+        this.nodeConfig = nodeConfig;
+        this.nodeConfigDataSource = nodeConfigDataSource;
     }
 
     @Override
     public void afterTakeLeadership() {
 
-        this.oplogClient = opLogClientFactory.initClient(binaryLogConfig);
+        this.oplogClient = opLogClientFactory.initClient(nodeConfig);
         // 启动连接
         try {
             disposable = oplogClient.getOplog().subscribe(document -> {
@@ -46,12 +46,12 @@ public class OplogLeaderSelectorListener implements LeaderSelectorListener {
                 OpLogEventHandler handler = oplogClient.getOpLogEventHandlerFactory().getHandler(eventType);
                 handler.handle(document);
             });
-            binaryLogConfig.setActive(true);
-            binaryLogConfig.setVersion(binaryLogConfig.getVersion() + 1);
-            configDataSource.update(binaryLogConfig);
+            nodeConfig.setActive(true);
+            nodeConfig.setVersion(nodeConfig.getVersion() + 1);
+            nodeConfigDataSource.update(nodeConfig);
         } catch (Exception e) {
             // TODO: 17/01/2018 继续优化异常处理逻辑
-            logger.error("[" + binaryLogConfig.getNamespace() + "] 处理事件异常，{}", e);
+            logger.error("[" + nodeConfig.getNamespace() + "] 处理事件异常，{}", e);
         }
 
     }
@@ -59,8 +59,8 @@ public class OplogLeaderSelectorListener implements LeaderSelectorListener {
     @Override
     public boolean afterLosingLeadership() {
         disposable.dispose();
-        binaryLogConfig.setActive(false);
-        configDataSource.update(binaryLogConfig);
-        return opLogClientFactory.closeClient(oplogClient, binaryLogConfig.getNamespace());
+        nodeConfig.setActive(false);
+        nodeConfigDataSource.update(nodeConfig);
+        return opLogClientFactory.closeClient(oplogClient, nodeConfig.getNamespace());
     }
 }

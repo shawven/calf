@@ -4,12 +4,12 @@ package com.github.shawven.calf.oplog.server.core;
 import com.github.shawven.calf.base.Constants;
 import com.github.shawven.calf.base.DataSourceException;
 import com.github.shawven.calf.base.ServiceStatus;
-import com.github.shawven.calf.extension.BinaryLogConfig;
+import com.github.shawven.calf.extension.NodeConfig;
 import com.github.shawven.calf.extension.ClientDataSource;
-import com.github.shawven.calf.extension.ConfigDataSource;
+import com.github.shawven.calf.extension.NodeConfigDataSource;
 import com.github.shawven.calf.extension.LeaderSelector;
 import com.github.shawven.calf.oplog.server.DataPublisher;
-import com.github.shawven.calf.oplog.server.EtcdKeyPrefixUtil;
+import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.server.NetUtils;
 import com.github.shawven.calf.oplog.server.core.leaderselector.OplogLeaderSelectorListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +37,9 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
     @Autowired
     private ClientDataSource clientDataSource;
     @Autowired
-    private ConfigDataSource configDataSource;
+    private NodeConfigDataSource nodeConfigDataSource;
     @Autowired
-    private EtcdKeyPrefixUtil etcdKeyPrefixUtil;
+    private KeyPrefixUtil keyPrefixUtil;
 
 
     @Qualifier("opLogDataPublisher")
@@ -58,11 +58,11 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
     @Override
     public void startDistribute() {
         // 1. 从etcd获得初始配置信息
-        List<BinaryLogConfig> configList = configDataSource.init(TYPE);
+        List<NodeConfig> configList = nodeConfigDataSource.init(TYPE);
 
         // 2. 竞争每个数据源的Leader
         executorService = Executors.newCachedThreadPool();
-        configList.forEach( config -> {
+        configList.forEach(config -> {
             // 在线程中启动事件监听
             if(config.isActive()) {
                 submitBinLogDistributeTask(config);
@@ -70,23 +70,23 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
         });
 
         // 3. 注册数据源Config 命令Watcher
-        configDataSource.registerConfigCommandWatcher();
+        nodeConfigDataSource.registerConfigCommandWatcher();
 
         // 4. 服务节点上报
         updateServiceStatus(TYPE);
     }
 
     @Override
-    public void submitBinLogDistributeTask(BinaryLogConfig config) {
+    public void submitBinLogDistributeTask(NodeConfig config) {
         executorService.submit(() -> binLogDistributeTask(config));
     }
 
 
-    private void binLogDistributeTask(BinaryLogConfig binaryLogConfig) {
-        String namespace = binaryLogConfig.getNamespace();
+    private void binLogDistributeTask(NodeConfig nodeConfig) {
+        String namespace = nodeConfig.getNamespace();
         String identification = NetUtils.getLocalAddress().getHostAddress();
-        String identificationPath = etcdKeyPrefixUtil.withPrefix(Constants.LEADER_IDENTIFICATION_PATH);
-        OplogLeaderSelectorListener listener = new OplogLeaderSelectorListener(opLogClientFactory,binaryLogConfig, configDataSource);
+        String identificationPath = keyPrefixUtil.withPrefix(Constants.LEADER_IDENTIFICATION_PATH);
+        OplogLeaderSelectorListener listener = new OplogLeaderSelectorListener(opLogClientFactory, nodeConfig, nodeConfigDataSource);
         LeaderSelector leaderSelector = null;
 //        LeaderSelector leaderSelector = new LeaderSelector(etcdClient, binaryLogConfig.getNamespace(), 20L, identification, identificationPath, listener);
         leaderSelectorMap.put(namespace, leaderSelector);

@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 2019/10/16
  **/
 @Component
-public class EtcdKeyPrefixUtil {
+public class KeyPrefixUtil {
 
     @Value("${spring.etcd.root:/root/}")
     private String root;

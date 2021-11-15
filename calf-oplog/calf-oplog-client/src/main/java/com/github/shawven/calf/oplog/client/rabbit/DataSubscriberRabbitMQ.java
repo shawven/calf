@@ -1,10 +1,11 @@
 package com.github.shawven.calf.oplog.client.rabbit;
 
+import com.github.shawven.calf.oplog.client.DataHandler;
+import com.github.shawven.calf.oplog.client.DataSubscriber;
+import com.github.shawven.calf.oplog.client.DatabaseEventHandler;
 import com.rabbitmq.client.*;
 import com.rabbitmq.http.client.Client;
 import com.rabbitmq.http.client.domain.QueueInfo;
-import oplog.client.BinLogDistributorClient;
-import oplog.client.DataSubscriber;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 
 /**
@@ -34,7 +36,9 @@ public class DataSubscriberRabbitMQ implements DataSubscriber {
 
     private static final ExecutorService executors = Executors.newFixedThreadPool(5);
 
-    public DataSubscriberRabbitMQ(ConnectionFactory connectionFactory, Client rabbitHttpClient, RedissonClient redissonClient) throws Exception {
+    public DataSubscriberRabbitMQ(ConnectionFactory connectionFactory,
+                                  Client rabbitHttpClient,
+                                  RedissonClient redissonClient) throws Exception {
         this.rabbitMQClient = RabbitMQClient.getInstance(connectionFactory);
         this.rabbitHttpClient = rabbitHttpClient;
         this.vhost = this.rabbitMQClient.getConnectionFactory().getVirtualHost();
@@ -42,12 +46,16 @@ public class DataSubscriberRabbitMQ implements DataSubscriber {
     }
 
     @Override
-    public void subscribe(String clientId, BinLogDistributorClient binLogDistributorClient) {
+    public void subscribe(String clientId, Function<String, DatabaseEventHandler> handlerFunc) {
         List<QueueInfo> queueList = rabbitHttpClient.getQueues(vhost);
         ConnectionFactory connectionFactory = rabbitMQClient.getConnectionFactory();
         //处理历史数据
         queueList.stream().filter(queueInfo -> queueInfo.getName().startsWith(DATA + clientId) && !queueInfo.getName().endsWith("-Lock"))
-                .forEach(queueInfo -> executors.submit(new DataHandler(queueInfo.getName(), clientId, binLogDistributorClient, redissonClient, connectionFactory)));
+                .forEach(queueInfo -> {
+                    DataHandler dataHandler = new DataHandler(queueInfo.getName(), clientId,
+                            redissonClient, connectionFactory, handlerFunc);
+                    executors.submit(dataHandler);
+                });
         try {
             Channel channel = connectionFactory.createConnection().createChannel(false);
                 channel.queueDeclare(NOTIFIER + clientId, true, false, true, null);
@@ -58,7 +66,9 @@ public class DataSubscriberRabbitMQ implements DataSubscriber {
                         //每次推送都会执行这个方法，每次开线程，使用线程里面redis锁判断开销太大，先在外面判断一次
                         if (!DataHandler.DATA_KEY_IN_PROCESS.contains(msg)) {
                             //如果没在处理再进入
-                            executors.submit(new DataHandler(msg, clientId, binLogDistributorClient, redissonClient, connectionFactory));
+
+                            DataHandler dataHandler = new DataHandler(msg, clientId, redissonClient, connectionFactory, handlerFunc);
+                            executors.submit(dataHandler);
                         }
                     }
                 };
