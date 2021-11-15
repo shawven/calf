@@ -1,11 +1,11 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import oplog.client.model.ClientInfo;
-import oplog.client.model.dto.EventBaseDTO;
-import oplog.client.model.dto.UpdateRow;
-import oplog.client.model.dto.UpdateRowsDTO;
 import com.github.shawven.calf.base.DatabaseEvent;
+import com.github.shawven.calf.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
+import com.github.shawven.calf.oplog.server.mode.UpdateRow;
+import com.github.shawven.calf.oplog.server.mode.UpdateRowsDTO;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class OpLogUpdateEventHandler extends OpLogEventHandler {
         //添加表信息
         updateRowsDTO.setDatabase(super.getDataBase(event));
         updateRowsDTO.setTable(super.getTable(event));
-        updateRowsDTO.setNamespace(context.getBinaryLogConfig().getNamespace());
+        updateRowsDTO.setNamespace(context.getNodeConfig().getNamespace());
         //添加列映射
 
         List<UpdateRow> urs = new ArrayList<>();

@@ -9,6 +9,8 @@ import com.github.shawven.calf.base.EventBaseDTO;
  * @modified by
  */
 public interface DatabaseEventHandler {
+
     void handle(EventBaseDTO data);
-    Class getClazz();
+
+    Class<? extends DatabaseEventHandler> getClazz();
 }

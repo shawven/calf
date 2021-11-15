@@ -1,8 +1,6 @@
 package com.github.shawven.calf.base;
 
 
-import oplog.parm.DatabaseEvent;
-
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;

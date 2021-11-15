@@ -1,6 +1,9 @@
 package com.github.shawven.calf.oplog.server.core;
 
-import com.github.shawven.calf.base.ClientInfo;
+import com.github.shawven.calf.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
+import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
+import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import org.bson.Document;
 import org.springframework.util.CollectionUtils;
 
@@ -62,8 +65,8 @@ public abstract class OpLogEventHandler {
      */
     protected void publish(EventBaseDTO data, Set<ClientInfo> clientInfos) {
         if (data != null) {
-            DataPublisher dataPublisher = context.getDataPublisher();
-            dataPublisher.publish(clientInfos, data);
+            DataPublisherManager dataPublisherManager = context.getDataPublisherManager();
+            dataPublisherManager.publish(clientInfos, data);
         }
     }
 

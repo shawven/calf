@@ -23,14 +23,34 @@
             <artifactId>calf-oplog-extension</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-    </dependencies>
+        <dependency>
+            <groupId>com.github.shawven.calf</groupId>
+            <artifactId>calf-oplog-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.29</version>
+        </dependency>
+        <dependency>
+            <groupId>io.etcd</groupId>
+            <artifactId>jetcd-core</artifactId>
+            <version>0.3.0</version>
+            <optional>true</optional>
+        </dependency>
+        <!-- Autoconfigure -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+
+        <!-- @ConfigurationProperties annotation processing (metadata for IDEs) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 </project>

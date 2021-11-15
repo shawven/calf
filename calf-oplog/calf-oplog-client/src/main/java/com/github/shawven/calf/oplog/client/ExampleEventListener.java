@@ -1,6 +1,6 @@
 package com.github.shawven.calf.oplog.client;
 
-import com.github.shawven.calf.base.ClientInfo;
+import com.github.shawven.calf.oplog.client.rabbit.RabbitDataSubscriber;
 import com.rabbitmq.http.client.Client;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -39,12 +39,13 @@ public class ExampleEventListener {
     @PostConstruct
     public void start() throws Exception {
         //初始化订阅的实现
-        DataSubscriber dataSubscriber = new DataSubscriberRabbitMQ(connectionFactory, rabbitHttpClient, redissonClient);
-        new BinLogDistributorManager(appName, dataSubscriber)
+        DataSubscriber dataSubscriber = new RabbitDataSubscriber(connectionFactory, rabbitHttpClient, redissonClient);
+        new DatabaseEventHandlerManager(appName, dataSubscriber)
                 //在binlog中注册handler
                 .registerHandler(exampleDatabaseEventHandler)
-                .setQueueType(ClientInfo.QUEUE_TYPE_RABBIT)
+                .setQueueType("rabbit")
                 .setServerUrl(serverUrl)
-                .autoRegisterClient().start();
+                .autoRegisterClient()
+                .start();
     }
 }
