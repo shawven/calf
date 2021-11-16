@@ -1,9 +1,8 @@
 package com.github.shawven.calf.oplog.server.core;
 
-import oplog.client.model.ClientInfo;
-import oplog.client.model.dto.DeleteRowsDTO;
-import oplog.client.model.dto.EventBaseDTO;
 import com.github.shawven.calf.base.DatabaseEvent;
+import com.github.shawven.calf.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.server.mode.DeleteRowsDTO;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ public class OpLogDeleteEventHandler extends OpLogEventHandler {
         //添加表信息
         deleteRowsDTO.setDatabase(super.getDataBase(event));
         deleteRowsDTO.setTable(super.getTable(event));
-        deleteRowsDTO.setNamespace(context.getBinaryLogConfig().getNamespace());
+        deleteRowsDTO.setNamespace(context.getNodeConfig().getNamespace());
         //添加列映射
         Document context = (Document) event.get(OpLogClientFactory.CONTEXT_KEY);
         List<Map<String, Object>> urs = new ArrayList<>();

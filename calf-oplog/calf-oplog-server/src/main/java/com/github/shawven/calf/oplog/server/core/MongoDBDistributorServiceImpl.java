@@ -7,7 +7,6 @@ import com.github.shawven.calf.base.ServiceStatus;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
-import com.github.shawven.calf.oplog.server.datasource.leaderselector.LeaderSelector;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.server.NetUtils;
