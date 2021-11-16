@@ -1,4 +1,4 @@
-package com.github.shawven.calf.oplog.server.datasource;
+package com.github.shawven.calf.extension;
 
 import java.util.*;
 
@@ -10,8 +10,6 @@ public interface NodeConfigDataSource {
 
     List<NodeConfig> init(String dataSourceType);
 
-    List<NodeConfig> getAll();
-
     boolean create(NodeConfig newConfig);
 
     void update(NodeConfig newConfig);
@@ -20,7 +18,9 @@ public interface NodeConfigDataSource {
 
     NodeConfig getByNamespace(String namespace);
 
-    List<String> getNamespaceList();
+    List<NodeConfig> getAll();
+
+    void registerWatcher() ;
 
     /**
      * 真正开启数据源的逻辑
@@ -39,5 +39,8 @@ public interface NodeConfigDataSource {
      */
     void stop(String namespace);
 
-    void registerWatcher() ;
+
+    List<String> getNamespaceList();
+
+    void registerConfigCommandWatcher();
 }
