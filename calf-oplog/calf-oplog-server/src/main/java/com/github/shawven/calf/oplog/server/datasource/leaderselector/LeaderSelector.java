@@ -15,7 +15,7 @@ public interface LeaderSelector extends Closeable {
      *
      * @return null if there is no current leader.
      */
-    String getLeader();
+    String getLeader() throws Exception;
 
     /**
      * start racing for leadership.

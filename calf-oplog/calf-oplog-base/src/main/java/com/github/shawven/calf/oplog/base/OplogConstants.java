@@ -1,10 +1,10 @@
-package com.github.shawven.calf.base;
+package com.github.shawven.calf.oplog.base;
 
 /**
  * @author wanglaomo
  * @since 2019/6/4
  **/
-public interface Constants {
+public interface OplogConstants {
 
     String REDIS_PREFIX = "BINLOG::DISTRIBUTOR::";
 

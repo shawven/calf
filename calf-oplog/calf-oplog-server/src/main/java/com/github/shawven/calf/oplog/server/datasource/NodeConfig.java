@@ -12,9 +12,9 @@ public class NodeConfig {
     private String password;
     private Integer serverId;
 
-    private String dataSourceUrl;
+    private String dataSourceUrl = "mongodb://root@192.168.2.201:27017/?authSource=admin";
 
-    private String driverClassName = "com.mysql.jdbc.Driver";
+    private String driverClassName;
 
     private boolean deletable = false;
 

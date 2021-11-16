@@ -1,6 +1,7 @@
 package com.github.shawven.calf.oplog.server.publisher.rabbit;
 
-import com.github.shawven.calf.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,9 @@ public class RabbitDataPublisher implements DataPublisher {
         amqpTemplate.convertAndSend(notifyExchange.getName(),queueName, msg);
     }
 
-    public boolean deleteTopic(String topicName) {
+    @Override
+    public boolean destroy(ClientInfo clientInfo) {
+        String topicName = DATA.concat(clientInfo.getKey());
         Queue queue = new Queue(topicName, true, false, true);
         amqpAdmin.declareQueue(queue);
         Binding binding = BindingBuilder.bind(queue).to(dataExchange).with(topicName);

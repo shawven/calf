@@ -14,8 +14,6 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <modules>
@@ -27,9 +25,6 @@
         <module>calf-oplog</module>
         <module>calf-payment</module>
         <module>calf-util</module>
-        <module>calf-oplog-server</module>
-        <module>calf-oplog-base</module>
-        <module>calf-oplog-client-rabbit</module>
     </modules>
 
 </project>

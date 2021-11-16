@@ -1,4 +1,4 @@
-package com.github.shawven.calf.base;
+package com.github.shawven.calf.oplog.base;
 
 /**
  * 保持顺序的级别

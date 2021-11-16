@@ -1,4 +1,6 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.github.shawven.calf.oplog.server.autoconfig.OplogServerAutoConfiguration,\
+com.github.shawven.calf.oplog.server.autoconfig.DataSourceAutoConfiguration,\
+com.github.shawven.calf.oplog.server.autoconfig.DataPublisherAutoConfiguration
 

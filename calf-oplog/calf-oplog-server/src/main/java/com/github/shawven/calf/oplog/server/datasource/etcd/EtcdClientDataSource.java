@@ -2,9 +2,9 @@ package com.github.shawven.calf.oplog.server.datasource.etcd;
 
 import com.alibaba.fastjson.JSON;
 import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
-import com.github.shawven.calf.base.Constants;
+import com.github.shawven.calf.oplog.base.OplogConstants;
 import com.github.shawven.calf.oplog.server.mode.Command;
-import com.github.shawven.calf.base.ServiceStatus;
+import com.github.shawven.calf.oplog.base.ServiceStatus;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
@@ -52,7 +52,7 @@ public class EtcdClientDataSource implements ClientDataSource {
         KV kvClient = client.getKVClient();
         try {
             kvClient.put(
-                    ByteSequence.from(keyPrefixUtil.withPrefix(Constants.DEFAULT_BINLOG_CONFIG_COMMAND_KEY), StandardCharsets.UTF_8),
+                    ByteSequence.from(keyPrefixUtil.withPrefix(OplogConstants.DEFAULT_BINLOG_CONFIG_COMMAND_KEY), StandardCharsets.UTF_8),
                     ByteSequence.from(JSON.toJSONString(command), StandardCharsets.UTF_8)
             ).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -249,7 +249,7 @@ public class EtcdClientDataSource implements ClientDataSource {
     public void updateServiceStatus(String serviceKey, ServiceStatus status, long leaseId) throws Exception {
 
         KV client = this.client.getKVClient();
-        client.put(ByteSequence.from(keyPrefixUtil.withPrefix(Constants.SERVICE_STATUS_PATH).concat(serviceKey), StandardCharsets.UTF_8),
+        client.put(ByteSequence.from(keyPrefixUtil.withPrefix(OplogConstants.SERVICE_STATUS_PATH).concat(serviceKey), StandardCharsets.UTF_8),
                 ByteSequence.from(JSON.toJSONString(status), StandardCharsets.UTF_8),
                 PutOption.newBuilder().withLeaseId(leaseId).build())
                 .get();
@@ -265,7 +265,7 @@ public class EtcdClientDataSource implements ClientDataSource {
         List<ServiceStatus> serviceStatuses = null;
         try {
 
-            ByteSequence prefix = ByteSequence.from(keyPrefixUtil.withPrefix(Constants.SERVICE_STATUS_PATH), StandardCharsets.UTF_8);
+            ByteSequence prefix = ByteSequence.from(keyPrefixUtil.withPrefix(OplogConstants.SERVICE_STATUS_PATH), StandardCharsets.UTF_8);
 
             serviceStatuses = client.get(prefix,GetOption.newBuilder().withPrefix(prefix).build())
                     .get().getKvs()
@@ -306,7 +306,7 @@ public class EtcdClientDataSource implements ClientDataSource {
     }
 
     private ByteSequence keyPrefix(String namespace, String key) {
-        String finalKey = keyPrefixUtil.withPrefix(namespace) + Constants.PATH_SEPARATOR + key;
-        return ByteSequence.from(key, StandardCharsets.UTF_8);
+        String finalKey = keyPrefixUtil.withPrefix(namespace) + OplogConstants.PATH_SEPARATOR + key;
+        return ByteSequence.from(finalKey, StandardCharsets.UTF_8);
     }
 }

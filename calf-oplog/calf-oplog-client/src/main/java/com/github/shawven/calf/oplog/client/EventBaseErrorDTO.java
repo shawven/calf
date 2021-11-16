@@ -1,6 +1,6 @@
 package com.github.shawven.calf.oplog.client;
 
-import com.github.shawven.calf.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
 
 import java.io.Serializable;
 

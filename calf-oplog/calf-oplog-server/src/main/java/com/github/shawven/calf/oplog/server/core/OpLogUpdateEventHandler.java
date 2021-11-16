@@ -1,8 +1,8 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.base.DatabaseEvent;
-import com.github.shawven.calf.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
 import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.server.mode.UpdateRow;
 import com.github.shawven.calf.oplog.server.mode.UpdateRowsDTO;

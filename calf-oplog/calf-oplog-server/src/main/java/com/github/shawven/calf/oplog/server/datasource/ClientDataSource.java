@@ -1,6 +1,6 @@
 package com.github.shawven.calf.oplog.server.datasource;
 
-import com.github.shawven.calf.base.ServiceStatus;
+import com.github.shawven.calf.oplog.base.ServiceStatus;
 import com.github.shawven.calf.oplog.server.mode.Command;
 
 import java.util.List;

@@ -1,8 +1,6 @@
 package com.github.shawven.calf.oplog.server;
 
-import com.github.shawven.calf.base.Constants;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import com.github.shawven.calf.oplog.base.OplogConstants;
 import org.springframework.util.StringUtils;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,15 +27,15 @@ public class KeyPrefixUtil {
         }
 
         // init
-        if(!root.startsWith(Constants.PATH_SEPARATOR)) {
-            root = Constants.PATH_SEPARATOR.concat(root);
+        if(!root.startsWith(OplogConstants.PATH_SEPARATOR)) {
+            root = OplogConstants.PATH_SEPARATOR.concat(root);
         }
 
-        if(!root.endsWith(Constants.PATH_SEPARATOR)) {
-            root = root.concat(Constants.PATH_SEPARATOR);
+        if(!root.endsWith(OplogConstants.PATH_SEPARATOR)) {
+            root = root.concat(OplogConstants.PATH_SEPARATOR);
         }
 
-        prefix = root.concat(Constants.DEFAULT_ETCD_METADATA_PREFIX);
+        prefix = root.concat(OplogConstants.DEFAULT_ETCD_METADATA_PREFIX);
         prefixCache.compareAndSet(null, prefix);
         prefix = prefixCache.get();
 

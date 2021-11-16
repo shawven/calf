@@ -1,9 +1,9 @@
 package com.github.shawven.calf.oplog.client.rabbit;
 
 
-import com.github.shawven.calf.base.Constants;
-import com.github.shawven.calf.base.EventBaseDTO;
-import com.github.shawven.calf.base.LockLevel;
+import com.github.shawven.calf.oplog.base.OplogConstants;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.LockLevel;
 import com.github.shawven.calf.oplog.client.DatabaseEventHandler;
 import com.github.shawven.calf.oplog.client.EventBaseErrorDTO;
 import com.rabbitmq.client.Channel;
@@ -68,7 +68,7 @@ public class RabbitDataHandler implements Runnable {
         this.clientId = clientId;
         this.redissonClient = redissonClient;
         this.connectionFactory = connectionFactory;
-        this.errMapKey = Constants.REDIS_PREFIX.concat("BIN-LOG-ERR-MAP-").concat(clientId);
+        this.errMapKey = OplogConstants.REDIS_PREFIX.concat("BIN-LOG-ERR-MAP-").concat(clientId);
         this.dataKeyLock = dataKey.concat("-Lock");
         this.handlerFunction = handlerFunction;
     }

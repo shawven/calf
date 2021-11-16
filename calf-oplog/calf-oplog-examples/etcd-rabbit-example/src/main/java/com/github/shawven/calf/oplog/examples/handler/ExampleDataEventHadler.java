@@ -1,8 +1,10 @@
-package com.github.shawven.calf.oplog.client;
+package com.github.shawven.calf.oplog.examples.handler;
 
-import com.github.shawven.calf.base.DatabaseEvent;
-import com.github.shawven.calf.base.EventBaseDTO;
-import com.github.shawven.calf.base.LockLevel;
+import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.LockLevel;
+import com.github.shawven.calf.oplog.client.DatabaseEventHandler;
+import com.github.shawven.calf.oplog.client.HandleDatabaseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

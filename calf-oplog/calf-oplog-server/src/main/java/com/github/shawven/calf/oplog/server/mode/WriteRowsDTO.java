@@ -1,8 +1,8 @@
 package com.github.shawven.calf.oplog.server.mode;
 
 
-import com.github.shawven.calf.base.DatabaseEvent;
-import com.github.shawven.calf.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
 
 import java.util.List;
 import java.util.Map;

@@ -1,0 +1,20 @@
+spring:
+  redis:
+    host: 192.168.2.201
+    redisson:
+      file: classpath:redisson.yml
+
+  rabbit:
+    host: 192.168.2.201
+    port: 5672
+    username: guest
+    password: guest
+    virtualHost: /binlog
+    apiUrl: http://192.168.2.201:15672/api/
+  etcd:
+    endpoints: http://192.168.2.201:2379
+    root: 204
+
+#自动注册客户端(服务端的地址)
+databaseEventServerUrl: http://localhost:8885/client/addAll
+appName: server-etcd-rabbit-example

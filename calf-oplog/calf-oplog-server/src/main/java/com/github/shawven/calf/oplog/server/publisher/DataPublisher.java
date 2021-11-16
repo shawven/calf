@@ -1,6 +1,7 @@
 package com.github.shawven.calf.oplog.server.publisher;
 
-import com.github.shawven.calf.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 
 /**
  * @author zhenhui
@@ -9,5 +10,9 @@ import com.github.shawven.calf.base.EventBaseDTO;
  */
 public interface DataPublisher {
 
+    String DATA = "BIN-LOG-DATA-";
+
     void publish(String clientId, String dataKey, EventBaseDTO data);
+
+    boolean destroy(ClientInfo clientInfo);
 }

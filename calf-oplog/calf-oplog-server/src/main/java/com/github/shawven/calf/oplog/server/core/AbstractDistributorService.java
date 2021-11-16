@@ -5,7 +5,7 @@ import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.mode.Command;
 import com.github.shawven.calf.oplog.server.mode.CommandType;
-import com.github.shawven.calf.base.ServiceStatus;
+import com.github.shawven.calf.oplog.base.ServiceStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

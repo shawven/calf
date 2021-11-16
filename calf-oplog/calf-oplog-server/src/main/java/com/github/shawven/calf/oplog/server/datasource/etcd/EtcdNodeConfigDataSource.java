@@ -1,15 +1,14 @@
 package com.github.shawven.calf.oplog.server.datasource.etcd;
 
 import com.alibaba.fastjson.JSON;
+import com.github.shawven.calf.oplog.server.core.ServiceSwitcher;
 import com.github.shawven.calf.oplog.server.mode.Command;
 import com.github.shawven.calf.oplog.server.mode.CommandType;
-import com.github.shawven.calf.base.Constants;
+import com.github.shawven.calf.oplog.base.OplogConstants;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.datasource.DataSourceException;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
-import com.github.shawven.calf.oplog.server.NetUtils;
-import com.github.shawven.calf.oplog.server.core.DistributorService;
 import io.etcd.jetcd.*;
 import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.options.WatchOption;
@@ -17,15 +16,11 @@ import io.etcd.jetcd.watch.WatchEvent;
 import io.etcd.jetcd.watch.WatchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -33,15 +28,13 @@ import java.util.stream.Collectors;
  * @author wanglaomo
  * @since 2019/6/4
  **/
-public class EtcdNodeConfigDataSource implements NodeConfigDataSource, ApplicationContextAware {
+public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
 
     private static final Logger logger = LoggerFactory.getLogger(EtcdNodeConfigDataSource.class);
 
     private final Client etcdClient;
 
     private final KeyPrefixUtil keyPrefixUtil;
-
-    private ApplicationContext applicationContext;
 
     public EtcdNodeConfigDataSource(Client etcdClient, KeyPrefixUtil keyPrefixUtil) {
         this.etcdClient = etcdClient;
@@ -77,7 +70,7 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource, Applicati
         KV kvClient = etcdClient.getKVClient();
         List<NodeConfig> NodeConfigs = new ArrayList<>();
         try {
-            GetResponse configRes = kvClient.get(ByteSequence.from(keyPrefixUtil.withPrefix(Constants.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8)).get();
+            GetResponse configRes = kvClient.get(ByteSequence.from(keyPrefixUtil.withPrefix(OplogConstants.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8)).get();
 
             if(configRes == null || configRes.getCount() == 0) {
                 return NodeConfigs;
@@ -171,8 +164,6 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource, Applicati
 
         return null;
     }
-
-
     @Override
     public List<String> getNamespaceList() {
         return getAll().stream()
@@ -180,57 +171,11 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource, Applicati
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 真正开启数据源的逻辑
-     *
-     * @param namespace
-     * @param delegatedIp
-     * @return
-     */
     @Override
-    public void start(String namespace, String delegatedIp) {
-        if(StringUtils.isEmpty(namespace)) {
-            return;
-        }
-
-        if(!StringUtils.isEmpty(delegatedIp)) {
-            NodeConfig config = this.getByNamespace(namespace);
-            String localIp = getLocalIp(config.getDataSourceType());
-            if(!delegatedIp.equals(localIp)) {
-                logger.info("Ignore start database command for ip not matching. local: [{}] delegatedId: [{}]", localIp, delegatedIp);
-                try {
-                    // 非指定ip延迟等待30s后竞争
-                    TimeUnit.SECONDS.sleep(30);
-                } catch (InterruptedException ignored) {
-
-                }
-            }
-        }
-        NodeConfig config = getByNamespace(namespace);
-        getDistributorService(config).submitBinLogDistributeTask(config);
-    }
-
-    /**
-     * 真正关闭数据源的逻辑
-     *
-     * @param namespace
-     * @return
-     */
-    @Override
-    public void stop(String namespace) {
-        if(StringUtils.isEmpty(namespace)) {
-            return;
-        }
-        NodeConfig config = getByNamespace(namespace);
-        getDistributorService(config).stopBinLogDistributeTask(namespace);
-        logger.info("[" + namespace + "] 关闭datasource监听成功");
-    }
-
-    @Override
-    public void registerWatcher() {
+    public void registerWatcher(ServiceSwitcher serviceSwitcher) {
         Watch watchClient = etcdClient.getWatchClient();
         watchClient.watch(
-                ByteSequence.from(keyPrefixUtil.withPrefix(Constants.DEFAULT_BINLOG_CONFIG_COMMAND_KEY), StandardCharsets.UTF_8),
+                ByteSequence.from(keyPrefixUtil.withPrefix(OplogConstants.DEFAULT_BINLOG_CONFIG_COMMAND_KEY), StandardCharsets.UTF_8),
                 WatchOption.newBuilder().withPrevKV(true).withNoDelete(true).build(),
                 new Watch.Listener() {
 
@@ -245,9 +190,9 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource, Applicati
 
                                 // 根据不同的命令类型（START/STOP）执行不同的逻辑
                                 if(CommandType.START_DATASOURCE.equals(command.getType())) {
-                                    start(command.getNamespace(), command.getDelegatedIp());
+                                    serviceSwitcher.start(command);
                                 } else if (CommandType.STOP_DATASOURCE.equals(command.getType())) {
-                                    stop(command.getNamespace());
+                                    serviceSwitcher.stop(command);
                                 }
                             }
                         }
@@ -256,13 +201,13 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource, Applicati
                     @Override
                     public void onError(Throwable throwable) {
                         logger.error("Watch binlog config command error.", throwable);
-                        new Thread(() -> registerWatcher()).start();
+                        new Thread(() -> registerWatcher(serviceSwitcher)).start();
                     }
 
                     @Override
                     public void onCompleted() {
                         logger.info("Watch binlog config command completed.");
-                        new Thread(() -> registerWatcher()).start();
+                        new Thread(() -> registerWatcher(serviceSwitcher)).start();
                     }
                 }
         );
@@ -273,24 +218,11 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource, Applicati
         KV kvClient = etcdClient.getKVClient();
         try {
             kvClient.put(
-                    ByteSequence.from(keyPrefixUtil.withPrefix(Constants.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8),
+                    ByteSequence.from(keyPrefixUtil.withPrefix(OplogConstants.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8),
                     ByteSequence.from(JSON.toJSONString(NodeConfigs), StandardCharsets.UTF_8)
             ).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DataSourceException("Failed to connect to etcd server.", e);
         }
-    }
-
-    private DistributorService getDistributorService(NodeConfig config) {
-        return applicationContext.getBean(config.getDataSourceType(), DistributorService.class);
-    }
-
-    public static String getLocalIp(String dataSourceType){
-        return dataSourceType + ":" + NetUtils.getLocalAddress().getHostAddress();
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
     }
 }

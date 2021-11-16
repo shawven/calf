@@ -1,10 +1,9 @@
 package com.github.shawven.calf.oplog.client;
 
 
-import com.github.shawven.calf.base.Constants;
-import com.github.shawven.calf.base.EventBaseDTO;
-import com.github.shawven.calf.base.EventBaseErrDTO;
-import com.github.shawven.calf.base.LockLevel;
+import com.github.shawven.calf.oplog.base.OplogConstants;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.LockLevel;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
 import org.redisson.api.RLock;
@@ -67,7 +66,7 @@ public class DataHandler implements Runnable {
         this.clientId = clientId;
         this.redissonClient = redissonClient;
         this.connectionFactory = connectionFactory;
-        this.errMapKey = Constants.REDIS_PREFIX.concat("BIN-LOG-ERR-MAP-").concat(clientId);
+        this.errMapKey = OplogConstants.REDIS_PREFIX.concat("BIN-LOG-ERR-MAP-").concat(clientId);
         this.dataKeyLock = dataKey.concat("-Lock");
         this.handlerFunction = handlerFunction;
     }
@@ -158,8 +157,8 @@ public class DataHandler implements Runnable {
             log.severe(e.toString());
             e.printStackTrace();
             if (leftRetryTimes == 1) {
-                RMap<String, EventBaseErrDTO> errMap = redissonClient.getMap(errMapKey, new JsonJacksonCodec());
-                errMap.put(dto.getUuid(), new EventBaseErrDTO(dto, e, dataKey));
+                RMap<String, EventBaseErrorDTO> errMap = redissonClient.getMap(errMapKey, new JsonJacksonCodec());
+                errMap.put(dto.getUuid(), new EventBaseErrorDTO(dto, e, dataKey));
             } else {
                 try {
                     Thread.sleep(retryInterval);
@@ -183,7 +182,7 @@ public class DataHandler implements Runnable {
             handle(dto);
             //如果之前有异常，恢复正常，那就处理
             if (retryTimes != 0) {
-                RMap<String, EventBaseErrDTO> errMap = redissonClient.getMap(errMapKey, new JsonJacksonCodec());
+                RMap<String, EventBaseErrorDTO> errMap = redissonClient.getMap(errMapKey, new JsonJacksonCodec());
                 errMap.remove(dto.getUuid());
             }
             return true;
@@ -193,8 +192,8 @@ public class DataHandler implements Runnable {
                 return true;
             }
             log.log(Level.INFO, "第" + ++retryTimes + "次重试");
-            RMap<String, EventBaseErrDTO> errMap = redissonClient.getMap(errMapKey, new JsonJacksonCodec());
-            errMap.put(dto.getUuid(), new EventBaseErrDTO(dto, e, dataKey));
+            RMap<String, EventBaseErrorDTO> errMap = redissonClient.getMap(errMapKey, new JsonJacksonCodec());
+            errMap.put(dto.getUuid(), new EventBaseErrorDTO(dto, e, dataKey));
             try {
                 Thread.sleep(retryInterval);
             } catch (InterruptedException e1) {

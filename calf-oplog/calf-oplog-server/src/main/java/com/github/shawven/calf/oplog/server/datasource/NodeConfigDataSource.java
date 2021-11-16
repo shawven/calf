@@ -1,4 +1,6 @@
-package com.github.shawven.calf.extension;
+package com.github.shawven.calf.oplog.server.datasource;
+
+import com.github.shawven.calf.oplog.server.core.ServiceSwitcher;
 
 import java.util.*;
 
@@ -20,27 +22,8 @@ public interface NodeConfigDataSource {
 
     List<NodeConfig> getAll();
 
-    void registerWatcher() ;
-
-    /**
-     * 真正开启数据源的逻辑
-     *
-     * @param namespace
-     * @param delegatedIp
-     * @return
-     */
-    void start(String namespace, String delegatedIp);
-
-    /**
-     * 真正关闭数据源的逻辑
-     *
-     * @param namespace
-     * @return
-     */
-    void stop(String namespace);
-
-
     List<String> getNamespaceList();
 
-    void registerConfigCommandWatcher();
+    void registerWatcher(ServiceSwitcher serviceSwitcher);
+
 }

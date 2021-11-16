@@ -1,18 +1,20 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.base.Constants;
+import com.github.shawven.calf.oplog.base.OplogConstants;
 import com.github.shawven.calf.oplog.server.datasource.DataSourceException;
-import com.github.shawven.calf.base.ServiceStatus;
+import com.github.shawven.calf.oplog.base.ServiceStatus;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.datasource.leaderselector.LeaderSelector;
+import com.github.shawven.calf.oplog.server.mode.Command;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.server.NetUtils;
 import com.github.shawven.calf.oplog.server.datasource.leaderselector.OplogLeaderSelectorListener;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -68,36 +70,71 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
         configList.forEach(config -> {
             // 在线程中启动事件监听
             if(config.isActive()) {
-                submitBinLogDistributeTask(config);
+                startTask(config);
             }
         });
 
         // 3. 注册数据源Config 命令Watcher
-        nodeConfigDataSource.registerWatcher();
+        nodeConfigDataSource.registerWatcher(new ServiceSwitcher() {
+            @Override
+            public void start(Command command) {
+                String namespace = command.getNamespace();
+                String delegatedIp = command.getDelegatedIp();
+                if(StringUtils.isEmpty(namespace)) {
+                    return;
+                }
+
+                if(!StringUtils.isEmpty(delegatedIp)) {
+                    NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
+                    String localIp = getLocalIp(config.getDataSourceType());
+                    if(!delegatedIp.equals(localIp)) {
+                        logger.info("Ignore start database command for ip not matching. local: [{}] delegatedId: [{}]", localIp, delegatedIp);
+                        try {
+                            // 非指定ip延迟等待30s后竞争
+                            TimeUnit.SECONDS.sleep(30);
+                        } catch (InterruptedException ignored) {
+
+                        }
+                    }
+                }
+                NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
+                MongoDBDistributorServiceImpl.this.startTask(config);
+            }
+
+            @Override
+            public void stop(Command command) {
+                String namespace = command.getNamespace();
+                if(StringUtils.isEmpty(namespace)) {
+                    return;
+                }
+                MongoDBDistributorServiceImpl.this.stopTask(namespace);
+                logger.info("[" + namespace + "] 关闭datasource监听成功");
+            }
+        });
 
         // 4. 服务节点上报
         updateServiceStatus(TYPE);
     }
 
-    @Override
-    public void submitBinLogDistributeTask(NodeConfig config) {
-        executorService.submit(() -> binLogDistributeTask(config));
-    }
-
-
-    private void binLogDistributeTask(NodeConfig nodeConfig) {
-        String namespace = nodeConfig.getNamespace();
-        String identification = NetUtils.getLocalAddress().getHostAddress();
-        String identificationPath = keyPrefixUtil.withPrefix(Constants.LEADER_IDENTIFICATION_PATH);
-        OplogLeaderSelectorListener listener = new OplogLeaderSelectorListener(opLogClientFactory, nodeConfig, nodeConfigDataSource);
-        LeaderSelector leaderSelector = null;
-//        LeaderSelector leaderSelector = new LeaderSelector(etcdClient, binaryLogConfig.getNamespace(), 20L, identification, identificationPath, listener);
-        leaderSelectorMap.put(namespace, leaderSelector);
-        leaderSelector.start();
+    public static String getLocalIp(String dataSourceType){
+        return dataSourceType + ":" + NetUtils.getLocalAddress().getHostAddress();
     }
 
     @Override
-    public void stopBinLogDistributeTask(String namespace) {
+    public void startTask(NodeConfig config) {
+        executorService.submit(() -> {
+            String namespace = config.getNamespace();
+            String identification = NetUtils.getLocalAddress().getHostAddress();
+            String identificationPath = keyPrefixUtil.withPrefix(OplogConstants.LEADER_IDENTIFICATION_PATH);
+            OplogLeaderSelectorListener listener = new OplogLeaderSelectorListener(opLogClientFactory, config, nodeConfigDataSource);
+            LeaderSelector leaderSelector = new LeaderSelector(etcdClient, config.getNamespace(), 20L, identification, identificationPath, listener);
+            leaderSelectorMap.put(namespace, leaderSelector);
+            leaderSelector.start();
+        });
+    }
+
+    @Override
+    public void stopTask(String namespace) {
         LeaderSelector leaderSelector = leaderSelectorMap.get(namespace);
         if(leaderSelector != null) {
             leaderSelector.close();
@@ -132,5 +169,4 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
             throw new DataSourceException("Update Service Status Error!", e);
         }
     }
-
 }
