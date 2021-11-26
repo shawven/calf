@@ -301,21 +301,41 @@ public class BaseTests {
             public void setChildren(List<Menu> children) {
                 this.children = children;
             }
+
+            @Override
+            public String toString() {
+                return "Menu{" +
+                        "name='" + name + '\'' +
+                        ", id='" + id + '\'' +
+                        '}';
+            }
         }
 
 
-        ArrayList<Menu> menus = Lists.newArrayList(
+        List<Menu> menus = Lists.newArrayList(
+                new Menu("B", "2"),
+                new Menu("BB", "22"),
                 new Menu("A", "1"),
                 new Menu("AA", "11"),
                 new Menu("AAA", "111"),
-                new Menu("B", "2"));
+                new Menu("AAB", "112"),
+                new Menu("AB", "12"),
+                new Menu("ABA", "121"),
+                new Menu("ABB", "122")
+
+        );
 
         List<Menu> tree = NodeTree.<Menu, Menu>from(menus)
                 .rootFilter(menu -> menu.id.length() == 1)
-                .childFilter((parent, child) -> parent.id.concat("1").equals(child.id))
+                .childFilter((parent, child) -> child.name.startsWith(parent.name)
+                        && child.name.length() - 1 == parent.name.length()
+                )
                 .build();
 
         System.out.println(tree);
+        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("12")));
+        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("112")));
+        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("122")));
     }
 
     @Test

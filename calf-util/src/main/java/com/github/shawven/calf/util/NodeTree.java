@@ -7,7 +7,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * @author Shoven
@@ -55,8 +57,7 @@ public class NodeTree {
             return null;
         }
 
-        Deque<N> queue = new LinkedList<>();
-        nodes.forEach(queue::push);
+        Deque<N> queue = new LinkedList<>(nodes);
 
         while (!queue.isEmpty()) {
             N node = queue.pop();
@@ -89,19 +90,34 @@ public class NodeTree {
         for (N node : nodes) {
             queue.push(node);
             link.clear();
+
+            boolean preNodeIsLeaf = false;
             while (!queue.isEmpty()) {
-                // 先添加（形成一条最终链）在判断
                 N elem = queue.pop();
-                link.add(elem);
 
                 List<N> children = elem.getChildren();
-                if (children != null && !children.isEmpty()) {
-                    children.forEach(queue::push);
+                // 当前节点是叶子节点
+                boolean curNodeIsLeaf = children == null || children.isEmpty();
+
+                // 当前节点非叶子节点且前一个节点是叶子节点，即遍历了所有的叶子节点回退到父节点
+                if (preNodeIsLeaf && !curNodeIsLeaf) {
+                    // 父节点已经判断过直接删除
+                    link.removeLast();
+                }
+
+                // 找到退出
+                if (predicate.test(elem)) {
+                    link.addLast(elem);
+                    return link;
+                }
+
+                if (curNodeIsLeaf) {
+                    preNodeIsLeaf = true;
                 } else {
-                    link.pollLast();
-                    if (predicate.test(elem)) {
-                        return link;
-                    }
+                    // 前序遍历，先添加父节点
+                    link.addLast(elem);
+                    // 子节点入栈
+                    children.forEach(queue::push);
                 }
             }
         }
@@ -119,13 +135,11 @@ public class NodeTree {
         if (node == null) {
             return emptyList();
         }
-        List<N> nodes = new ArrayList<>();
-        nodes.add(node);
-        return flatList(nodes);
+        return flatList(singletonList(node));
     }
 
     /**
-     * 压扁当前节点集合及其子节点成列表
+     * 压扁多个节点树成列表（平铺当前节点及其子节点）
      *
      * @param nodes 待处理节点集合
      * @param <N> 节点类型
@@ -210,13 +224,12 @@ public class NodeTree {
         }
 
         public List<R> build() {
-            if (data == null || data.isEmpty()) {
-                return emptyList();
-            }
-
             Objects.requireNonNull(rootFilter, "父节点选择器不能为空");
             Objects.requireNonNull(childFilter, "孩子节点选择器不能为空");
 
+            if (data == null || data.isEmpty()) {
+                return emptyList();
+            }
             // 输入和返回都实现了Node，则无需转换
             if (data.iterator().next() instanceof Node) {
                 nodeConvert = n -> (R)n;
@@ -224,75 +237,55 @@ public class NodeTree {
                 Objects.requireNonNull(nodeConvert, "节点转换器不能为空");
             }
 
-            Map<Boolean, List<T>> map = data.parallelStream().collect(groupingBy(o -> rootFilter.test(o)));
-            // 根节点列表
-            List<T> roots = map.get(true);
-            if (roots == null) {
-                roots = emptyList();
-            }
-            // 其他节点列表
-            List<T> others = map.get(false);
-            if (others == null) {
-                others = emptyList();
-            }
+            Map<Boolean, List<T>> map = data.stream()
+                    .filter(Objects::nonNull)
+                    .collect(groupingBy(o -> rootFilter.test(o)));
 
-            // 保存原来的数据
-            Deque<T> oldStack = new LinkedList<>();
-            // 保存转换后的数据
-            Deque<R> newStack = new LinkedList<>();
-            List<R> newNodes = new ArrayList<>();
+            // 子节点列表
+            List<T> children = map.getOrDefault(false, emptyList());
+            // 根节点
+            LinkedList<T> roots = new LinkedList<>();
+            map.getOrDefault(true, emptyList()).forEach(roots::push);
 
-            // 遍历根节点
-            for (T root : roots) {
-                // 根节点转换
-                R newRoot = nodeConvert.apply(root);
-                // 根节点元素入栈，触发寻找子节点这个过程
-                oldStack.push(root);
-                newStack.push(newRoot);
+            // 新根节点
+            LinkedList<R> newRoots = roots.stream().map(nodeConvert).collect(toCollection(LinkedList::new));
+            // 返回结果
+            List<R> res = new ArrayList<>(newRoots);
 
-                // 构建
-                doBuild(others, oldStack, newStack);
-
-                // 收集根节点
-                newNodes.add(newRoot);
-            }
-            return newNodes;
-        }
-
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        private void doBuild(List<T> others, Deque<T> oldStack, Deque<R> newStack) {
-            while (!oldStack.isEmpty()) {
+            while (!roots.isEmpty()) {
                 // 弹出临时父节点
-                T tempParent = oldStack.pop();
+                T oldParent = roots.pop();
                 // 弹出临时已转换的父节点
-                R newTempParent = newStack.pop();
+                R newParent = newRoots.pop();
 
                 // 遍历整个子列表，寻找根节点的直接直接子节点
-                Iterator<T> iterator = others.iterator();
+                Iterator<T> iterator = children.iterator();
                 while (iterator.hasNext()) {
                     T child = iterator.next();
 
                     // 已找到子节点
-                    if (childFilter.test(tempParent, child)) {
+                    if (childFilter.test(oldParent, child)) {
                         // 子节点转换
                         R newChild = nodeConvert.apply(child);
 
                         if (newChild instanceof DeNode) {
-                            ((DeNode) newChild).setParent((DeNode)newTempParent);
+                            ((DeNode) newChild).setParent((DeNode)newParent);
                         }
 
-                        // 构造父子关系（最终返回的是转换后的节点，所有对转换后的节点设置）
-                        addChild(newTempParent, newChild);
+                        // 构造父子关系.最终返回的是转换后的节
+                        addChild(newParent, newChild);
 
-                        // 子节点入栈（成为新的临时父节点，依次往复）
-                        oldStack.push(child);
-                        newStack.push(newChild);
+                        // 子节点入栈
+                        roots.push(child);
+                        newRoots.push(newChild);
 
                         // 排除已找到挂载子节点
                         iterator.remove();
                     }
                 }
             }
+
+            return res;
         }
 
         /**
