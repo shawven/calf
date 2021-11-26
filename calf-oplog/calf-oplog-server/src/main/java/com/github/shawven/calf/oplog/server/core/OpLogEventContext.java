@@ -1,8 +1,8 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.extension.BinaryLogConfig;
-import com.github.shawven.calf.oplog.server.DataPublisher;
+import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
+import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import com.mongodb.MongoClient;
 
 /**
@@ -14,30 +14,25 @@ public class OpLogEventContext {
     private MongoClient  mongoClient;
 
 
-    private BinaryLogConfig binaryLogConfig;
+    private NodeConfig nodeConfig;
 
-    private DataPublisher dataPublisher;
+    private DataPublisherManager dataPublisherManager;
 
-    public OpLogEventContext(MongoClient mongoClient,  BinaryLogConfig binaryLogConfig, DataPublisher dataPublisher) {
+    public OpLogEventContext(MongoClient mongoClient, NodeConfig nodeConfig, DataPublisherManager dataPublisherManager) {
         this.mongoClient = mongoClient;
-        this.binaryLogConfig = binaryLogConfig;
-        this.dataPublisher = dataPublisher;
+        this.nodeConfig = nodeConfig;
+        this.dataPublisherManager = dataPublisherManager;
     }
 
     public MongoClient getMongoClient() {
         return mongoClient;
     }
 
-    public void setMongoClient(MongoClient mongoClient) {
-        this.mongoClient = mongoClient;
+    public NodeConfig getNodeConfig() {
+        return nodeConfig;
     }
 
-    public BinaryLogConfig getBinaryLogConfig() {
-        return binaryLogConfig;
+    public DataPublisherManager getDataPublisherManager() {
+        return dataPublisherManager;
     }
-
-    public DataPublisher getDataPublisher() {
-        return dataPublisher;
-    }
-
 }

@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.client;
 
 
-import com.github.shawven.calf.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
 
 /**
  * @author zhenhui
@@ -9,6 +9,8 @@ import com.github.shawven.calf.base.EventBaseDTO;
  * @modified by
  */
 public interface DatabaseEventHandler {
+
     void handle(EventBaseDTO data);
-    Class getClazz();
+
+    Class<? extends DatabaseEventHandler> getClazz();
 }

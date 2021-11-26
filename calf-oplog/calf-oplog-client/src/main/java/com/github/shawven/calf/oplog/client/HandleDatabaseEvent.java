@@ -2,8 +2,8 @@ package com.github.shawven.calf.oplog.client;
 
 
 
-import com.github.shawven.calf.base.DatabaseEvent;
-import com.github.shawven.calf.base.LockLevel;
+import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.LockLevel;
 
 import java.lang.annotation.*;
 

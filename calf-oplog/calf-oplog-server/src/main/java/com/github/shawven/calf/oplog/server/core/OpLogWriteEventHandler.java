@@ -1,9 +1,9 @@
 package com.github.shawven.calf.oplog.server.core;
 
-import oplog.client.model.ClientInfo;
-import oplog.client.model.dto.EventBaseDTO;
-import oplog.client.model.dto.WriteRowsDTO;
-import com.github.shawven.calf.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
+import com.github.shawven.calf.oplog.server.mode.WriteRowsDTO;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class OpLogWriteEventHandler extends OpLogEventHandler {
         //添加表信息
         writeRowsDTO.setDatabase(super.getDataBase(event));
         writeRowsDTO.setTable(super.getTable(event));
-        writeRowsDTO.setNamespace(context.getBinaryLogConfig().getNamespace());
+        writeRowsDTO.setNamespace(context.getNodeConfig().getNamespace());
         //添加列映射
         Document context = (Document) event.get(OpLogClientFactory.CONTEXT_KEY);
         List<Map<String, Object>> urs = new ArrayList<>();

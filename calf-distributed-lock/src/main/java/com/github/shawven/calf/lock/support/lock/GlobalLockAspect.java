@@ -1,6 +1,5 @@
 package com.github.shawven.calf.lock.support.lock;
 
-import com.github.shawven.calf.lock.support.Response;
 import com.github.shawven.calf.lock.support.constant.CacheName;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
@@ -17,9 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
@@ -62,10 +59,6 @@ public class GlobalLockAspect {
                         logger.debug("try acquire globalLock {} failure!", lockKey);
                     }
 
-                    // 方法刚好是rest断点
-                    if (isRestEndpoint(method)) {
-                        return Response.unprocesable(PROCESSING_IN);
-                    }
                     return null;
                 }
             } finally {
@@ -86,10 +79,6 @@ public class GlobalLockAspect {
         }
     }
 
-    private boolean isRestEndpoint(Method method) {
-        return AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class)
-                && method.getReturnType().isAssignableFrom(ResponseEntity.class);
-    }
 
     private void release(RLock lock, String lockKey) {
         try {

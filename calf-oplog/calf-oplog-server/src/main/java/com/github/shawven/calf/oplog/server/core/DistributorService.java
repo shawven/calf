@@ -2,8 +2,8 @@ package com.github.shawven.calf.oplog.server.core;
 
 
 
-import com.github.shawven.calf.extension.BinaryLogConfig;
-import com.github.shawven.calf.base.ServiceStatus;
+import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
+import com.github.shawven.calf.oplog.base.ServiceStatus;
 
 import java.util.List;
 
@@ -15,15 +15,15 @@ public interface DistributorService {
 
     void startDistribute();
 
-    boolean persistDatasourceConfig(BinaryLogConfig config);
+    boolean persistDatasourceConfig(NodeConfig config);
 
     boolean removeDatasourceConfig(String namespace);
 
-    void submitBinLogDistributeTask(BinaryLogConfig config);
+    void startTask(NodeConfig config);
 
-    void stopBinLogDistributeTask(String namespace);
+    void stopTask(String namespace);
 
-    List<BinaryLogConfig> getAllConfigs();
+    List<NodeConfig> getAllConfigs();
 
     boolean startDatasource(String namespace, String delegatedIp);
 
