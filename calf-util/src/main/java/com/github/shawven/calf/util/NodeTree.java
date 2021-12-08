@@ -244,8 +244,7 @@ public class NodeTree {
             // 子节点列表
             List<T> children = map.getOrDefault(false, emptyList());
             // 根节点
-            LinkedList<T> roots = new LinkedList<>();
-            map.getOrDefault(true, emptyList()).forEach(roots::push);
+            LinkedList<T> roots = new LinkedList<>(map.getOrDefault(true, emptyList()));
 
             // 新根节点
             LinkedList<R> newRoots = roots.stream().map(nodeConvert).collect(toCollection(LinkedList::new));
