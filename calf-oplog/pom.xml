@@ -46,13 +46,11 @@
                 <version>3.16.4</version>
             </dependency>
 
-
             <dependency>
                 <groupId>com.rabbitmq</groupId>
                 <artifactId>http-client</artifactId>
                 <version>3.2.0.RELEASE</version>
             </dependency>
-
 
             <dependency>
                 <groupId>com.alibaba</groupId>
