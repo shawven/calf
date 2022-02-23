@@ -3,6 +3,9 @@ package com.github.shawven.calf.util;
 import com.github.shawven.calf.util.excel.ExcelReader;
 import com.github.shawven.calf.util.excel.ExcelWriter;
 import com.google.common.collect.*;
+import com.nlf.calendar.Lunar;
+import com.nlf.calendar.Solar;
+import com.nlf.calendar.util.HolidayUtil;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -21,14 +24,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -471,6 +470,69 @@ public class BaseTests {
         FileOutputStream os = new FileOutputStream("D:\\" + System.currentTimeMillis() + ".xlsx");
         wb.write(os);
         os.close();
+    }
+
+
+
+
+    public static class ChinaDate extends Lunar {
+
+        Map<String, String> sFtv = new HashMap<String, String>();
+        Map<String, String> lFtv = new HashMap<String, String>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
+        {
+            // 国历节日
+            sFtv.put("0101", "元旦");
+            sFtv.put("0501", "劳动节");
+            sFtv.put("1001", "国庆节");
+
+            //农历节日
+            lFtv.put("0101", "春节");
+            lFtv.put("0505", "端午");
+            lFtv.put("0815", "中秋");
+        }
+
+        public ChinaDate() {
+        }
+
+        public ChinaDate(int lunarYear, int lunarMonth, int lunarDay) {
+            super(lunarYear, lunarMonth, lunarDay);
+        }
+
+        public ChinaDate(int lunarYear, int lunarMonth, int lunarDay, int hour, int minute, int second) {
+            super(lunarYear, lunarMonth, lunarDay, hour, minute, second);
+        }
+
+        public ChinaDate(Date date) {
+            super(date);
+        }
+
+        public String getHoliday() {
+            String val = lFtv.get(formatter.format(MonthDay.of(getMonth(), getDay())));
+            if (val != null) {
+                return val;
+            }
+            if (Math.abs(getMonth()) == 12 && getDay() >= 29 && getYear() != next(1).getYear()) {
+                return "除夕";
+            }
+
+            Solar solar = getSolar();
+            return sFtv.get(formatter.format(MonthDay.of(solar.getMonth(), solar.getDay())));
+        }
+
+    }
+    @Test
+    public void testLunar() {
+
+        //今天
+//        Lunar date = new Lunar();
+
+        //指定阴历的某一天
+
+        ChinaDate date = new ChinaDate(Times.toDate(LocalDate.of(2022,2,19)));
+        System.out.println(date);
+        System.out.println(date.getJieQi());
+
     }
 
     private static String byte2Hex(byte[] bytes) {
