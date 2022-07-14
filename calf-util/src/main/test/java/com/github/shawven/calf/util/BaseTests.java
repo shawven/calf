@@ -6,6 +6,7 @@ import com.google.common.collect.*;
 import com.nlf.calendar.Lunar;
 import com.nlf.calendar.Solar;
 import com.nlf.calendar.util.HolidayUtil;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -32,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -302,6 +304,19 @@ public class BaseTests {
             }
 
             @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Menu menu = (Menu) o;
+                return Objects.equals(name, menu.name) && Objects.equals(id, menu.id);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(name, id);
+            }
+
+            @Override
             public String toString() {
                 return "Menu{" +
                         "name='" + name + '\'' +
@@ -312,15 +327,14 @@ public class BaseTests {
 
 
         List<Menu> menus = Lists.newArrayList(
-                new Menu("B", "2"),
-                new Menu("BB", "22"),
                 new Menu("A", "1"),
-                new Menu("AA", "11"),
-                new Menu("AAA", "111"),
-                new Menu("AAB", "112"),
-                new Menu("AB", "12"),
-                new Menu("ABA", "121"),
-                new Menu("ABB", "122")
+                    new Menu("AA", "11"),
+                    new Menu("AB", "12"),
+                        new Menu("ABA", "121"),
+                        new Menu("ABB", "122"),
+                        new Menu("ABC", "123"),
+                new Menu("B", "2"),
+                    new Menu("BB", "22")
 
         );
 
@@ -331,10 +345,33 @@ public class BaseTests {
                 )
                 .build();
 
+        List<Menu> displayedList = Lists.newArrayList(
+                            new Menu("AB", "11")
+
+                ).stream().flatMap(rsp -> {
+                    // 根据子节点进行向上追踪得到完整的链条，当子节点有权限父节点无权限时也能找出出父节点
+                    List<Menu> link = NodeTree.traceNode(tree, node -> node.id.equals(rsp.id));
+                    List<Menu> copyLink = link.stream().map(source -> new Menu(source.name, source.id)).collect(Collectors.toList());
+                    // 把树压扁
+                    return NodeTree.flatList(copyLink).stream();
+                })
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Menu> result = NodeTree.<Menu, Menu>from(displayedList)
+                .rootFilter(menu -> menu.id.length() == 1)
+                .childFilter((parent, child) -> child.name.startsWith(parent.name)
+                        && child.name.length() - 1 == parent.name.length()
+                )
+                .build();
+
         System.out.println(tree);
+        System.out.println(result);
         System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("12")));
+        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("111")));
         System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("112")));
-        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("122")));
+        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("113")));
+        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("123")));
     }
 
     @Test
@@ -549,5 +586,9 @@ public class BaseTests {
         return stringBuffer.toString();
     }
 
-
+    @Test
+    public void testEscape() {
+        String str = "{\"data\":\"{\\\"FDefaultValue\\\":\\\"0\\\",\\\"FValue\\\":\\\"0\\\"}\",\"success\":true,\"errorCode\":0}";
+        System.out.println(StringEscapeUtils.unescapeJava(str));;
+    }
 }

@@ -114,4 +114,20 @@ public class Times {
     public static LocalDateTime parseLocalDateTime(String time, String pattern) {
         return LocalDateTime.parse(time, DateTimeFormatter.ofPattern(pattern));
     }
+
+    public static String formatDateTimeString(Date time) {
+        return DATE_TIME_FORMATTER.format(toLocalDateTime(time));
+    }
+
+    public static String formatDateTimeString(long time) {
+        return DATE_TIME_FORMATTER.format(toLocalDate(time));
+    }
+
+    public static String formatDateString(Date time) {
+        return DateTimeFormatter.ISO_LOCAL_DATE.format(toLocalDate(time));
+    }
+
+    public static String formatDateString(long time) {
+        return DateTimeFormatter.ISO_LOCAL_DATE.format(toLocalDate(time));
+    }
 }

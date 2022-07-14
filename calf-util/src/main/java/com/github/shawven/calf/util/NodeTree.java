@@ -73,58 +73,6 @@ public class NodeTree {
     }
 
     /**
-     * 追踪节点（顶级节点到目标节点的路径）
-     *
-     * @param nodes 待查找节点列表
-     * @param predicate 断言函数
-     * @param <N> 返回类型
-     * @return 继承于Node的具体类型
-     */
-    public static <N extends Node<N>> List<N> traceNode(List<N> nodes, Predicate<N> predicate) {
-        if (nodes == null || nodes.isEmpty()) {
-            return emptyList();
-        }
-        LinkedList<N> link = new LinkedList<>();
-        Deque<N> queue = new LinkedList<>();
-
-        for (N node : nodes) {
-            queue.push(node);
-            link.clear();
-
-            boolean preNodeIsLeaf = false;
-            while (!queue.isEmpty()) {
-                N elem = queue.pop();
-
-                List<N> children = elem.getChildren();
-                // 当前节点是叶子节点
-                boolean curNodeIsLeaf = children == null || children.isEmpty();
-
-                // 当前节点非叶子节点且前一个节点是叶子节点，即遍历了所有的叶子节点回退到父节点
-                if (preNodeIsLeaf && !curNodeIsLeaf) {
-                    // 父节点已经判断过直接删除
-                    link.removeLast();
-                }
-
-                // 找到退出
-                if (predicate.test(elem)) {
-                    link.addLast(elem);
-                    return link;
-                }
-
-                if (curNodeIsLeaf) {
-                    preNodeIsLeaf = true;
-                } else {
-                    // 前序遍历，先添加父节点
-                    link.addLast(elem);
-                    // 子节点入栈
-                    children.forEach(queue::push);
-                }
-            }
-        }
-        return emptyList();
-    }
-
-    /**
      * 压扁节点树成列表（平铺当前节点及其子节点）
      *
      * @param node 待处理节点
