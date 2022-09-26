@@ -3,6 +3,7 @@ package com.github.shawven.calf.util;
 import com.github.shawven.calf.util.excel.ExcelReader;
 import com.github.shawven.calf.util.excel.ExcelWriter;
 import com.google.common.collect.*;
+import com.google.gson.Gson;
 import com.nlf.calendar.Lunar;
 import com.nlf.calendar.Solar;
 import com.nlf.calendar.util.HolidayUtil;
@@ -132,17 +133,6 @@ public class BaseTests {
         }
     }
 
-
-    @Test
-    public void testString() {
-        String s = new String("code");
-        changeString(s);
-        Assert.assertEquals("code", s);
-    }
-
-    public void changeString(String s) {
-        s = "123";
-    }
 
     @Test
     public void test() throws Exception {
@@ -345,33 +335,8 @@ public class BaseTests {
                 )
                 .build();
 
-        List<Menu> displayedList = Lists.newArrayList(
-                            new Menu("AB", "11")
-
-                ).stream().flatMap(rsp -> {
-                    // 根据子节点进行向上追踪得到完整的链条，当子节点有权限父节点无权限时也能找出出父节点
-                    List<Menu> link = NodeTree.traceNode(tree, node -> node.id.equals(rsp.id));
-                    List<Menu> copyLink = link.stream().map(source -> new Menu(source.name, source.id)).collect(Collectors.toList());
-                    // 把树压扁
-                    return NodeTree.flatList(copyLink).stream();
-                })
-                .distinct()
-                .collect(Collectors.toList());
-
-        List<Menu> result = NodeTree.<Menu, Menu>from(displayedList)
-                .rootFilter(menu -> menu.id.length() == 1)
-                .childFilter((parent, child) -> child.name.startsWith(parent.name)
-                        && child.name.length() - 1 == parent.name.length()
-                )
-                .build();
-
         System.out.println(tree);
-        System.out.println(result);
-        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("12")));
-        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("111")));
-        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("112")));
-        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("113")));
-        System.out.println(NodeTree.traceNode(tree, menu -> menu.id.equals("123")));
+
     }
 
     @Test
@@ -590,5 +555,37 @@ public class BaseTests {
     public void testEscape() {
         String str = "{\"data\":\"{\\\"FDefaultValue\\\":\\\"0\\\",\\\"FValue\\\":\\\"0\\\"}\",\"success\":true,\"errorCode\":0}";
         System.out.println(StringEscapeUtils.unescapeJava(str));;
+    }
+
+
+    @Test
+    public void testJsonMap() {
+        Model model = new Model();
+        model.put("1", "2");
+        model.setA("1");
+        System.out.println(new Gson().toJson(model));
+    }
+}
+
+
+class Model extends HashMap<String, String> {
+
+    String a;
+    String b;
+
+    public String getA() {
+        return a;
+    }
+
+    public void setA(String a) {
+        this.a = a;
+    }
+
+    public String getB() {
+        return b;
+    }
+
+    public void setB(String b) {
+        this.b = b;
     }
 }
