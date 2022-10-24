@@ -47,14 +47,24 @@ public class ReflectHelpers {
      * @param <T> 对象的参数类型
      * @return 对象
      */
-    public static <T> T mapToObject(Map<String, Object> map, Class<T> cls) throws Exception {
+    public static <T> T mapToObject(Map<String, Object> map, Class<T> cls) {
         if (map == null || map.isEmpty()) {
             return null;
         }
-        T obj = cls.newInstance();
+        T obj = null;
+        try {
+            obj = cls.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
         PropertyDescriptor[] pds = getPropertyDescriptors(cls, true, false);
         for (PropertyDescriptor pd : pds) {
-            pd.getWriteMethod().invoke(obj, map.get(pd.getName()));
+            try {
+                pd.getWriteMethod().invoke(obj, map.get(pd.getName()));
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+
         }
         return obj;
     }
@@ -65,7 +75,7 @@ public class ReflectHelpers {
      * @param obj 对象
      * @return 对象属性Map
      */
-    public static Map<String, Object> objectToMap(Object obj) throws Exception {
+    public static Map<String, Object> objectToMap(Object obj) {
         if (obj == null) {
             return emptyMap();
         }
@@ -73,8 +83,13 @@ public class ReflectHelpers {
         Map<String, Object> map = new HashMap<>(pds.length);
         for (PropertyDescriptor pd : pds) {
             String key = pd.getName();
-            Object value = pd.getReadMethod().invoke(obj, map.get(pd.getName()));
-            map.put(key, value);
+            Object value = null;
+            try {
+                value = pd.getReadMethod().invoke(obj);
+                map.put(key, value);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
         }
         return map;
     }
