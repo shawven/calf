@@ -1,5 +1,8 @@
 package com.github.shawven.calf.util;
 
+import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -22,6 +25,7 @@ import static java.util.Collections.emptyMap;
  */
 public class ReflectHelpers {
 
+    private static final Map<Class<?>, BeanInfo> BEAN_INFO_CACHE = new ConcurrentReferenceHashMap<>(256);
     /**
      * 对象值转换
      *
@@ -59,12 +63,7 @@ public class ReflectHelpers {
         }
         PropertyDescriptor[] pds = getPropertyDescriptors(cls, true, false);
         for (PropertyDescriptor pd : pds) {
-            try {
-                pd.getWriteMethod().invoke(obj, map.get(pd.getName()));
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-
+            ReflectionUtils.invokeMethod(pd.getWriteMethod(), obj, map.get(pd.getName()));
         }
         return obj;
     }
@@ -82,14 +81,7 @@ public class ReflectHelpers {
         PropertyDescriptor[] pds = getPropertyDescriptors(obj.getClass(), false, true);
         Map<String, Object> map = new HashMap<>(pds.length);
         for (PropertyDescriptor pd : pds) {
-            String key = pd.getName();
-            Object value = null;
-            try {
-                value = pd.getReadMethod().invoke(obj);
-                map.put(key, value);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
+            map.put(pd.getName(), ReflectionUtils.invokeMethod(pd.getReadMethod(), obj));
         }
         return map;
     }
@@ -253,11 +245,14 @@ public class ReflectHelpers {
     }
 
     private static PropertyDescriptor[] getPropertyDescriptors(Class<?> type, boolean read, boolean write) {
-        BeanInfo info;
-        try {
-            info = Introspector.getBeanInfo(type, Object.class);
-        } catch (IntrospectionException e) {
-            throw new RuntimeException(e);
+        BeanInfo info = BEAN_INFO_CACHE.get(type);
+        if (info == null) {
+            try {
+                info = Introspector.getBeanInfo(type, Object.class);
+            } catch (IntrospectionException e) {
+                throw new RuntimeException(e);
+            }
+            BEAN_INFO_CACHE.put(type, info);
         }
         PropertyDescriptor[] all = info.getPropertyDescriptors();
         if (read && write) {
