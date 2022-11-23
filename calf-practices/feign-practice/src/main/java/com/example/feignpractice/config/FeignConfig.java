@@ -1,10 +1,13 @@
 package com.example.feignpractice.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Client;
 import feign.Contract;
 import feign.httpclient.ApacheHttpClient;
 import org.apache.http.client.HttpClient;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.openfeign.AnnotatedParameterProcessor;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignClientsConfiguration;
@@ -15,6 +18,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.Environment;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +48,8 @@ public class FeignConfig {
 
 
     /**
-     * 自定义注解生效  DefaultRequest
-     * @see DefaultRequest
+     * 自定义注解生效  RequestWith
+     * @see RequestWith
      *
      * @param feignConversionService
      * @return
@@ -61,5 +66,10 @@ public class FeignConfig {
             feignFormatterRegistrar.registerFormatters(conversionService);
         }
         return conversionService;
+    }
+
+    @Bean
+    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
+        return new MappingJackson2HttpMessageConverter(objectMapper);
     }
 }
