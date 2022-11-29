@@ -1,10 +1,6 @@
 package com.github.shawven.calf.oplog.server.autoconfig;
 
-import io.etcd.jetcd.Client;
-import io.etcd.jetcd.Util;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 

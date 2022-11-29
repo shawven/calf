@@ -3,7 +3,6 @@ package com.github.shawven.calf.oplog.server.autoconfig;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitDataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitHttpClient;
-import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitServiceImpl;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.DirectExchange;
@@ -15,7 +14,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,11 +36,6 @@ class DataPublisherAutoConfiguration {
         @Autowired
         private RabbitProperties rabbitProperties;
 
-
-        @Bean
-        public RabbitServiceImpl rabbitService(RabbitHttpClient rabbitHttpClient) {
-            return new RabbitServiceImpl(rabbitProperties.getVirtualHost(), rabbitHttpClient);
-        }
 
         @Bean
         @ConditionalOnProperty("spring.rabbit.host")
@@ -97,20 +90,20 @@ class DataPublisherAutoConfiguration {
     }
 
 
-    @Configuration(proxyBeanMethods = false)
-    @ConfigurationProperties(prefix = "kafka.zk")
-    @EnableConfigurationProperties(KafkaProperties.class)
-    static class KafkaConfiguration {
-
-        @Autowired
-        private KafkaProperties kafkaProperties;
-
-        @Bean
-        public ZkClient zkClient() {
-            return new ZkClient(kafkaProperties.getServers(),
-                    kafkaProperties.getSessionTimeout(),
-                    kafkaProperties.getConnectionTimeout(),
-                    ZKStringSerializer$.MODULE$);
-        }
-    }
+//    @Configuration(proxyBeanMethods = false)
+//    @ConfigurationProperties(prefix = "kafka.zk")
+//    @EnableConfigurationProperties(KafkaProperties.class)
+//    static class KafkaConfiguration {
+//
+//        @Autowired
+//        private KafkaProperties kafkaProperties;
+//
+//        @Bean
+//        public ZkClient zkClient() {
+//            return new ZkClient(kafkaProperties.getServers(),
+//                    kafkaProperties.getSessionTimeout(),
+//                    kafkaProperties.getConnectionTimeout(),
+//                    ZKStringSerializer$.MODULE$);
+//        }
+//    }
 }

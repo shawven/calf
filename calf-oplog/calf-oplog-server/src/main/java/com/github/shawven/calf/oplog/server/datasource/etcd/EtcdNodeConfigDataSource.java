@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.github.shawven.calf.oplog.server.core.ServiceSwitcher;
 import com.github.shawven.calf.oplog.server.mode.Command;
 import com.github.shawven.calf.oplog.server.mode.CommandType;
-import com.github.shawven.calf.oplog.base.OplogConstants;
+import com.github.shawven.calf.oplog.base.Consts;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.datasource.DataSourceException;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
@@ -70,7 +70,7 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
         KV kvClient = etcdClient.getKVClient();
         List<NodeConfig> NodeConfigs = new ArrayList<>();
         try {
-            GetResponse configRes = kvClient.get(ByteSequence.from(keyPrefixUtil.withPrefix(OplogConstants.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8)).get();
+            GetResponse configRes = kvClient.get(ByteSequence.from(keyPrefixUtil.withPrefix(Consts.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8)).get();
 
             if(configRes == null || configRes.getCount() == 0) {
                 return NodeConfigs;
@@ -175,7 +175,7 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
     public void registerWatcher(ServiceSwitcher serviceSwitcher) {
         Watch watchClient = etcdClient.getWatchClient();
         watchClient.watch(
-                ByteSequence.from(keyPrefixUtil.withPrefix(OplogConstants.DEFAULT_BINLOG_CONFIG_COMMAND_KEY), StandardCharsets.UTF_8),
+                ByteSequence.from(keyPrefixUtil.withPrefix(Consts.DEFAULT_BINLOG_CONFIG_COMMAND_KEY), StandardCharsets.UTF_8),
                 WatchOption.newBuilder().withPrevKV(true).withNoDelete(true).build(),
                 new Watch.Listener() {
 
@@ -218,7 +218,7 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
         KV kvClient = etcdClient.getKVClient();
         try {
             kvClient.put(
-                    ByteSequence.from(keyPrefixUtil.withPrefix(OplogConstants.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8),
+                    ByteSequence.from(keyPrefixUtil.withPrefix(Consts.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8),
                     ByteSequence.from(JSON.toJSONString(NodeConfigs), StandardCharsets.UTF_8)
             ).get();
         } catch (InterruptedException | ExecutionException e) {

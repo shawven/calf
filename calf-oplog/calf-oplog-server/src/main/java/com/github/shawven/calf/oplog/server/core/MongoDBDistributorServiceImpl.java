@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.oplog.base.OplogConstants;
+import com.github.shawven.calf.oplog.base.Consts;
 import com.github.shawven.calf.oplog.server.datasource.DataSourceException;
 import com.github.shawven.calf.oplog.base.ServiceStatus;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
@@ -125,7 +125,7 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
         executorService.submit(() -> {
             String namespace = config.getNamespace();
             String identification = NetUtils.getLocalAddress().getHostAddress();
-            String identificationPath = keyPrefixUtil.withPrefix(OplogConstants.LEADER_IDENTIFICATION_PATH);
+            String identificationPath = keyPrefixUtil.withPrefix(Consts.LEADER_IDENTIFICATION_PATH);
             OplogLeaderSelectorListener listener = new OplogLeaderSelectorListener(opLogClientFactory, config, nodeConfigDataSource);
             LeaderSelector leaderSelector = new LeaderSelector(etcdClient, config.getNamespace(), 20L, identification, identificationPath, listener);
             leaderSelectorMap.put(namespace, leaderSelector);

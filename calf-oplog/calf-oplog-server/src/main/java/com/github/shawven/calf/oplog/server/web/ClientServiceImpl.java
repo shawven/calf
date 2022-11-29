@@ -3,6 +3,7 @@ package com.github.shawven.calf.oplog.server.web;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
+import com.github.shawven.calf.oplog.base.Consts;
 import com.github.shawven.calf.oplog.client.EventBaseErrorDTO;
 import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
@@ -77,7 +78,7 @@ public class ClientServiceImpl implements ClientService {
     public List<String> listErrorClient() {
 
         List<String> clientList=new ArrayList();
-        Iterable<String> keys = redissonClient.getKeys().getKeysByPattern(Constants.REDIS_PREFIX.concat("BIN-LOG-ERR-MAP-*"));
+        Iterable<String> keys = redissonClient.getKeys().getKeysByPattern(Consts.REDIS_PREFIX.concat("BIN-LOG-ERR-MAP-*"));
         keys.forEach(key->{
             clientList.add(key);
         });

@@ -64,6 +64,7 @@
             <artifactId>httpclient</artifactId>
             <optional>true</optional>
         </dependency>
+
         <!-- Autoconfigure -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
