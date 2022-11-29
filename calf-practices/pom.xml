@@ -26,6 +26,10 @@
         <module>demo-practice</module>
         <module>es7-practice</module>
         <module>websocket-practice</module>
+        <module>feign-practice</module>
+        <module>kafka-practice</module>
+        <module>shell-practice</module>
+        <module>native-practice</module>
     </modules>
 
 </project>
