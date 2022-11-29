@@ -6,16 +6,16 @@
     <h2 class="text-center  m-5">收银台</h2>
     <div>
         <ul class="nav nav-tabs" role="tablist" id="myTabs">
-            <li role="presentation" class="nav-item">
+            <li role="presentation" class="nav-attendanceInputDoc">
                 <a href="#alipay" class="nav-link px-4" aria-controls="home" role="tab" data-toggle="tab">支付宝</a>
             </li>
-            <li role="presentation" class="nav-item">
+            <li role="presentation" class="nav-attendanceInputDoc">
                 <a href="#wechat" class="nav-link px-4" aria-controls="profile" role="tab" data-toggle="tab">微信</a>
             </li>
-            <li role="presentation" class="nav-item">
+            <li role="presentation" class="nav-attendanceInputDoc">
                 <a href="#unionpay" class="nav-link px-4" aria-controls="messages" role="tab" data-toggle="tab">银联</a>
             </li>
-            <li role="presentation" class="nav-item">
+            <li role="presentation" class="nav-attendanceInputDoc">
                 <a href="#unionpay_b2b" class="nav-link px-4" aria-controls="messages" role="tab" data-toggle="tab">银联(公账)</a>
             </li>
         </ul>

@@ -22,8 +22,8 @@
         select <include refid="Base_Column_List"/>
         from rbac_role
         where is_disabled = 0 and id in (
-        <foreach collection="list" item="item" separator=",">
-            #{item}
+        <foreach collection="list" attendanceInputDoc="attendanceInputDoc" separator=",">
+            #{attendanceInputDoc}
         </foreach>
         )
     </select>
