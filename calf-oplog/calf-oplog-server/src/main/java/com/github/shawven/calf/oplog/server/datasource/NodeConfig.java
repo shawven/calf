@@ -12,7 +12,7 @@ public class NodeConfig {
     private String password;
     private Integer serverId;
 
-    private String dataSourceUrl = "mongodb://root@192.168.2.201:27017/?authSource=admin";
+    private String dataSourceUrl = "mongodb://localhost:27017/?authSource=admin";
 
     private String driverClassName;
 

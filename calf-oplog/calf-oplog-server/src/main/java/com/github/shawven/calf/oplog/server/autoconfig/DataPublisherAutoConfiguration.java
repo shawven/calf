@@ -2,7 +2,7 @@ package com.github.shawven.calf.oplog.server.autoconfig;
 
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitDataPublisher;
-import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitHttpClient;
+import com.rabbitmq.http.client.Client;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.DirectExchange;
@@ -67,21 +67,18 @@ class DataPublisherAutoConfiguration {
         }
 
         @Bean
-        public RabbitHttpClient rabbitHttpClient() throws MalformedURLException, URISyntaxException {
-            return new RabbitHttpClient(
-                    rabbitProperties.getApiUrl(),
-                    rabbitProperties.getUsername(),
-                    rabbitProperties.getPassword());
+        public Client rabbitHttpClient() throws MalformedURLException, URISyntaxException {
+            return new Client(rabbitProperties.getApiUrl(), rabbitProperties.getUsername(), rabbitProperties.getPassword());
         }
 
-        @Bean("notifyExchange")
+        @Bean
         public DirectExchange notifyExchange(ConnectionFactory connectionFactory) {
             DirectExchange notifyExchange = new DirectExchange(NOTIFY_EXCHANGE,true,false);
             new RabbitAdmin(connectionFactory).declareExchange(notifyExchange);
             return notifyExchange;
         }
 
-        @Bean("dataExchange")
+        @Bean
         public TopicExchange dataExchange(ConnectionFactory connectionFactory) {
             TopicExchange dataExchange = new TopicExchange(DATA_EXCHANGE,true,false);
             new RabbitAdmin(connectionFactory).declareExchange(dataExchange);

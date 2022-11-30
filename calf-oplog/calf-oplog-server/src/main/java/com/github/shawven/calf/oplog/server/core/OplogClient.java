@@ -2,13 +2,13 @@ package com.github.shawven.calf.oplog.server.core;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
-import com.mongodb.MongoClient;
 import com.mongodb.MongoInterruptedException;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.bson.BsonTimestamp;
 import org.bson.Document;
 import org.slf4j.Logger;

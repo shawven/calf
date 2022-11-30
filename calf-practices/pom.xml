@@ -30,6 +30,7 @@
         <module>kafka-practice</module>
         <module>shell-practice</module>
         <module>native-practice</module>
+        <module>etcd-practice</module>
     </modules>
 
 </project>

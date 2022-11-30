@@ -5,7 +5,7 @@ import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.core.OpLogClientFactory;
 import com.github.shawven.calf.oplog.server.core.OpLogEventHandler;
 import com.github.shawven.calf.oplog.server.core.OplogClient;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -6,9 +6,12 @@ import com.github.shawven.calf.oplog.server.core.DistributorService;
 import com.github.shawven.calf.oplog.server.core.MongoDBDistributorServiceImpl;
 import com.github.shawven.calf.oplog.server.core.OpLogClientFactory;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
+import com.github.shawven.calf.oplog.server.datasource.LeaderSelectorFactory;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
+import com.github.shawven.calf.oplog.server.datasource.etcd.EtcdLeaderSelectorFactory;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
+import io.etcd.jetcd.Client;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +45,13 @@ class OplogServerAutoConfiguration {
 
     @Bean
     public DistributorService distributorService(OpLogClientFactory opLogClientFactory,
-                                          ClientDataSource clientDataSource,
-                                          NodeConfigDataSource nodeConfigDataSource,
-                                          KeyPrefixUtil keyPrefixUtil,
-                                          DataPublisherManager dataPublisherManager) {
-        return new MongoDBDistributorServiceImpl(opLogClientFactory, clientDataSource, nodeConfigDataSource,
-                keyPrefixUtil, dataPublisherManager);
+                                                 LeaderSelectorFactory leaderSelectorFactory,
+                                                 ClientDataSource clientDataSource,
+                                                 NodeConfigDataSource nodeConfigDataSource,
+                                                 KeyPrefixUtil keyPrefixUtil,
+                                                 DataPublisherManager dataPublisherManager) {
+        return new MongoDBDistributorServiceImpl(opLogClientFactory, leaderSelectorFactory, nodeConfigDataSource,
+                keyPrefixUtil, clientDataSource, dataPublisherManager);
     }
 
     @Bean
@@ -61,20 +65,5 @@ class OplogServerAutoConfiguration {
     public DataPublisherManager opLogDataPublisher(Map<String, DataPublisher> dataPublisherMap){
         return new DataPublisherManager(dataPublisherMap);
     }
-
-
-    @Bean
-    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
-        return args -> {
-            Environment env = ctx.getEnvironment();
-            logger.info("server.port=>{}",env.getProperty("server.port"));
-            logger.info("spring.redisson.address=>{}",env.getProperty("spring.redisson.address"));
-            logger.info("spring.redisson.database=>{}", env.getProperty("spring.redisson.database"));
-            String[] beanDefinitionNames =  ctx.getBeanDefinitionNames();
-            Arrays.stream(beanDefinitionNames).sorted().forEach(val ->{
-            });
-        };
-    }
-
 
 }

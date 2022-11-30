@@ -1,0 +1,8 @@
+spring:
+  redis:
+    host: ${target-host}
+    redisson:
+      file: classpath:redisson.yml
+  etcd:
+    endpoints: http://localhost:2379
+    root: 204

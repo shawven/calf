@@ -2,11 +2,8 @@ package com.github.shawven.calf.oplog.server.core;
 
 
 import com.github.shawven.calf.oplog.base.Consts;
-import com.github.shawven.calf.oplog.server.datasource.DataSourceException;
+import com.github.shawven.calf.oplog.server.datasource.*;
 import com.github.shawven.calf.oplog.base.ServiceStatus;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
-import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.datasource.leaderselector.LeaderSelector;
 import com.github.shawven.calf.oplog.server.mode.Command;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
@@ -46,23 +43,24 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
 
     private ScheduledExecutorService scheduledExecutorService;
 
+    private LeaderSelectorFactory leaderSelectorFactory;
+
     private Map<String, LeaderSelector> leaderSelectorMap = new ConcurrentHashMap<>();
 
-    public MongoDBDistributorServiceImpl(OpLogClientFactory opLogClientFactory,
-                                         ClientDataSource clientDataSource,
-                                         NodeConfigDataSource nodeConfigDataSource,
-                                         KeyPrefixUtil keyPrefixUtil,
-                                         DataPublisherManager dataPublisherManager) {
+    public MongoDBDistributorServiceImpl(OpLogClientFactory opLogClientFactory, LeaderSelectorFactory leaderSelectorFactory,
+                                         NodeConfigDataSource nodeConfigDataSource, KeyPrefixUtil keyPrefixUtil,
+                                         ClientDataSource clientDataSource, DataPublisherManager dataPublisherManager) {
         this.opLogClientFactory = opLogClientFactory;
-        this.clientDataSource = clientDataSource;
+        this.leaderSelectorFactory = leaderSelectorFactory;
         this.nodeConfigDataSource = nodeConfigDataSource;
         this.keyPrefixUtil = keyPrefixUtil;
+        this.clientDataSource = clientDataSource;
         this.dataPublisherManager = dataPublisherManager;
     }
 
     @Override
     public void startDistribute() {
-        // 1. 从etcd获得初始配置信息
+        // 1. 获得初始配置信息
         List<NodeConfig> configList = nodeConfigDataSource.init(TYPE);
 
         // 2. 竞争每个数据源的Leader
@@ -127,7 +125,9 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
             String identification = NetUtils.getLocalAddress().getHostAddress();
             String identificationPath = keyPrefixUtil.withPrefix(Consts.LEADER_IDENTIFICATION_PATH);
             OplogLeaderSelectorListener listener = new OplogLeaderSelectorListener(opLogClientFactory, config, nodeConfigDataSource);
-            LeaderSelector leaderSelector = new LeaderSelector(etcdClient, config.getNamespace(), 20L, identification, identificationPath, listener);
+
+            LeaderSelector leaderSelector = leaderSelectorFactory.getLeaderSelector(namespace, 20L, identification, identificationPath, listener);
+
             leaderSelectorMap.put(namespace, leaderSelector);
             leaderSelector.start();
         });

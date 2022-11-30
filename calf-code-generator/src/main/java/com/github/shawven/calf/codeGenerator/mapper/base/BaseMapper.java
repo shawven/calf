@@ -17,7 +17,7 @@ public interface BaseMapper<T> extends com.baomidou.mybatisplus.core.mapper.Base
         return selectOne(new QueryWrapper<>(entity));
     }
 
-    default Integer selectCount(T entity) {
+    default long selectCount(T entity) {
         return selectCount(new QueryWrapper<>(entity));
     }
 

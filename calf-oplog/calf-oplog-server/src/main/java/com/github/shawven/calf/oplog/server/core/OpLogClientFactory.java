@@ -5,8 +5,9 @@ import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.internal.MongoClientImpl;
 import org.bson.BsonTimestamp;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -107,7 +108,7 @@ public class OpLogClientFactory {
     }
 
     private MongoClient getMongoClient(NodeConfig nodeConfig) {
-        return new MongoClient(new MongoClientURI(nodeConfig.getDataSourceUrl()));
+        return MongoClients.create(nodeConfig.getDataSourceUrl());
     }
 
     private void registerMetaDataWatcher(NodeConfig nodeConfig, OpLogEventHandlerFactory opLogEventHandlerFactory) {

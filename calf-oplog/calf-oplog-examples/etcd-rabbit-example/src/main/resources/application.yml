@@ -1,18 +1,20 @@
+target-host: localhost
+
 spring:
   redis:
-    host: 192.168.2.201
+    host: ${target-host}
     redisson:
       file: classpath:redisson.yml
 
   rabbit:
-    host: 192.168.2.201
+    host: ${target-host}
     port: 5672
-    username: guest
-    password: guest
+    username: user
+    password: bitnami
     virtualHost: /binlog
-    apiUrl: http://192.168.2.201:15672/api/
+    apiUrl: http://${target-host}:15672/api/
   etcd:
-    endpoints: http://192.168.2.201:2379
+    endpoints: http://${target-host}:2379
     root: 204
 
 #自动注册客户端(服务端的地址)

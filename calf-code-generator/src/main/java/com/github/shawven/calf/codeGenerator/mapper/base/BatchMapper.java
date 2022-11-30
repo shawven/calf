@@ -116,38 +116,7 @@ public interface BatchMapper<T> extends AopSupport {
      * @param consumer
      * @return
      */
-    default boolean executeBatch(Consumer<SqlSession> consumer) {
-        SqlSessionFactory sqlSessionFactory = SqlHelper.sqlSessionFactory(currentModelClass());
-        SqlSessionHolder sqlSessionHolder = (SqlSessionHolder) TransactionSynchronizationManager.getResource(sqlSessionFactory);
-        boolean transaction = TransactionSynchronizationManager.isSynchronizationActive();
-        if (sqlSessionHolder != null) {
-            SqlSession sqlSession = sqlSessionHolder.getSqlSession();
-            //原生无法支持执行器切换，当存在批量操作时，会嵌套两个session的，优先commit上一个session
-            //按道理来说，这里的值应该一直为false。
-            sqlSession.commit(!transaction);
-        }
-        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);
-        if (!transaction) {
-            log.warn("SqlSession [" + sqlSession + "] was not registered for synchronization because DataSource is not transactional");
-        }
-        try {
-            consumer.accept(sqlSession);
-            //非事物情况下，强制commit。
-            sqlSession.commit(!transaction);
-            return true;
-        } catch (Throwable t) {
-            sqlSession.rollback();
-            Throwable unwrapped = ExceptionUtil.unwrapThrowable(t);
-            if (unwrapped instanceof RuntimeException) {
-                MyBatisExceptionTranslator myBatisExceptionTranslator
-                        = new MyBatisExceptionTranslator(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(), true);
-                throw Objects.requireNonNull(myBatisExceptionTranslator.translateExceptionIfPossible((RuntimeException) unwrapped));
-            }
-            throw ExceptionUtils.mpe(unwrapped);
-        } finally {
-            sqlSession.close();
-        }
-    }
+   boolean executeBatch(Consumer<SqlSession> consumer);
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     default Class<T> currentModelClass() {

@@ -3,8 +3,11 @@ package com.github.shawven.calf.oplog.client.rabbit;
 import com.github.shawven.calf.oplog.client.DataSubscriber;
 import com.github.shawven.calf.oplog.client.DatabaseEventHandler;
 import com.rabbitmq.client.*;
+import com.rabbitmq.http.client.Client;
+import com.rabbitmq.http.client.domain.QueueInfo;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.IOException;
 import java.util.List;

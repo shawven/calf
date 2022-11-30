@@ -3,7 +3,7 @@ package com.github.shawven.calf.oplog.server.core;
 
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
 
 /**
  * @author: kl @kailing.pub
@@ -11,7 +11,7 @@ import com.mongodb.MongoClient;
  */
 public class OpLogEventContext {
 
-    private MongoClient  mongoClient;
+    private MongoClient mongoClient;
 
 
     private NodeConfig nodeConfig;

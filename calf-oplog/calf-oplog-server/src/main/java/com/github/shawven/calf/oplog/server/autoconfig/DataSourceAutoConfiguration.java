@@ -2,11 +2,13 @@ package com.github.shawven.calf.oplog.server.autoconfig;
 
 import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
+import com.github.shawven.calf.oplog.server.datasource.LeaderSelectorFactory;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.datasource.etcd.EtcdClientDataSource;
+import com.github.shawven.calf.oplog.server.datasource.etcd.EtcdLeaderSelectorFactory;
 import com.github.shawven.calf.oplog.server.datasource.etcd.EtcdNodeConfigDataSource;
 import io.etcd.jetcd.Client;
-import io.etcd.jetcd.Util;
+import io.etcd.jetcd.support.Util;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -32,6 +34,12 @@ class DataSourceAutoConfiguration {
         }
 
         @Bean
+        @ConditionalOnMissingBean(LeaderSelectorFactory.class)
+        public LeaderSelectorFactory leaderSelectorFactory(Client client) {
+            return new EtcdLeaderSelectorFactory(client);
+        }
+
+        @Bean
         public KeyPrefixUtil keyPrefixUtil(EtcdProperties etcdProperties) {
             return new KeyPrefixUtil(etcdProperties.getRoot());
         }
@@ -44,10 +52,9 @@ class DataSourceAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean(ClientDataSource.class)
-        public ClientDataSource clientDataSource(Client client, KeyPrefixUtil keyPrefixUtil,
+        public ClientDataSource etcdClientDataSource(Client client, KeyPrefixUtil keyPrefixUtil,
                                                  NodeConfigDataSource nodeConfigDataSource) {
             return new EtcdClientDataSource(client, keyPrefixUtil, nodeConfigDataSource);
         }
-
     }
 }

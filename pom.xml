@@ -23,7 +23,7 @@
         <module>calf-examples</module>
         <module>calf-practices</module>
 
-<!--        <module>calf-oplog</module>-->
+        <module>calf-oplog</module>
         <module>calf-payment</module>
         <module>calf-util</module>
     </modules>
