@@ -6,9 +6,12 @@ import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import org.bson.Document;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author: kl @kailing.pub
@@ -22,6 +25,7 @@ public abstract class OpLogEventHandler {
 
     public OpLogEventHandler(OpLogEventContext context) {
         this.context = context;
+        updateClientBatch(context.getClients());
     }
 
     public String getDataBase(Document event){
@@ -69,7 +73,34 @@ public abstract class OpLogEventHandler {
         }
     }
 
+    /**
+     * 添加客户端关注的表
+     *
+     * @param client
+     */
+    public void addClient(ClientInfo client) {
+        String key = getClientInfoMapKey(client);
+        Set<ClientInfo> set = clientInfoMap.computeIfAbsent(key, k -> new HashSet<>());
+        set.add(client);
+    }
 
+    /**
+     * 删除客户端关注的表
+     *
+     * @param clientInfo
+     */
+    public void deleteClient(ClientInfo clientInfo){
+        String key = getClientInfoMapKey(clientInfo);
+        Set<ClientInfo> clientInfos = clientInfoMap.get(key);
+        clientInfos.remove(clientInfo);
+        clientInfoMap.put(key, clientInfos);
+    }
+
+    public void updateClientBatch(List<ClientInfo> clients) {
+        clients.stream()
+                .collect(Collectors.groupingBy(this::getClientInfoMapKey))
+                .forEach((mapKey, clientInfoList) -> clientInfoMap.put(mapKey, new HashSet<>(clientInfoList)));
+    }
 
     private String getClientInfoMapKey(ClientInfo clientInfo) {
         return clientInfo.getDatabaseName().concat("/").concat(clientInfo.getTableName());

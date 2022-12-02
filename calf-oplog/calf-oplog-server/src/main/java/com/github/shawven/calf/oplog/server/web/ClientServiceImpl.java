@@ -5,9 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 import com.github.shawven.calf.oplog.base.Consts;
 import com.github.shawven.calf.oplog.client.EventBaseErrorDTO;
+import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
-import com.github.shawven.calf.oplog.server.datasource.etcd.EtcdService;
+import com.github.shawven.calf.oplog.server.datasource.DataSourceService;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitService;
 import com.rabbitmq.http.client.domain.QueueInfo;
@@ -32,13 +33,13 @@ public class ClientServiceImpl implements ClientService {
     RedissonClient redissonClient;
 
     @Autowired
-    private RabbitService rabbitMQService;
+    private RabbitService rabbitService;
 
     @Autowired
-    private NodeConfigDataSource binaryLogConfigContainer;
+    private NodeConfigDataSource nodeConfigDataSource;
 
     @Autowired
-    private EtcdService etcdService;
+    private ClientDataSource clientDataSource;
 
     @Autowired
     private DataPublisher dataPublisher;
@@ -49,7 +50,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public void addClient(ClientInfo clientInfo, Integer partitions, Integer replication) {
 
-        etcdService.addBinLogConsumerClient(clientInfo);
+        clientDataSource.addBinLogConsumerClient(clientInfo);
 
         if(ClientInfo.QUEUE_TYPE_KAFKA.equals(clientInfo.getQueueType())){
 //            kafkaService.createKafkaTopic(clientInfo, partitions, replication);
@@ -60,7 +61,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public List<ClientInfo> listClient(String queryType) {
 
-        return etcdService.listBinLogConsumerClient(queryType);
+        return clientDataSource.listBinLogConsumerClient(queryType);
     }
 
     @Override
@@ -88,13 +89,13 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public void deleteClient(ClientInfo clientInfo) {
 
-        etcdService.removeBinLogConsumerClient(clientInfo);
+        clientDataSource.removeBinLogConsumerClient(Collections.singletonList(clientInfo));
     }
 
     @Override
     public String getLogStatus() {
 
-        List<Map<String, Object>> res = etcdService.listBinLogStatus();
+        List<Map<String, Object>> res = clientDataSource.listBinLogStatus();
         return JSONArray.toJSONString(res);
     }
 
@@ -112,7 +113,7 @@ public class ClientServiceImpl implements ClientService {
                 return object.toJSONString();
         } else if (ClientInfo.QUEUE_TYPE_RABBIT.equals(type)) {
                 ClientId="BIN-LOG-DATA-".concat(clientName);
-                QueueInfo queueInfo = rabbitMQService.getQueue(ClientId);
+                QueueInfo queueInfo = rabbitService.getQueue(ClientId);
                 if (queueInfo == null || new Long(0L).equals(queueInfo.getMessagesReady())) {
                     object.put("queueSize", 0);
                     object.put("queue", new ArrayList<>());
@@ -120,7 +121,7 @@ public class ClientServiceImpl implements ClientService {
                 } else {
                     long queueSize = queueInfo.getMessagesReady();
                     long count = (repage + 10) > queueSize ? queueSize : (repage + 10);
-                    List<EventBaseDTO> list = rabbitMQService.getMessageList(ClientId, count);
+                    List<EventBaseDTO> list = rabbitService.getMessageList(ClientId, count);
                     list = list.subList(repage, list.size());
                     object.put("queueSize", queueSize);
                     object.put("queue", list);
@@ -154,16 +155,16 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<String> listNamespace() {
-        return binaryLogConfigContainer.getNamespaceList();
+        return nodeConfigDataSource.getNamespaceList();
     }
 
     @Override
     public Result deleteTopic(String clientInfoKey) {
 
-        List<ClientInfo> clientInfos = etcdService.listBinLogConsumerClientByKey(clientInfoKey);
+        List<ClientInfo> clientInfos = clientDataSource.listBinLogConsumerClientByKey(clientInfoKey);
 
         // 从EventHandler的发送列表中删除
-        etcdService.removeBinLogConsumerClient(clientInfos);
+        clientDataSource.removeBinLogConsumerClient(clientInfos);
 
         // 刪除对应队列中的topic
         Set<String> clientInfoSet = new HashSet<>();

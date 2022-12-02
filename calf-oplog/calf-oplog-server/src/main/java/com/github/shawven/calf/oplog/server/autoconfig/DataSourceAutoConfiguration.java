@@ -2,6 +2,7 @@ package com.github.shawven.calf.oplog.server.autoconfig;
 
 import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
+import com.github.shawven.calf.oplog.server.datasource.DataSourceService;
 import com.github.shawven.calf.oplog.server.datasource.LeaderSelectorFactory;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.datasource.etcd.EtcdClientDataSource;
@@ -44,17 +45,18 @@ class DataSourceAutoConfiguration {
             return new KeyPrefixUtil(etcdProperties.getRoot());
         }
 
-        @Bean
-        @ConditionalOnMissingBean(NodeConfigDataSource.class)
-        public NodeConfigDataSource nodeConfigDataSource(Client client, KeyPrefixUtil keyPrefixUtil) {
-            return new EtcdNodeConfigDataSource(client, keyPrefixUtil);
-        }
 
         @Bean
         @ConditionalOnMissingBean(ClientDataSource.class)
         public ClientDataSource etcdClientDataSource(Client client, KeyPrefixUtil keyPrefixUtil,
                                                  NodeConfigDataSource nodeConfigDataSource) {
             return new EtcdClientDataSource(client, keyPrefixUtil, nodeConfigDataSource);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean(NodeConfigDataSource.class)
+        public NodeConfigDataSource nodeConfigDataSource(Client client, KeyPrefixUtil keyPrefixUtil) {
+            return new EtcdNodeConfigDataSource(client, keyPrefixUtil);
         }
     }
 }

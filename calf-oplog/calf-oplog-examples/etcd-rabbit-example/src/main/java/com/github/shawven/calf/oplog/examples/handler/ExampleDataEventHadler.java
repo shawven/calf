@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 @HandleDatabaseEvent(
         namespace = "test",
         database = "test",
-        table = "student",
+        table = "t_user",
         events = {DatabaseEvent.WRITE_ROWS,DatabaseEvent.UPDATE_ROWS, DatabaseEvent.DELETE_ROWS},
         lockLevel = LockLevel.TABLE)
 public class ExampleDataEventHadler implements DatabaseEventHandler {

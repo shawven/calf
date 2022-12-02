@@ -19,7 +19,7 @@ public class DataSourceController {
 
     private final DistributorService distributorService;
 
-    public DataSourceController(@Qualifier("MongoDB") DistributorService distributorService) {
+    public DataSourceController(DistributorService distributorService) {
         this.distributorService = distributorService;
     }
 

@@ -1,6 +1,7 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
+import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -80,16 +82,22 @@ public class OpLogClientFactory {
         String namespace = nodeConfig.getNamespace();
 
         MongoClient mongoClient = this.getMongoClient(nodeConfig);
-        OpLogEventContext context = new OpLogEventContext(mongoClient, nodeConfig, dataPublisherManager);
+        OpLogEventContext context = createEventContext(nodeConfig, mongoClient);
 
         OpLogEventHandlerFactory opLogEventHandlerFactory = new OpLogEventHandlerFactory(context);
 
         OplogClient client = new OplogClient(mongoClient, opLogEventHandlerFactory);
+
         // 配置当前位置
         configOpLogStatus(client, nodeConfig);
         // 启动Client列表数据监听
         registerMetaDataWatcher(nodeConfig, opLogEventHandlerFactory);
         return client;
+    }
+
+    private OpLogEventContext createEventContext(NodeConfig nodeConfig, MongoClient mongoClient) {
+        List<ClientInfo> clients = clientDataSource.listBinLogConsumerClient(nodeConfig);
+        return new OpLogEventContext(mongoClient, nodeConfig, dataPublisherManager, clients);
     }
 
     /**

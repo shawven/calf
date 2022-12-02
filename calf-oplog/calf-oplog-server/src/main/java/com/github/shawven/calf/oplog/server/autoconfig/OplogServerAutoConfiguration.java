@@ -11,6 +11,11 @@ import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.datasource.etcd.EtcdLeaderSelectorFactory;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
+import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitService;
+import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitServiceImpl;
+import com.github.shawven.calf.oplog.server.web.ClientController;
+import com.github.shawven.calf.oplog.server.web.ClientServiceImpl;
+import com.github.shawven.calf.oplog.server.web.DataSourceController;
 import io.etcd.jetcd.Client;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -64,6 +69,12 @@ class OplogServerAutoConfiguration {
     @Bean
     public DataPublisherManager opLogDataPublisher(Map<String, DataPublisher> dataPublisherMap){
         return new DataPublisherManager(dataPublisherMap);
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @Import({ClientController.class, DataSourceController.class, ClientServiceImpl.class, RabbitServiceImpl.class})
+    static class webSupportConfiguration {
+
     }
 
 }

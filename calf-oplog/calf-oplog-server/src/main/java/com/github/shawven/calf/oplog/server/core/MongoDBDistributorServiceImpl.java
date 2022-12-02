@@ -81,22 +81,22 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
                 if(StringUtils.isEmpty(namespace)) {
                     return;
                 }
-
-                if(!StringUtils.isEmpty(delegatedIp)) {
-                    NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
-                    String localIp = getLocalIp(config.getDataSourceType());
-                    if(!delegatedIp.equals(localIp)) {
-                        logger.info("Ignore start database command for ip not matching. local: [{}] delegatedId: [{}]", localIp, delegatedIp);
-                        try {
-                            // 非指定ip延迟等待30s后竞争
-                            TimeUnit.SECONDS.sleep(30);
-                        } catch (InterruptedException ignored) {
-
-                        }
-                    }
-                }
-                NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
-                MongoDBDistributorServiceImpl.this.startTask(config);
+                nodeConfigDataSource.getAll();
+//                if(!StringUtils.isEmpty(delegatedIp)) {
+//                    NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
+//                    String localIp = getLocalIp(config.getDataSourceType());
+//                    if(!delegatedIp.equals(localIp)) {
+//                        logger.info("Ignore start database command for ip not matching. local: [{}] delegatedId: [{}]", localIp, delegatedIp);
+//                        try {
+//                            // 非指定ip延迟等待30s后竞争
+//                            TimeUnit.SECONDS.sleep(30);
+//                        } catch (InterruptedException ignored) {
+//
+//                        }
+//                    }
+//                }
+//                NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
+//                MongoDBDistributorServiceImpl.this.startTask(config);
             }
 
             @Override
