@@ -81,22 +81,29 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
                 if(StringUtils.isEmpty(namespace)) {
                     return;
                 }
-                nodeConfigDataSource.getAll();
-//                if(!StringUtils.isEmpty(delegatedIp)) {
-//                    NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
-//                    String localIp = getLocalIp(config.getDataSourceType());
-//                    if(!delegatedIp.equals(localIp)) {
-//                        logger.info("Ignore start database command for ip not matching. local: [{}] delegatedId: [{}]", localIp, delegatedIp);
-//                        try {
-//                            // 非指定ip延迟等待30s后竞争
-//                            TimeUnit.SECONDS.sleep(30);
-//                        } catch (InterruptedException ignored) {
-//
-//                        }
-//                    }
-//                }
-//                NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
-//                MongoDBDistributorServiceImpl.this.startTask(config);
+
+                if(!StringUtils.isEmpty(delegatedIp)) {
+                    CompletableFuture.runAsync(() -> {
+                        NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
+                        String localIp = getLocalIp(config.getDataSourceType());
+                        if(!delegatedIp.equals(localIp)) {
+                            logger.info("Ignore start database command for ip not matching. local: [{}] delegatedId: [{}]", localIp, delegatedIp);
+                            try {
+                                // 非指定ip延迟等待30s后竞争
+                                TimeUnit.SECONDS.sleep(30);
+                            } catch (InterruptedException ignored) {
+
+                            }
+                        }
+                    });
+
+                }
+                CompletableFuture.runAsync(() -> {
+
+                    NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
+                    MongoDBDistributorServiceImpl.this.startTask(config);
+                });
+
             }
 
             @Override
@@ -105,8 +112,11 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
                 if(StringUtils.isEmpty(namespace)) {
                     return;
                 }
-                MongoDBDistributorServiceImpl.this.stopTask(namespace);
-                logger.info("[" + namespace + "] 关闭datasource监听成功");
+                CompletableFuture.runAsync(() -> {
+                    MongoDBDistributorServiceImpl.this.stopTask(namespace);
+                    logger.info("[" + namespace + "] 关闭datasource监听成功");
+                });
+
             }
         });
 
