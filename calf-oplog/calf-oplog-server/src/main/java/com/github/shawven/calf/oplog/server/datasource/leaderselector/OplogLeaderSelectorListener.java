@@ -1,11 +1,14 @@
 package com.github.shawven.calf.oplog.server.datasource.leaderselector;
 
+import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.core.OpLogClientFactory;
-import com.github.shawven.calf.oplog.server.core.OpLogEventHandler;
+import com.github.shawven.calf.oplog.server.core.AbstractOpLogEventHandler;
 import com.github.shawven.calf.oplog.server.core.OplogClient;
 import io.reactivex.rxjava3.disposables.Disposable;
+import org.bson.BsonTimestamp;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,14 +26,17 @@ public class OplogLeaderSelectorListener implements LeaderSelectorListener {
     private OpLogClientFactory opLogClientFactory;
     private OplogClient oplogClient;
     private NodeConfig nodeConfig;
+    private ClientDataSource clientDataSource;
     private NodeConfigDataSource nodeConfigDataSource;
     private Disposable disposable;
 
     public OplogLeaderSelectorListener(OpLogClientFactory opLogClientFactory,
                                        NodeConfig nodeConfig,
+                                       ClientDataSource clientDataSource,
                                        NodeConfigDataSource nodeConfigDataSource) {
         this.opLogClientFactory = opLogClientFactory;
         this.nodeConfig = nodeConfig;
+        this.clientDataSource = clientDataSource;
         this.nodeConfigDataSource = nodeConfigDataSource;
     }
 
@@ -43,8 +49,9 @@ public class OplogLeaderSelectorListener implements LeaderSelectorListener {
             disposable = oplogClient.getOplog().subscribe(document -> {
                 opLogClientFactory.eventCount.incrementAndGet();
                 String eventType = document.getString(EVENTTYPE_KEY);
-                OpLogEventHandler handler = oplogClient.getOpLogEventHandlerFactory().getHandler(eventType);
+                AbstractOpLogEventHandler handler = oplogClient.getOpLogEventHandlerFactory().getHandler(eventType);
                 handler.handle(document);
+                updateOpLogStatus(document);
             });
             nodeConfig.setActive(true);
             nodeConfig.setVersion(nodeConfig.getVersion() + 1);
@@ -62,5 +69,15 @@ public class OplogLeaderSelectorListener implements LeaderSelectorListener {
         nodeConfig.setActive(false);
         nodeConfigDataSource.update(nodeConfig);
         return opLogClientFactory.closeClient(oplogClient, nodeConfig.getNamespace());
+    }
+
+    /**
+     * 更新日志位置
+     *
+     * @param document
+     */
+    protected void updateOpLogStatus(Document document) {
+        BsonTimestamp ts = (BsonTimestamp) document.get(OpLogClientFactory.TIMESTAMP_KEY);
+        clientDataSource.updateBinLogStatus(String.valueOf(ts.getTime()), ts.getInc(), nodeConfig, System.currentTimeMillis());
     }
 }

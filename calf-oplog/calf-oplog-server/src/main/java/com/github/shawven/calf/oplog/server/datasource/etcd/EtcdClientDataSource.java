@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -69,21 +70,22 @@ public class EtcdClientDataSource implements ClientDataSource {
         String namespace = config.getNamespace();
         String binLogStatusKey = config.getBinLogStatusKey();
 
-        String binLogStatusStr = getMetaData(namespace, binLogStatusKey);
-        Map<String, Object> binLogStatus;
-        if(StringUtils.isEmpty(binLogStatusStr)) {
-            binLogStatus = new HashMap<>();
-        } else {
-            binLogStatus = JSON.parseObject(binLogStatusStr).toJavaObject(Map.class);
-        }
+        asyncGetMetaData(namespace, binLogStatusKey).thenAccept(binLogStatusStr -> {
+            Map<String, Object> binLogStatus;
+            if(StringUtils.isEmpty(binLogStatusStr)) {
+                binLogStatus = new HashMap<>();
+            } else {
+                binLogStatus = JSON.parseObject(binLogStatusStr).toJavaObject(Map.class);
+            }
 
-        if(!StringUtils.isEmpty(binlogFilename)) {
-            binLogStatus.put("binlogFilename", binlogFilename);
-        }
-        binLogStatus.put("binlogPosition", binlogPosition);
-        binLogStatus.put("timestamp", timestamp);
-        binLogStatus.put("datetime", LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_DATE_TIME));
-        writeMetaData(namespace, binLogStatusKey, JSON.toJSONString(binLogStatus));
+            if(!StringUtils.isEmpty(binlogFilename)) {
+                binLogStatus.put("binlogFilename", binlogFilename);
+            }
+            binLogStatus.put("binlogPosition", binlogPosition);
+            binLogStatus.put("timestamp", timestamp);
+            binLogStatus.put("datetime", LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_DATE_TIME));
+            writeMetaData(namespace, binLogStatusKey, JSON.toJSONString(binLogStatus));
+        });
     }
 
     @Override
@@ -124,16 +126,18 @@ public class EtcdClientDataSource implements ClientDataSource {
         String namespace = clientInfo.getNamespace();
         NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
 
-        String binLogClientSetStr = getMetaData(namespace, config.getBinLogClientSet());
-        Set<ClientInfo> clientSet = null;
-        if(StringUtils.isEmpty(binLogClientSetStr)) {
-            clientSet = new HashSet<>();
-        } else {
-            List<ClientInfo> clientList = JSON.parseArray(binLogClientSetStr, ClientInfo.class);
-            clientSet = new HashSet<>(clientList);
-        }
-        clientSet.add(clientInfo);
-        writeMetaData(namespace, config.getBinLogClientSet(), JSON.toJSONString(clientSet));
+        asyncGetMetaData(namespace, config.getBinLogClientSet()).thenAccept(binLogClientSetStr -> {
+            Set<ClientInfo> clientSet = null;
+            if(StringUtils.isEmpty(binLogClientSetStr)) {
+                clientSet = new HashSet<>();
+            } else {
+                List<ClientInfo> clientList = JSON.parseArray(binLogClientSetStr, ClientInfo.class);
+                clientSet = new HashSet<>(clientList);
+            }
+            clientSet.add(clientInfo);
+            writeMetaData(namespace, config.getBinLogClientSet(), JSON.toJSONString(clientSet));
+        });
+
     }
 
     @Override
@@ -142,15 +146,16 @@ public class EtcdClientDataSource implements ClientDataSource {
         String namespace = clientInfo.getNamespace();
 
         NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
-        String binLogClientSetStr = getMetaData(namespace, config.getBinLogClientSet());
-        if(StringUtils.isEmpty(binLogClientSetStr)) {
-            return;
-        } else {
-            List<ClientInfo> clientList = JSON.parseArray(binLogClientSetStr, ClientInfo.class);
-            Set<ClientInfo> clientSet = new HashSet<>(clientList);
-            clientSet.remove(clientInfo);
-            writeMetaData(namespace, config.getBinLogClientSet(), JSON.toJSONString(clientSet));
-        }
+        asyncGetMetaData(namespace, config.getBinLogClientSet()).thenAccept(binLogClientSetStr -> {
+            if(StringUtils.isEmpty(binLogClientSetStr)) {
+                return;
+            } else {
+                List<ClientInfo> clientList = JSON.parseArray(binLogClientSetStr, ClientInfo.class);
+                Set<ClientInfo> clientSet = new HashSet<>(clientList);
+                clientSet.remove(clientInfo);
+                writeMetaData(namespace, config.getBinLogClientSet(), JSON.toJSONString(clientSet));
+            }
+        });
     }
 
     @Override
@@ -160,15 +165,16 @@ public class EtcdClientDataSource implements ClientDataSource {
         clientMap.forEach((namespace, clientList) -> {
 
             NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
-            String binLogClientSetStr = getMetaData(namespace, config.getBinLogClientSet());
-            if(StringUtils.isEmpty(binLogClientSetStr)) {
-                return;
-            } else {
-                List<ClientInfo> currentList = JSON.parseArray(binLogClientSetStr, ClientInfo.class);
-                Set<ClientInfo> clientSet = new HashSet<>(currentList);
-                clientSet.removeAll(clientList);
-                writeMetaData(namespace, config.getBinLogClientSet(), JSON.toJSONString(clientSet));
-            }
+            asyncGetMetaData(namespace, config.getBinLogClientSet()).thenAccept(binLogClientSetStr -> {
+                if(StringUtils.isEmpty(binLogClientSetStr)) {
+                    return;
+                } else {
+                    List<ClientInfo> currentList = JSON.parseArray(binLogClientSetStr, ClientInfo.class);
+                    Set<ClientInfo> clientSet = new HashSet<>(currentList);
+                    clientSet.removeAll(clientList);
+                    writeMetaData(namespace, config.getBinLogClientSet(), JSON.toJSONString(clientSet));
+                }
+            });
         });
 
     }
@@ -246,13 +252,11 @@ public class EtcdClientDataSource implements ClientDataSource {
     }
 
     @Override
-    public void updateServiceStatus(String serviceKey, ServiceStatus status, long leaseId) throws Exception {
-
+    public void updateServiceStatus(String serviceKey, ServiceStatus status, long leaseId) {
         KV client = this.client.getKVClient();
         client.put(ByteSequence.from(keyPrefixUtil.withPrefix(Consts.SERVICE_STATUS_PATH).concat(serviceKey), StandardCharsets.UTF_8),
                 ByteSequence.from(JSON.toJSONString(status), StandardCharsets.UTF_8),
-                PutOption.newBuilder().withLeaseId(leaseId).build())
-                .get();
+                PutOption.newBuilder().withLeaseId(leaseId).build());
     }
 
     /**
@@ -282,6 +286,17 @@ public class EtcdClientDataSource implements ClientDataSource {
         return serviceStatuses;
     }
 
+    private CompletableFuture<String> asyncGetMetaData(String namespace, String dataKey) {
+        return client.getKVClient().get(keyPrefix(namespace, dataKey))
+                .thenApply(o -> {
+                    List<KeyValue> kvs = o.getKvs();
+                    if(kvs != null && !kvs.isEmpty()) {
+                        return kvs.get(0).getValue().toString(StandardCharsets.UTF_8);
+                    }
+                    return null;
+                });
+    }
+
     private String getMetaData(String namespace, String dataKey) {
         KV kvClient = client.getKVClient();
         String metaData = null;
@@ -297,12 +312,7 @@ public class EtcdClientDataSource implements ClientDataSource {
     }
 
     private void writeMetaData(String namespace, String dataKey, String metaData) {
-        KV kvClient = client.getKVClient();
-        try {
-            kvClient.put(keyPrefix(namespace, dataKey), ByteSequence.from(metaData, StandardCharsets.UTF_8)).get();
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("Failed to connect to etcd server.",e);
-        }
+        client.getKVClient().put(keyPrefix(namespace, dataKey), ByteSequence.from(metaData, StandardCharsets.UTF_8));
     }
 
     private ByteSequence keyPrefix(String namespace, String key) {

@@ -1,7 +1,15 @@
 package com.github.shawven.calf.oplog.server.core;
 
+import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
+import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author: kl @kailing.pub
@@ -19,14 +27,31 @@ public class OpLogEventHandlerFactory {
     private final OpLogDefaultEventHandler defaultEventHandler;
 
     public OpLogEventHandlerFactory(OpLogEventContext context) {
+        String namespace = context.getNodeConfig().getNamespace();
+        DataPublisherManager dataPublisherManager = context.getDataPublisherManager();
+        Map<String, Set<ClientInfo>> clientInfoMap = extractedClientInfoMap(context);
 
-        this.updateEventHandler = new OpLogUpdateEventHandler(context);
-        this.writeEventHandler = new OpLogWriteEventHandler(context);
-        this.deleteEventHandler = new OpLogDeleteEventHandler(context);
-        this.defaultEventHandler = new OpLogDefaultEventHandler(context);
+        this.updateEventHandler = new OpLogUpdateEventHandler(namespace, dataPublisherManager, clientInfoMap);
+        this.writeEventHandler = new OpLogWriteEventHandler(namespace, dataPublisherManager, clientInfoMap);
+        this.deleteEventHandler = new OpLogDeleteEventHandler(namespace, dataPublisherManager, clientInfoMap);
+        this.defaultEventHandler = new OpLogDefaultEventHandler(namespace, dataPublisherManager, clientInfoMap);
     }
 
-    public OpLogEventHandler getHandler(String eventType) {
+    private Map<String, Set<ClientInfo>> extractedClientInfoMap(OpLogEventContext context) {
+        Map<String, Set<ClientInfo>> clientInfoMap = new HashMap<>();
+        context.getClients().stream()
+                .collect(Collectors.groupingBy(this::getClientInfoMapKey))
+                .forEach((mapKey, clientInfoList) -> {
+                    clientInfoMap.put(mapKey, new HashSet<>(clientInfoList));
+                });
+        return clientInfoMap;
+    }
+
+    private String getClientInfoMapKey(ClientInfo clientInfo) {
+        return clientInfo.getDatabaseName().concat("/").concat(clientInfo.getTableName());
+    }
+
+    public AbstractOpLogEventHandler getHandler(String eventType) {
         switch (eventType) {
             case "u":
                 return updateEventHandler;

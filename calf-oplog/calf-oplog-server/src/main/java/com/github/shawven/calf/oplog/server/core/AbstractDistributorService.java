@@ -8,7 +8,6 @@ import com.github.shawven.calf.oplog.server.mode.CommandType;
 import com.github.shawven.calf.oplog.base.ServiceStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,24 +19,25 @@ import java.util.concurrent.ScheduledExecutorService;
 public abstract class AbstractDistributorService implements DistributorService {
     protected static final Logger logger = LoggerFactory.getLogger(AbstractDistributorService.class);
 
-    protected ScheduledExecutorService scheduledExecutorService;
+    protected NodeConfigDataSource nodeConfigDataSource;
 
-    @Autowired
-    protected NodeConfigDataSource dataSource;
-
-    @Autowired
     protected ClientDataSource clientDataSource;
+
+    public AbstractDistributorService(NodeConfigDataSource nodeConfigDataSource, ClientDataSource clientDataSource) {
+        this.nodeConfigDataSource = nodeConfigDataSource;
+        this.clientDataSource = clientDataSource;
+    }
 
     @Override
     public List<NodeConfig> getAllConfigs() {
 
-        return dataSource.getAll();
+        return nodeConfigDataSource.getAll();
     }
 
     @Override
     public boolean persistDatasourceConfig(NodeConfig config) {
 
-        boolean res = dataSource.create(config);
+        boolean res = nodeConfigDataSource.create(config);
         if(!res) {
             return false;
         }
@@ -47,7 +47,7 @@ public abstract class AbstractDistributorService implements DistributorService {
     @Override
     public boolean removeDatasourceConfig(String namespace) {
 
-        NodeConfig removedConfig = dataSource.remove(namespace);
+        NodeConfig removedConfig = nodeConfigDataSource.remove(namespace);
         if(removedConfig == null) {
             return false;
         }

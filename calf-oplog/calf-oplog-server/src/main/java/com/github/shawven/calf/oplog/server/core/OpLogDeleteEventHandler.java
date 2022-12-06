@@ -4,6 +4,7 @@ import com.github.shawven.calf.oplog.base.DatabaseEvent;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.server.mode.DeleteRowsDTO;
+import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +18,12 @@ import java.util.Set;
  * @author: kl @kailing.pub
  * @date: 2020/1/7
  */
-public class OpLogDeleteEventHandler extends OpLogEventHandler {
+public class OpLogDeleteEventHandler extends AbstractOpLogEventHandler {
+
     private static final Logger log = LoggerFactory.getLogger(OpLogDeleteEventHandler.class);
 
-    public OpLogDeleteEventHandler(OpLogEventContext context) {
-        super(context);
+    public OpLogDeleteEventHandler(String namespace, DataPublisherManager dataPublisherManager, Map<String, Set<ClientInfo>> clientInfoMap) {
+        super(namespace, dataPublisherManager, clientInfoMap);
     }
 
     @Override
@@ -31,20 +33,12 @@ public class OpLogDeleteEventHandler extends OpLogEventHandler {
         //添加表信息
         deleteRowsDTO.setDatabase(super.getDataBase(event));
         deleteRowsDTO.setTable(super.getTable(event));
-        deleteRowsDTO.setNamespace(context.getNodeConfig().getNamespace());
+        deleteRowsDTO.setNamespace(getNamespace());
         //添加列映射
         Document context = (Document) event.get(OpLogClientFactory.CONTEXT_KEY);
         List<Map<String, Object>> urs = new ArrayList<>();
         urs.add(context);
         deleteRowsDTO.setRowMaps(urs);
         return deleteRowsDTO;
-    }
-
-    @Override
-    protected Set<ClientInfo> filter(Document event) {
-        String database = super.getDataBase(event);
-        String table = super.getTable(event);
-        String tableKey = database.concat("/").concat(table);
-        return clientInfoMap.get(tableKey);
     }
 }

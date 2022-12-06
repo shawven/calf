@@ -3,6 +3,7 @@ package com.github.shawven.calf.oplog.server.datasource;
 import com.github.shawven.calf.oplog.server.core.ServiceSwitcher;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author xw
@@ -21,6 +22,8 @@ public interface NodeConfigDataSource {
     NodeConfig getByNamespace(String namespace);
 
     List<NodeConfig> getAll();
+
+    CompletableFuture<List<NodeConfig>> asyncGetAll();
 
     List<String> getNamespaceList();
 

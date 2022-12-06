@@ -50,6 +50,7 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
     public MongoDBDistributorServiceImpl(OpLogClientFactory opLogClientFactory, LeaderSelectorFactory leaderSelectorFactory,
                                          NodeConfigDataSource nodeConfigDataSource, KeyPrefixUtil keyPrefixUtil,
                                          ClientDataSource clientDataSource, DataPublisherManager dataPublisherManager) {
+        super(nodeConfigDataSource, clientDataSource);
         this.opLogClientFactory = opLogClientFactory;
         this.leaderSelectorFactory = leaderSelectorFactory;
         this.nodeConfigDataSource = nodeConfigDataSource;
@@ -134,7 +135,8 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
             String namespace = config.getNamespace();
             String identification = NetUtils.getLocalAddress().getHostAddress();
             String identificationPath = keyPrefixUtil.withPrefix(Consts.LEADER_IDENTIFICATION_PATH);
-            OplogLeaderSelectorListener listener = new OplogLeaderSelectorListener(opLogClientFactory, config, nodeConfigDataSource);
+            OplogLeaderSelectorListener listener = new OplogLeaderSelectorListener(opLogClientFactory, config,
+                    clientDataSource, nodeConfigDataSource);
 
             LeaderSelector leaderSelector = leaderSelectorFactory.getLeaderSelector(namespace, 20L, identification, identificationPath, listener);
 

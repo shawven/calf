@@ -163,7 +163,7 @@ public class EtcdLeaderSelector implements LeaderSelector {
 
     private void cancelTask() {
         try {
-            if (state.equals(State.HOLD) && leaderSelectorListener.afterLosingLeadership()) {
+            if (state.get().equals(State.HOLD) && leaderSelectorListener.afterLosingLeadership()) {
                 state.set(State.STARTED);
             }
             if (leaseCloser != null) {

@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -67,21 +68,25 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
 
     @Override
     public List<NodeConfig> getAll() {
-        KV kvClient = etcdClient.getKVClient();
-        List<NodeConfig> NodeConfigs = new ArrayList<>();
         try {
-            GetResponse configRes = kvClient.get(ByteSequence.from(keyPrefixUtil.withPrefix(Consts.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8)).get();
-
-            if(configRes == null || configRes.getCount() == 0) {
-                return NodeConfigs;
-            }
-            // not range query
-            String configListStr = configRes.getKvs().get(0).getValue().toString(StandardCharsets.UTF_8);
-            NodeConfigs = JSON.parseArray(configListStr, NodeConfig.class);
+            return asyncGetAll().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new DataSourceException("Failed to connect to etcd server.", e);
         }
-        return NodeConfigs;
+    }
+
+    @Override
+    public CompletableFuture<List<NodeConfig>> asyncGetAll() {
+        return etcdClient.getKVClient()
+                .get(ByteSequence.from(keyPrefixUtil.withPrefix(Consts.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8))
+                .thenApply(configRes -> {
+                    if(configRes == null || configRes.getCount() == 0) {
+                        return new ArrayList<>();
+                    }
+                    // not range query
+                    String configListStr = configRes.getKvs().get(0).getValue().toString(StandardCharsets.UTF_8);
+                    return JSON.parseArray(configListStr, NodeConfig.class);
+                });
     }
 
     @Override
@@ -105,28 +110,28 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
         if(Thread.currentThread().isInterrupted()) {
             return;
         }
+        asyncGetAll().thenAccept(configList -> {
+            AtomicBoolean modifyFlag = new AtomicBoolean(false);
+            configList = configList.stream().map((c) -> {
+                if(newConfig.getNamespace().equalsIgnoreCase(c.getNamespace())) {
 
-        AtomicBoolean modifyFlag = new AtomicBoolean(false);
-        List<NodeConfig> configList = getAll();
-        configList = configList.stream().map((c) -> {
-            if(newConfig.getNamespace().equalsIgnoreCase(c.getNamespace())) {
+                    // 版本号小于集群中版本号则忽略
+                    if(newConfig.getVersion() < c.getVersion()) {
+                        logger.warn("Ignore BinLogConfig[{}] Modify case local version [{}] < current version [{}]", newConfig.getNamespace(), newConfig.getVersion(), c.getVersion());
+                        return c;
+                    } else {
+                        modifyFlag.set(true);
 
-                // 版本号小于集群中版本号则忽略
-                if(newConfig.getVersion() < c.getVersion()) {
-                    logger.warn("Ignore BinLogConfig[{}] Modify case local version [{}] < current version [{}]", newConfig.getNamespace(), newConfig.getVersion(), c.getVersion());
-                    return c;
-                } else {
-                    modifyFlag.set(true);
-
-                    return newConfig;
+                        return newConfig;
+                    }
                 }
-            }
-            return c;
-        }).collect(Collectors.toList());
+                return c;
+            }).collect(Collectors.toList());
 
-        if(modifyFlag.get()) {
-            persistConfig(configList);
-        }
+            if(modifyFlag.get()) {
+                persistConfig(configList);
+            }
+        });
     }
 
     @Override
@@ -215,14 +220,9 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
 
 
     private void persistConfig(List<NodeConfig> NodeConfigs) {
-        KV kvClient = etcdClient.getKVClient();
-        try {
-            kvClient.put(
-                    ByteSequence.from(keyPrefixUtil.withPrefix(Consts.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8),
-                    ByteSequence.from(JSON.toJSONString(NodeConfigs), StandardCharsets.UTF_8)
-            ).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new DataSourceException("Failed to connect to etcd server.", e);
-        }
+        etcdClient.getKVClient().put(
+                ByteSequence.from(keyPrefixUtil.withPrefix(Consts.DEFAULT_BINLOG_CONFIG_KEY), StandardCharsets.UTF_8),
+                ByteSequence.from(JSON.toJSONString(NodeConfigs), StandardCharsets.UTF_8)
+        );
     }
 }
