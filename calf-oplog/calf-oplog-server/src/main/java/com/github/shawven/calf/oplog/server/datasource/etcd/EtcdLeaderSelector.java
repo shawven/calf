@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -78,10 +79,6 @@ public class EtcdLeaderSelector implements LeaderSelector {
         STARTED,
         //关闭
         CLOSE
-    }
-
-    public EtcdLeaderSelector(Client client, String leaderPath, Long leaseTTL, String identification, LeaderSelectorListener listener) {
-        this(client, leaderPath, leaseTTL, identification, DEFAULT_LEADER_IDENTIFICATION_PATH,true, listener);
     }
 
     public EtcdLeaderSelector(Client client, String leaderPath, Long leaseTTL, String identification, String leaderIdentificationPath, LeaderSelectorListener listener) {
@@ -203,13 +200,13 @@ public class EtcdLeaderSelector implements LeaderSelector {
             @Override
             public void onError(Throwable t) {
                 logger.debug("LeaderSelector lease renewal Exception!", t.fillInStackTrace());
-                cancelTask();
+                CompletableFuture.runAsync(() -> cancelTask());
             }
 
             @Override
             public void onCompleted() {
                 logger.info("LeaderSelector lease renewal completed! start canceling task.");
-                cancelTask();
+                CompletableFuture.runAsync(() -> cancelTask());
             }
         });
         return leaseId;

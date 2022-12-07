@@ -37,9 +37,9 @@ class DataPublisherAutoConfiguration {
         private RabbitProperties rabbitProperties;
 
 
-        @Bean
+        @Bean("rabbitDataPublisher")
         @ConditionalOnProperty("spring.rabbit.host")
-        public DataPublisher dataPublisher(AmqpAdmin amqpAdmin,
+        public DataPublisher rabbitDataPublisher(AmqpAdmin amqpAdmin,
                                            AmqpTemplate amqpTemplate,
                                            DirectExchange notifyExchange,
                                            TopicExchange dataExchange) {

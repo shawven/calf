@@ -68,7 +68,8 @@ public class OplogLeaderSelectorListener implements LeaderSelectorListener {
         disposable.dispose();
         nodeConfig.setActive(false);
         nodeConfigDataSource.update(nodeConfig);
-        return opLogClientFactory.closeClient(oplogClient, nodeConfig.getNamespace());
+        opLogClientFactory.closeClient(oplogClient, nodeConfig.getNamespace());
+        return true;
     }
 
     /**

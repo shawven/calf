@@ -23,7 +23,7 @@ public class OpLogDefaultEventHandler extends AbstractOpLogEventHandler {
 
     @Override
     public void handle(Document event) {
-        log.info("跳过不处理的MongoDB事件event:{}", event);
+        log.debug("跳过不处理的MongoDB事件event:{}", event);
     }
 
 }

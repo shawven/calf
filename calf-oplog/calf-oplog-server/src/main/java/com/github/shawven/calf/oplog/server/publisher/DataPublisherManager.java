@@ -120,6 +120,6 @@ public class DataPublisherManager {
     }
 
     public DataPublisher selectDataPublisher(ClientInfo clientInfo) {
-        return dataPublisherMap.get(clientInfo.getQueueType());
+        return dataPublisherMap.get(clientInfo.getQueueType().toLowerCase() + "DataPublisher");
     }
 }
