@@ -1,21 +1,18 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.internal.MongoClientImpl;
 import org.bson.BsonTimestamp;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -27,13 +24,12 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class OpLogClientFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(OpLogClientFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpLogClientFactory.class);
 
     protected final RedissonClient redissonClient;
 
-    private final DataPublisherManager dataPublisherManager;
-
     private final NodeConfigDataSource nodeConfigDataSource;
+
     private final ClientDataSource clientDataSource;
 
 
@@ -69,35 +65,21 @@ public class OpLogClientFactory {
 
     public OpLogClientFactory(ClientDataSource clientDataSource,
                               NodeConfigDataSource nodeConfigDataSource,
-                              RedissonClient redissonClient,
-                              DataPublisherManager dataPublisherManager) {
+                              RedissonClient redissonClient) {
         this.redissonClient = redissonClient;
-        this.dataPublisherManager = dataPublisherManager;
         this.nodeConfigDataSource = nodeConfigDataSource;
         this.clientDataSource = clientDataSource;
     }
 
     public OplogClient initClient(NodeConfig nodeConfig) {
+        MongoClient mongoClient = MongoClients.create(nodeConfig.getDataSourceUrl());
 
-        String namespace = nodeConfig.getNamespace();
-
-        MongoClient mongoClient = this.getMongoClient(nodeConfig);
-        OpLogEventContext context = createEventContext(nodeConfig, mongoClient);
-
-        OpLogEventHandlerFactory opLogEventHandlerFactory = new OpLogEventHandlerFactory(context);
-
-        OplogClient client = new OplogClient(mongoClient, opLogEventHandlerFactory);
+        OplogClient client = new OplogClient(mongoClient);
 
         // 配置当前位置
         configOpLogStatus(client, nodeConfig);
-        // 启动Client列表数据监听
-        registerMetaDataWatcher(nodeConfig, opLogEventHandlerFactory);
-        return client;
-    }
 
-    private OpLogEventContext createEventContext(NodeConfig nodeConfig, MongoClient mongoClient) {
-        List<ClientInfo> clients = clientDataSource.listBinLogConsumerClient(nodeConfig);
-        return new OpLogEventContext(mongoClient, nodeConfig, dataPublisherManager, clients);
+        return client;
     }
 
     /**
@@ -115,21 +97,12 @@ public class OpLogClientFactory {
         }
     }
 
-    private MongoClient getMongoClient(NodeConfig nodeConfig) {
-        return MongoClients.create(nodeConfig.getDataSourceUrl());
-    }
-
-    private void registerMetaDataWatcher(NodeConfig nodeConfig, OpLogEventHandlerFactory opLogEventHandlerFactory) {
-    }
-
-
-
     public boolean closeClient(OplogClient oplogClient, String namespace) {
         try {
             // remove active namespace
             oplogClient.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return true;
         }
         NodeConfig nodeConfig = nodeConfigDataSource.getByNamespace(namespace);
@@ -140,7 +113,7 @@ public class OpLogClientFactory {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return false;
         }
 
@@ -153,7 +126,6 @@ public class OpLogClientFactory {
     }
 
     public long eventCountSinceLastTime() {
-
         long total = eventCount.get();
         long res = total - lastEventCount;
 

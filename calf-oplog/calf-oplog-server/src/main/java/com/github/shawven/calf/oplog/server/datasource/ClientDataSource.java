@@ -5,6 +5,7 @@ import com.github.shawven.calf.oplog.server.mode.Command;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author xw
@@ -37,4 +38,6 @@ public interface ClientDataSource {
     void updateServiceStatus(String serviceKey, ServiceStatus status, long leaseId) throws Exception;
 
     List<ServiceStatus> getServiceStatus();
+
+    void watcherClientInfo(NodeConfig nodeConfig, Consumer<List<ClientInfo>> consumer);
 }

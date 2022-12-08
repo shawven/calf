@@ -2,7 +2,7 @@ package com.github.shawven.calf.oplog.server.datasource.etcd;
 
 import com.github.shawven.calf.oplog.server.datasource.LeaderSelectorFactory;
 import com.github.shawven.calf.oplog.server.datasource.leaderselector.LeaderSelector;
-import com.github.shawven.calf.oplog.server.datasource.leaderselector.OplogLeaderSelectorListener;
+import com.github.shawven.calf.oplog.server.core.OplogTaskListener;
 import io.etcd.jetcd.Client;
 
 /**
@@ -19,7 +19,7 @@ public class EtcdLeaderSelectorFactory implements LeaderSelectorFactory {
 
     @Override
     public LeaderSelector getLeaderSelector(String namespace, long timeToLive, String identification,
-                                            String identificationPath, OplogLeaderSelectorListener listener) {
+                                            String identificationPath, OplogTaskListener listener) {
 
         return new EtcdLeaderSelector(client, namespace, timeToLive, identification, identificationPath, listener);
     }

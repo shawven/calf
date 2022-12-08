@@ -28,10 +28,7 @@ public class OplogClient implements AutoCloseable{
 
     private BsonTimestamp ts;
 
-    private OpLogEventHandlerFactory opLogEventHandlerFactory;
-
-    public OplogClient(MongoClient mongoClient,OpLogEventHandlerFactory opLogEventHandlerFactory) {
-        this.opLogEventHandlerFactory = opLogEventHandlerFactory;
+    public OplogClient(MongoClient mongoClient) {
         this.mongoClient = mongoClient;
     }
 
@@ -158,13 +155,5 @@ public class OplogClient implements AutoCloseable{
 
     public void setOplog(Observable<Document> oplog) {
         this.oplog = oplog;
-    }
-
-    public OpLogEventHandlerFactory getOpLogEventHandlerFactory() {
-        return opLogEventHandlerFactory;
-    }
-
-    public void setOpLogEventHandlerFactory(OpLogEventHandlerFactory opLogEventHandlerFactory) {
-        this.opLogEventHandlerFactory = opLogEventHandlerFactory;
     }
 }

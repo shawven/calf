@@ -9,7 +9,6 @@ import com.github.shawven.calf.oplog.server.mode.Command;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.server.NetUtils;
-import com.github.shawven.calf.oplog.server.datasource.leaderselector.OplogLeaderSelectorListener;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.StringUtils;
 
@@ -74,7 +73,7 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
         });
 
         // 3. 注册数据源Config 命令Watcher
-        nodeConfigDataSource.registerWatcher(new ServiceSwitcher() {
+        nodeConfigDataSource.registerServiceWatcher(new NodeConfigDataSource.ServiceWatcher() {
             @Override
             public void start(Command command) {
                 String namespace = command.getNamespace();
@@ -122,7 +121,7 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
         });
 
         // 4. 服务节点上报
-        updateServiceStatus(TYPE);
+        updateServiceStatus();
     }
 
     public static String getLocalIp(String dataSourceType){
@@ -130,13 +129,14 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
     }
 
     @Override
-    public void startTask(NodeConfig config) {
+    public void startTask(NodeConfig nodeConfig) {
         executorService.submit(() -> {
-            String namespace = config.getNamespace();
+            String namespace = nodeConfig.getNamespace();
             String identification = NetUtils.getLocalAddress().getHostAddress();
             String identificationPath = keyPrefixUtil.withPrefix(Consts.LEADER_IDENTIFICATION_PATH);
-            OplogLeaderSelectorListener listener = new OplogLeaderSelectorListener(opLogClientFactory, config,
-                    clientDataSource, nodeConfigDataSource);
+
+            OplogTaskListener listener = new OplogTaskListener(nodeConfig,
+                    opLogClientFactory, clientDataSource, nodeConfigDataSource, dataPublisherManager);
 
             LeaderSelector leaderSelector = leaderSelectorFactory.getLeaderSelector(namespace, 20L, identification, identificationPath, listener);
 
@@ -154,14 +154,14 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
     }
 
 
-    protected void updateServiceStatus(String dataSourceType) {
+    protected void updateServiceStatus() {
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
         try {
             long leaseId = clientDataSource.getLease("Update Service Status", 20);
             scheduledExecutorService.scheduleWithFixedDelay(() -> {
 
                 ServiceStatus serviceStatus = new ServiceStatus();
-                String localIp = dataSourceType + ":" + NetUtils.getLocalAddress().getHostAddress();
+                String localIp = TYPE + ":" + NetUtils.getLocalAddress().getHostAddress();
                 serviceStatus.setIp(localIp);
 //                serviceStatus.setActiveNamespaces(opLogClientFactory.getActiveNameSpaces());
                 serviceStatus.setTotalEventCount(opLogClientFactory.getEventCount());

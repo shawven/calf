@@ -10,10 +10,7 @@ import com.github.shawven.calf.oplog.server.mode.WriteRowsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -38,7 +35,7 @@ public class DataPublisherManager {
         this.dataPublisherMap = dataPublisherMap;
     }
 
-    public void publish(Set<ClientInfo> clientInfos, EventBaseDTO data) {
+    public void publish(Collection<ClientInfo> clientInfos, EventBaseDTO data) {
         clientInfos.forEach(clientInfo -> {
             if (LockLevel.COLUMN.equals(clientInfo.getLockLevel())) {
                 List<Map<String, Object>> rowMaps;

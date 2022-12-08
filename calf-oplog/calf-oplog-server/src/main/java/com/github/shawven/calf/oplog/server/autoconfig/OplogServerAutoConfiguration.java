@@ -43,9 +43,8 @@ class OplogServerAutoConfiguration {
     @Bean
     public OpLogClientFactory opLogClientFactory(ClientDataSource clientDataSource,
                                           NodeConfigDataSource nodeConfigDataSource,
-                                          RedissonClient redissonClient,
-                                          DataPublisherManager dataPublisherManager) {
-        return new OpLogClientFactory(clientDataSource, nodeConfigDataSource, redissonClient, dataPublisherManager);
+                                          RedissonClient redissonClient) {
+        return new OpLogClientFactory(clientDataSource, nodeConfigDataSource, redissonClient);
     }
 
     @Bean

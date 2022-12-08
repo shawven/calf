@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.datasource.etcd;
 
 import com.github.shawven.calf.oplog.server.datasource.leaderselector.LeaderSelector;
-import com.github.shawven.calf.oplog.server.datasource.leaderselector.LeaderSelectorListener;
+import com.github.shawven.calf.oplog.server.datasource.leaderselector.TaskListener;
 import io.etcd.jetcd.*;
 import io.etcd.jetcd.lease.LeaseKeepAliveResponse;
 import io.etcd.jetcd.lock.LockResponse;
@@ -29,7 +29,7 @@ public class EtcdLeaderSelector implements LeaderSelector {
     /**
      * invoke when acquire leadership
      */
-    private final LeaderSelectorListener leaderSelectorListener;
+    private final TaskListener taskListener;
 
     /**
      * etcd lock client
@@ -81,18 +81,18 @@ public class EtcdLeaderSelector implements LeaderSelector {
         CLOSE
     }
 
-    public EtcdLeaderSelector(Client client, String leaderPath, Long leaseTTL, String identification, String leaderIdentificationPath, LeaderSelectorListener listener) {
+    public EtcdLeaderSelector(Client client, String leaderPath, Long leaseTTL, String identification, String leaderIdentificationPath, TaskListener listener) {
         this(client, leaderPath, leaseTTL, identification, leaderIdentificationPath, true, listener);
     }
 
-    public EtcdLeaderSelector (Client client, String leaderPath, Long leaseTTL, String identification, String leaderIdentificationPath, boolean autoRequeue, LeaderSelectorListener listener) {
+    public EtcdLeaderSelector (Client client, String leaderPath, Long leaseTTL, String identification, String leaderIdentificationPath, boolean autoRequeue, TaskListener listener) {
         this.lockClient = client.getLockClient();
         this.leaseClient = client.getLeaseClient();
         this.kvClient = client.getKVClient();
         this.leaderPath = leaderPath;
         this.leaseTTL = leaseTTL;
         this.autoRequeue = autoRequeue;
-        this.leaderSelectorListener = listener;
+        this.taskListener = listener;
         this.identification = identification == null ? null : ByteSequence.from(identification, StandardCharsets.UTF_8);
         leaderIdentificationPath = StringUtils.isEmpty(leaderIdentificationPath) ? DEFAULT_LEADER_IDENTIFICATION_PATH : leaderIdentificationPath;
         if(!leaderIdentificationPath.endsWith("/")) {
@@ -154,13 +154,14 @@ public class EtcdLeaderSelector implements LeaderSelector {
             logger.info("LeaderSelector uses [{}] as identification", finalIdentification.toString(StandardCharsets.UTF_8));
             kvClient.put(leaderIdentificationPathByte, finalIdentification).get();
             Assert.isTrue(state.compareAndSet(State.STARTED,State.HOLD),"Leadership cannot be acquired without initiating the process");
-            leaderSelectorListener.afterTakeLeadership();
+            taskListener.start();
         }
     }
 
     private void cancelTask() {
         try {
-            if (state.get().equals(State.HOLD) && leaderSelectorListener.afterLosingLeadership()) {
+            if (state.get().equals(State.HOLD)) {
+                taskListener.end();
                 state.set(State.STARTED);
             }
             if (leaseCloser != null) {
@@ -215,9 +216,8 @@ public class EtcdLeaderSelector implements LeaderSelector {
     @Override
     public void close() {
         if(State.HOLD.equals(state.get())){
-            if(leaderSelectorListener.afterLosingLeadership()) {
-                state.compareAndSet(State.HOLD, State.STARTED);
-            }
+            taskListener.end();
+            state.compareAndSet(State.HOLD, State.STARTED);
         }
         state.set(State.CLOSE);
         leaseCloser.close();

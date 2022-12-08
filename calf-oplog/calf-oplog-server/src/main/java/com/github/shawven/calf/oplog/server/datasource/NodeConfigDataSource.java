@@ -1,8 +1,8 @@
 package com.github.shawven.calf.oplog.server.datasource;
 
-import com.github.shawven.calf.oplog.server.core.ServiceSwitcher;
+import com.github.shawven.calf.oplog.server.mode.Command;
 
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -27,6 +27,13 @@ public interface NodeConfigDataSource {
 
     List<String> getNamespaceList();
 
-    void registerWatcher(ServiceSwitcher serviceSwitcher);
+    void registerServiceWatcher(ServiceWatcher watcher);
+
+    interface ServiceWatcher {
+
+        void start(Command command);
+
+        void stop(Command command);
+    }
 
 }

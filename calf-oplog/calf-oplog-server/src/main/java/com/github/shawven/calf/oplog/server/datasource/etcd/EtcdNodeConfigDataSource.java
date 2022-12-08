@@ -1,16 +1,16 @@
 package com.github.shawven.calf.oplog.server.datasource.etcd;
 
 import com.alibaba.fastjson.JSON;
-import com.github.shawven.calf.oplog.server.core.ServiceSwitcher;
-import com.github.shawven.calf.oplog.server.mode.Command;
-import com.github.shawven.calf.oplog.server.mode.CommandType;
 import com.github.shawven.calf.oplog.base.Consts;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
+import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.server.datasource.DataSourceException;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
-import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
-import io.etcd.jetcd.*;
-import io.etcd.jetcd.kv.GetResponse;
+import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
+import com.github.shawven.calf.oplog.server.mode.Command;
+import com.github.shawven.calf.oplog.server.mode.CommandType;
+import io.etcd.jetcd.ByteSequence;
+import io.etcd.jetcd.Client;
+import io.etcd.jetcd.Watch;
 import io.etcd.jetcd.options.WatchOption;
 import io.etcd.jetcd.watch.WatchEvent;
 import io.etcd.jetcd.watch.WatchResponse;
@@ -177,7 +177,7 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
     }
 
     @Override
-    public void registerWatcher(ServiceSwitcher serviceSwitcher) {
+    public void registerServiceWatcher(ServiceWatcher watcher) {
         Watch watchClient = etcdClient.getWatchClient();
         watchClient.watch(
                 ByteSequence.from(keyPrefixUtil.withPrefix(Consts.DEFAULT_BINLOG_CONFIG_COMMAND_KEY), StandardCharsets.UTF_8),
@@ -195,9 +195,9 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
 
                                 // 根据不同的命令类型（START/STOP）执行不同的逻辑
                                 if(CommandType.START_DATASOURCE.equals(command.getType())) {
-                                    serviceSwitcher.start(command);
+                                    watcher.start(command);
                                 } else if (CommandType.STOP_DATASOURCE.equals(command.getType())) {
-                                    serviceSwitcher.stop(command);
+                                    watcher.stop(command);
                                 }
                             }
                         }
@@ -206,13 +206,13 @@ public class EtcdNodeConfigDataSource implements NodeConfigDataSource {
                     @Override
                     public void onError(Throwable throwable) {
                         logger.error("Watch binlog config command error.", throwable);
-                        new Thread(() -> registerWatcher(serviceSwitcher)).start();
+                        new Thread(() -> registerServiceWatcher(watcher)).start();
                     }
 
                     @Override
                     public void onCompleted() {
                         logger.info("Watch binlog config command completed.");
-                        new Thread(() -> registerWatcher(serviceSwitcher)).start();
+                        new Thread(() -> registerServiceWatcher(watcher)).start();
                     }
                 }
         );

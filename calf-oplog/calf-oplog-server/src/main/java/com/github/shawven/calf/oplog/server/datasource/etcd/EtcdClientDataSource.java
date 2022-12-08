@@ -1,18 +1,20 @@
 package com.github.shawven.calf.oplog.server.datasource.etcd;
 
 import com.alibaba.fastjson.JSON;
-import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.base.Consts;
-import com.github.shawven.calf.oplog.server.mode.Command;
 import com.github.shawven.calf.oplog.base.ServiceStatus;
+import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
+import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
-import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
+import com.github.shawven.calf.oplog.server.mode.Command;
 import io.etcd.jetcd.*;
 import io.etcd.jetcd.lease.LeaseKeepAliveResponse;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
+import io.etcd.jetcd.options.WatchOption;
+import io.etcd.jetcd.watch.WatchResponse;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -284,6 +287,34 @@ public class EtcdClientDataSource implements ClientDataSource {
         }
 
         return serviceStatuses;
+    }
+
+    @Override
+    public void watcherClientInfo(NodeConfig nodeConfig, Consumer<List<ClientInfo>> consumer) {
+        client.getWatchClient().watch(
+                keyPrefix(nodeConfig.getNamespace(), nodeConfig.getBinLogClientSet()),
+                WatchOption.DEFAULT,
+                new Watch.Listener() {
+                    @Override
+                    public void onNext(WatchResponse response) {
+                        response.getEvents().forEach(event -> {
+                            KeyValue keyValue = event.getKeyValue();
+                            List<ClientInfo> clientInfos = JSON.parseArray(keyValue.getValue().toString(), ClientInfo.class);
+                            consumer.accept(clientInfos);
+                        });
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        logger.error("watcherClientInfos.onError: " + e.getMessage(), e);
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        logger.info("watcherClientInfos.onCompleted");
+                    }
+                }
+        );
     }
 
     private CompletableFuture<String> asyncGetMetaData(String namespace, String dataKey) {
