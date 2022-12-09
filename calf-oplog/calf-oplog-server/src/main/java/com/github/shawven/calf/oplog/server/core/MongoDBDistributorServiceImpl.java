@@ -131,14 +131,14 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
     @Override
     public void startTask(NodeConfig nodeConfig) {
         executorService.submit(() -> {
+            String path = keyPrefixUtil.withPrefix(Consts.LEADER_IDENTIFICATION_PATH);
             String namespace = nodeConfig.getNamespace();
-            String identification = NetUtils.getLocalAddress().getHostAddress();
-            String identificationPath = keyPrefixUtil.withPrefix(Consts.LEADER_IDENTIFICATION_PATH);
+            String uniqueId = NetUtils.getLocalAddress().getHostAddress();
 
             OplogTaskListener listener = new OplogTaskListener(nodeConfig,
                     opLogClientFactory, clientDataSource, nodeConfigDataSource, dataPublisherManager);
 
-            LeaderSelector leaderSelector = leaderSelectorFactory.getLeaderSelector(namespace, 20L, identification, identificationPath, listener);
+            LeaderSelector leaderSelector = leaderSelectorFactory.getLeaderSelector(path, namespace, uniqueId, 20L, listener);
 
             leaderSelectorMap.put(namespace, leaderSelector);
             leaderSelector.start();

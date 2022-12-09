@@ -11,7 +11,7 @@ public interface TaskListener {
     /**
      * 任务开始
      */
-    void start() throws InterruptedException;
+    void start();
 
     /**
      * 任务结束

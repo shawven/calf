@@ -1,5 +1,6 @@
 package com.github.shawven.calf.oplog.server.datasource.etcd;
 
+import com.github.shawven.calf.oplog.server.datasource.leaderselector.AbstractLeaderSelector;
 import com.github.shawven.calf.oplog.server.datasource.leaderselector.LeaderSelector;
 import com.github.shawven.calf.oplog.server.datasource.leaderselector.TaskListener;
 import io.etcd.jetcd.*;
@@ -9,190 +10,64 @@ import io.etcd.jetcd.support.CloseableClient;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class EtcdLeaderSelector implements LeaderSelector {
+class EtcdLeaderSelector extends AbstractLeaderSelector {
 
     private static final Logger logger = LoggerFactory.getLogger(LeaderSelector.class);
 
-    private static final String DEFAULT_LEADER_IDENTIFICATION_PATH = "/leader-selector/leader-identification/";
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
 
-    /**
-     * invoke when acquire leadership
-     */
-    private final TaskListener taskListener;
-
-    /**
-     * etcd lock client
-     */
-    private final Lock lockClient;
-
-    /**
-     * etcd lease client
-     */
-    private final Lease leaseClient;
+    private Client client;
 
     private CloseableClient leaseCloser;
 
-    /**
-     * etcd kv client
-     */
-    private final KV kvClient;
+    private final String path;
 
-    /**
-     * leader selector state
-     */
-    private final AtomicReference<State> state = new AtomicReference<>(State.STARTED);
+    private final String uniqueId;
 
-    /**
-     * keep racing for leadership when losing
-     */
-    private final boolean autoRequeue;
+    private final long ttl;
 
-    /**
-     * the path for this leadership group
-     */
-    private final String leaderPath;
 
-    /**
-     * the path for this leadership identification
-     */
-    private final String leaderIdentificationPath;
-
-    private final ByteSequence identification;
-
-    private final long leaseTTL;
-
-    private enum State {
-        //持有领导权
-        HOLD,
-        //准备领导竞争
-        STARTED,
-        //关闭
-        CLOSE
+    public EtcdLeaderSelector (Client client, String path, String uniqueId,
+                               Long ttl, boolean autoRequeue, TaskListener listener) {
+        super(autoRequeue, listener);
+        this.client = client;
+        this.path = path;
+        this.uniqueId = uniqueId != null ? uniqueId : UUID.randomUUID().toString();
+        this.ttl = ttl;
     }
 
-    public EtcdLeaderSelector(Client client, String leaderPath, Long leaseTTL, String identification, String leaderIdentificationPath, TaskListener listener) {
-        this(client, leaderPath, leaseTTL, identification, leaderIdentificationPath, true, listener);
-    }
 
-    public EtcdLeaderSelector (Client client, String leaderPath, Long leaseTTL, String identification, String leaderIdentificationPath, boolean autoRequeue, TaskListener listener) {
-        this.lockClient = client.getLockClient();
-        this.leaseClient = client.getLeaseClient();
-        this.kvClient = client.getKVClient();
-        this.leaderPath = leaderPath;
-        this.leaseTTL = leaseTTL;
-        this.autoRequeue = autoRequeue;
-        this.taskListener = listener;
-        this.identification = identification == null ? null : ByteSequence.from(identification, StandardCharsets.UTF_8);
-        leaderIdentificationPath = StringUtils.isEmpty(leaderIdentificationPath) ? DEFAULT_LEADER_IDENTIFICATION_PATH : leaderIdentificationPath;
-        if(!leaderIdentificationPath.endsWith("/")) {
-            leaderIdentificationPath = leaderIdentificationPath.concat("/");
-        }
-        this.leaderIdentificationPath = leaderIdentificationPath;
-    }
-
-    /**
-     * get current leader.
-     *
-     * @return null if there is no current leader.
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
     @Override
-    public String getLeader() throws Exception {
+    protected void doStartCallback() throws ExecutionException, InterruptedException {
+        ByteSequence pathKey = ByteSequence.from(path, UTF_8);
+        ByteSequence uniqueIdKey = ByteSequence.from(uniqueId, UTF_8);
 
-        KeyValue identificationKV = kvClient
-                .get(ByteSequence.from(leaderIdentificationPath.concat(leaderPath), StandardCharsets.UTF_8))
-                .get()
-                // null safety
-                .getKvs()
-                .get(0);
-
-        return identificationKV == null ? null : identificationKV.getValue().toString(StandardCharsets.UTF_8);
+        logger.info("LeaderSelector uses [{}] as uniqueId", uniqueId);
+        client.getKVClient().put(pathKey, uniqueIdKey).get();
     }
 
-    /**
-     * start racing for leadership.
-     */
     @Override
-    public void start() {
-        logger.info("LeaderSelector start racing for leadership");
-        leaderElection();
+    public void close() {
+        super.close();
+        leaseCloser.close();
     }
 
 
-    private synchronized void leaderElection() {
-        logger.debug("LeaderSelector start");
-        try {
-            doWorkInternal();
-        } catch (Exception e) {
-            logger.error("LeaderSelector has some error.", e);
-            cancelTask();
-        }
-    }
-
-    private void doWorkInternal() throws Exception {
-
-        long leaseId = acquireActiveLease();
+    @Override
+    protected void lockForStart() throws ExecutionException, InterruptedException {
         // acquire distributed lock
-        LockResponse lockResponse = lockClient.lock(ByteSequence.from(leaderPath, StandardCharsets.UTF_8), leaseId).get();
-        logger.debug("LeaderSelector successfully get Lock [{}]", lockResponse.getKey().toString(StandardCharsets.UTF_8));
-        if(!state.get().equals(State.CLOSE)){
-            // update etcd leader identification to support query
-            ByteSequence leaderIdentificationPathByte = ByteSequence.from(leaderIdentificationPath.concat(leaderPath), StandardCharsets.UTF_8);
-            ByteSequence finalIdentification = Optional.ofNullable(identification).orElse(ByteSequence.from(String.valueOf(UUID.randomUUID()), StandardCharsets.UTF_8));
-            logger.info("LeaderSelector uses [{}] as identification", finalIdentification.toString(StandardCharsets.UTF_8));
-            kvClient.put(leaderIdentificationPathByte, finalIdentification).get();
-            Assert.isTrue(state.compareAndSet(State.STARTED,State.HOLD),"Leadership cannot be acquired without initiating the process");
-            taskListener.start();
-        }
-    }
+        long leaseId = client.getLeaseClient().grant(ttl).get().getID();
+        logger.debug("LeaderSelector get leaseId:[{}] and ttl:[{}]", leaseId, ttl);
 
-    private void cancelTask() {
-        try {
-            if (state.get().equals(State.HOLD)) {
-                taskListener.end();
-                state.set(State.STARTED);
-            }
-            if (leaseCloser != null) {
-                leaseCloser.close();
-            }
-        } catch (Exception e) {
-            state.set(State.STARTED);
-        }
-        logger.debug("LeaderSelector has successfully canceled the task.");
-        if(autoRequeue) {
-            try {
-                // 延迟领导选举
-                TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            leaderElection();
-        }
-    }
-
-    /**
-     * acquire etcd lease and keep lease avtive
-     *
-     * @return
-     * @throws InterruptedException
-     * @throws ExecutionException
-     */
-    private long acquireActiveLease() throws InterruptedException, ExecutionException {
-        long leaseId = leaseClient.grant(leaseTTL).get().getID();
-        logger.debug("LeaderSelector get leaseId:[{}] and ttl:[{}]", leaseId, leaseTTL);
-        this.leaseCloser = leaseClient.keepAlive(leaseId, new StreamObserver<LeaseKeepAliveResponse>() {
+        this.leaseCloser = client.getLeaseClient().keepAlive(leaseId, new StreamObserver<LeaseKeepAliveResponse>() {
             @Override
             public void onNext(LeaseKeepAliveResponse value) {
                 logger.debug("LeaderSelector lease keeps alive for [{}]s:", value.getTTL());
@@ -201,26 +76,17 @@ public class EtcdLeaderSelector implements LeaderSelector {
             @Override
             public void onError(Throwable t) {
                 logger.debug("LeaderSelector lease renewal Exception!", t.fillInStackTrace());
-                CompletableFuture.runAsync(() -> cancelTask());
+                CompletableFuture.runAsync(() -> doEnd());
             }
 
             @Override
             public void onCompleted() {
                 logger.info("LeaderSelector lease renewal completed! start canceling task.");
-                CompletableFuture.runAsync(() -> cancelTask());
+                CompletableFuture.runAsync(() -> doEnd());
             }
         });
-        return leaseId;
-    }
 
-    @Override
-    public void close() {
-        if(State.HOLD.equals(state.get())){
-            taskListener.end();
-            state.compareAndSet(State.HOLD, State.STARTED);
-        }
-        state.set(State.CLOSE);
-        leaseCloser.close();
-        logger.info("LeaderSelector has been closed");
+        LockResponse lockResponse = client.getLockClient().lock(ByteSequence.from(path, UTF_8), leaseId).get();
+        logger.debug("LeaderSelector successfully get Lock [{}]", lockResponse.getKey().toString(UTF_8));
     }
 }

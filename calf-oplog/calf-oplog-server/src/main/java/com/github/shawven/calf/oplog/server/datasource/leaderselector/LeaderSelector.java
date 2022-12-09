@@ -9,14 +9,6 @@ import java.io.Closeable;
  **/
 public interface LeaderSelector extends Closeable {
 
-
-    /**
-     * get current leader.
-     *
-     * @return null if there is no current leader.
-     */
-    String getLeader() throws Exception;
-
     /**
      * start racing for leadership.
      */
