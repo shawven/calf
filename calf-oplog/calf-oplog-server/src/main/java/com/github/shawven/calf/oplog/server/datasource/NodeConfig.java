@@ -24,14 +24,9 @@ public class NodeConfig {
      */
     private Integer version = 0;
 
-    /**
-     * 在redis中保存状态的key名称
-     */
-    private String binLogStatusKey = "binLogStatus";
-    /**
-     * 在redis中保存状态的key名称
-     */
-    private String binLogClientSet = "binLogClientSet";
+    private String statusKey = "status";
+
+    private String clientSetKey = "clientSet";
     /**
      * 订阅的数据源类型
      */
@@ -86,20 +81,20 @@ public class NodeConfig {
         this.serverId = serverId;
     }
 
-    public String getBinLogStatusKey() {
-        return binLogStatusKey;
+    public String getStatusKey() {
+        return statusKey;
     }
 
-    public void setBinLogStatusKey(String binLogStatusKey) {
-        this.binLogStatusKey = binLogStatusKey;
+    public void setStatusKey(String statusKey) {
+        this.statusKey = statusKey;
     }
 
-    public String getBinLogClientSet() {
-        return binLogClientSet;
+    public String getClientSetKey() {
+        return clientSetKey;
     }
 
-    public void setBinLogClientSet(String binLogClientSet) {
-        this.binLogClientSet = binLogClientSet;
+    public void setClientSetKey(String clientSetKey) {
+        this.clientSetKey = clientSetKey;
     }
 
     public String getNamespace() {

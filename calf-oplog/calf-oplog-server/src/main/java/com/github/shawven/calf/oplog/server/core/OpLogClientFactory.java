@@ -4,7 +4,6 @@ package com.github.shawven.calf.oplog.server.core;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
-import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import org.bson.BsonTimestamp;
@@ -89,7 +88,7 @@ public class OpLogClientFactory {
      * @param nodeConfig
      */
     private void configOpLogStatus(OplogClient oplogClient, NodeConfig nodeConfig) {
-        Map<String, Object> binLogStatus = clientDataSource.getBinaryLogStatus(nodeConfig);
+        Map<String, Object> binLogStatus = clientDataSource.getNodeStatus(nodeConfig);
         if (binLogStatus != null) {
             int seconds = Integer.parseInt(String.valueOf(binLogStatus.get("binlogFilename")));
             int inc = Integer.parseInt((String.valueOf(binLogStatus.get("binlogPosition"))));

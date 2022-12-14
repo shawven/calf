@@ -46,7 +46,7 @@ class EtcdLeaderSelector extends AbstractLeaderSelector {
 
 
     @Override
-    protected void doStartCallback() throws ExecutionException, InterruptedException {
+    protected void startedCallback() throws ExecutionException, InterruptedException {
         ByteSequence pathKey = ByteSequence.from(path, UTF_8);
         ByteSequence uniqueIdKey = ByteSequence.from(uniqueId, UTF_8);
 

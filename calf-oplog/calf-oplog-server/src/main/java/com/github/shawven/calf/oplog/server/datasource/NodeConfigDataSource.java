@@ -17,13 +17,11 @@ public interface NodeConfigDataSource {
 
     void update(NodeConfig newConfig);
 
-    NodeConfig remove(String namespace);
+    boolean remove(String namespace);
 
     NodeConfig getByNamespace(String namespace);
 
     List<NodeConfig> getAll();
-
-    CompletableFuture<List<NodeConfig>> asyncGetAll();
 
     List<String> getNamespaceList();
 

@@ -8,7 +8,6 @@ import com.github.shawven.calf.oplog.client.EventBaseErrorDTO;
 import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
 import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
 import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
-import com.github.shawven.calf.oplog.server.datasource.DataSourceService;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitService;
 import com.rabbitmq.http.client.domain.QueueInfo;
@@ -50,7 +49,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public void addClient(ClientInfo clientInfo, Integer partitions, Integer replication) {
 
-        clientDataSource.addBinLogConsumerClient(clientInfo);
+        clientDataSource.addConsumerClient(clientInfo);
 
         if(ClientInfo.QUEUE_TYPE_KAFKA.equals(clientInfo.getQueueType())){
 //            kafkaService.createKafkaTopic(clientInfo, partitions, replication);
@@ -61,7 +60,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public List<ClientInfo> listClient(String queryType) {
 
-        return clientDataSource.listBinLogConsumerClient(queryType);
+        return clientDataSource.listConsumerClient(queryType);
     }
 
     @Override
@@ -88,14 +87,13 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void deleteClient(ClientInfo clientInfo) {
-
-        clientDataSource.removeBinLogConsumerClient(Collections.singletonList(clientInfo));
+        clientDataSource.removeConsumerClient(Collections.singletonList(clientInfo));
     }
 
     @Override
     public String getLogStatus() {
 
-        List<Map<String, Object>> res = clientDataSource.listBinLogStatus();
+        List<Map<String, Object>> res = clientDataSource.listStatus();
         return JSONArray.toJSONString(res);
     }
 
@@ -160,11 +158,10 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Result deleteTopic(String clientInfoKey) {
-
-        List<ClientInfo> clientInfos = clientDataSource.listBinLogConsumerClientByKey(clientInfoKey);
+        List<ClientInfo> clientInfos = clientDataSource.listConsumerClientsByKey(clientInfoKey);
 
         // 从EventHandler的发送列表中删除
-        clientDataSource.removeBinLogConsumerClient(clientInfos);
+        clientDataSource.removeConsumerClient(clientInfos);
 
         // 刪除对应队列中的topic
         Set<String> clientInfoSet = new HashSet<>();

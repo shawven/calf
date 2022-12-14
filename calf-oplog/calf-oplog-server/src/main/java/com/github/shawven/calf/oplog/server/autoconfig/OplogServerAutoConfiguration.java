@@ -5,9 +5,7 @@ import com.github.shawven.calf.oplog.server.OplogServer;
 import com.github.shawven.calf.oplog.server.core.DistributorService;
 import com.github.shawven.calf.oplog.server.core.MongoDBDistributorServiceImpl;
 import com.github.shawven.calf.oplog.server.core.OpLogClientFactory;
-import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
-import com.github.shawven.calf.oplog.server.datasource.LeaderSelectorFactory;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
+import com.github.shawven.calf.oplog.server.datasource.*;
 import com.github.shawven.calf.oplog.server.datasource.etcd.EtcdLeaderSelectorFactory;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
@@ -25,6 +23,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +37,19 @@ import java.util.Map;
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, DataPublisherAutoConfiguration.class})
 class OplogServerAutoConfiguration {
 
-    private final Logger logger = LoggerFactory.getLogger(OplogServerAutoConfiguration.class);
+
+    @Bean
+    @ConditionalOnMissingBean(ClientDataSource.class)
+    public ClientDataSource etcdClientDataSource(DataSource dataSource, KeyPrefixUtil keyPrefixUtil,
+                                                 NodeConfigDataSource nodeConfigDataSource) {
+        return new ClientDataSourceImpl(dataSource, keyPrefixUtil, nodeConfigDataSource);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(NodeConfigDataSource.class)
+    public NodeConfigDataSource nodeConfigDataSource(DataSource dataSource, KeyPrefixUtil keyPrefixUtil) {
+        return new NodeConfigDataSourceImpl(dataSource, keyPrefixUtil);
+    }
 
     @Bean
     public OpLogClientFactory opLogClientFactory(ClientDataSource clientDataSource,

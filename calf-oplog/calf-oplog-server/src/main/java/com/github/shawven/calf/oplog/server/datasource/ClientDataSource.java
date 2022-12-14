@@ -13,29 +13,25 @@ import java.util.function.Consumer;
  */
 public interface ClientDataSource {
 
-    boolean sendBinLogCommand(Command command);
+    List<ClientInfo> listConsumerClient(String queryType);
 
-    void updateBinLogStatus(String binlogFilename, long binlogPosition, NodeConfig nodeConfig, long timestamp);
+    List<ClientInfo> listConsumerClient(NodeConfig nodeConfig);
 
-    List<Map<String, Object>> listBinLogStatus();
+    List<ClientInfo> listConsumerClientsByKey(String clientInfoKey);
 
-    void addBinLogConsumerClient(ClientInfo clientInfo);
+    void addConsumerClient(ClientInfo clientInfo);
 
-    List<ClientInfo> listBinLogConsumerClient(String queryType);
+    void removeConsumerClient(List<ClientInfo> clientInfos);
 
-    void removeBinLogConsumerClient(ClientInfo clientInfo);
+    boolean sendCommand(Command command);
 
-    List<ClientInfo> listBinLogConsumerClient(NodeConfig nodeConfig);
+    void updateNodeStatus(String filename, long position, NodeConfig nodeConfig);
 
-    Map<String, Object> getBinaryLogStatus(NodeConfig nodeConfig);
+    List<Map<String, Object>> listStatus();
 
-    List<ClientInfo> listBinLogConsumerClientByKey(String clientInfoKey);
+    Map<String, Object> getNodeStatus(NodeConfig nodeConfig);
 
-    void removeBinLogConsumerClient(List<ClientInfo> clientInfos);
-
-    long getLease(String leaseName, long leaseTTL) throws Exception;
-
-    void updateServiceStatus(String serviceKey, ServiceStatus status, long leaseId) throws Exception;
+    void updateServiceStatus(String serviceKey, ServiceStatus status) throws Exception;
 
     List<ServiceStatus> getServiceStatus();
 

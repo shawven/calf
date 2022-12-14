@@ -6,17 +6,15 @@ package com.github.shawven.calf.oplog.base;
  **/
 public interface Consts {
 
-    String REDIS_PREFIX = "BINLOG::DISTRIBUTOR::";
+    String APP_PREFIX = "binlog-distributor/";
 
-    String PATH_SEPARATOR = "/";
+    String COMMAND = "command";
 
-    String DEFAULT_ETCD_METADATA_PREFIX = "BINLOG-DISTRIBUTOR" + PATH_SEPARATOR;
+    String NODE_CONFIG = "node-config";
 
-    String DEFAULT_BINLOG_CONFIG_COMMAND_KEY = "CONFIG_COMMAND";
+    String LEADER_PATH = "leader-selector/";
 
-    String DEFAULT_BINLOG_CONFIG_KEY = "DATASOURCE-CONFIG";
+    String SERVICE_STATUS_PATH =  "service-status/";
 
-    String LEADER_IDENTIFICATION_PATH = "leader-selector/leader-identification/";
-
-    String SERVICE_STATUS_PATH        =  "service-status/";
+    String REDIS_PREFIX = "binlog::distributor::";
 }

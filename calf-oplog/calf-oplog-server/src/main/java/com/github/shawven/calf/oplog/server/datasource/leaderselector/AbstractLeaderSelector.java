@@ -63,7 +63,7 @@ public abstract class AbstractLeaderSelector implements LeaderSelector{
         logger.info("LeaderSelector has been closed");
     }
 
-    protected boolean doStart() throws Exception {
+    protected void doStart() throws Exception {
         lockForStart();
 
         logger.debug("LeaderSelector successfully get Lock");
@@ -73,13 +73,10 @@ public abstract class AbstractLeaderSelector implements LeaderSelector{
             if(!(state.compareAndSet(State.STARTED, State.HOLD))) {
                 throw new IllegalStateException("Leadership cannot be acquired without initiating the process");
             }
-            doStartCallback();
+            startedCallback();
             taskListener.start();
         }
-        return ready;
     }
-
-
 
     protected void doEnd() {
         try {
@@ -104,7 +101,7 @@ public abstract class AbstractLeaderSelector implements LeaderSelector{
         }
     }
 
-    protected abstract void doStartCallback() throws ExecutionException, InterruptedException;
+    protected abstract void startedCallback() throws ExecutionException, InterruptedException;
 
     protected abstract void lockForStart() throws ExecutionException, InterruptedException;
 

@@ -78,11 +78,11 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
             public void start(Command command) {
                 String namespace = command.getNamespace();
                 String delegatedIp = command.getDelegatedIp();
-                if(StringUtils.isEmpty(namespace)) {
+                if(!StringUtils.hasText(namespace)) {
                     return;
                 }
 
-                if(!StringUtils.isEmpty(delegatedIp)) {
+                if(StringUtils.hasText(delegatedIp)) {
                     CompletableFuture.runAsync(() -> {
                         NodeConfig config = nodeConfigDataSource.getByNamespace(namespace);
                         String localIp = getLocalIp(config.getDataSourceType());
@@ -109,7 +109,7 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
             @Override
             public void stop(Command command) {
                 String namespace = command.getNamespace();
-                if(StringUtils.isEmpty(namespace)) {
+                if(!StringUtils.hasText(namespace)) {
                     return;
                 }
                 CompletableFuture.runAsync(() -> {
@@ -131,7 +131,7 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
     @Override
     public void startTask(NodeConfig nodeConfig) {
         executorService.submit(() -> {
-            String path = keyPrefixUtil.withPrefix(Consts.LEADER_IDENTIFICATION_PATH);
+            String path = keyPrefixUtil.withPrefix(Consts.LEADER_PATH);
             String namespace = nodeConfig.getNamespace();
             String uniqueId = NetUtils.getLocalAddress().getHostAddress();
 
@@ -157,7 +157,6 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
     protected void updateServiceStatus() {
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
         try {
-            long leaseId = clientDataSource.getLease("Update Service Status", 20);
             scheduledExecutorService.scheduleWithFixedDelay(() -> {
 
                 ServiceStatus serviceStatus = new ServiceStatus();
@@ -171,8 +170,8 @@ public class MongoDBDistributorServiceImpl extends AbstractDistributorService {
                 serviceStatus.setUpdateTime(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
 
                 try {
-                    clientDataSource.updateServiceStatus(localIp, serviceStatus, leaseId);
-                    logger.info("Update Service Status: [{}]", serviceStatus.toString());
+                    clientDataSource.updateServiceStatus(localIp, serviceStatus);
+                    logger.info("Update Service Status: [{}]", serviceStatus);
                 } catch (Exception e) {
                     throw new DataSourceException("Update Service Status Error!", e);
                 }

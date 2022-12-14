@@ -3,51 +3,31 @@ package com.github.shawven.calf.oplog.server;
 import com.github.shawven.calf.oplog.base.Consts;
 import org.springframework.util.StringUtils;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
  * @author wanglaomo
  * @since 2019/10/16
  **/
 public class KeyPrefixUtil {
 
-    private String root;
+    private final String prefix;
 
     public KeyPrefixUtil(String root) {
-        this.root = root;
-    }
-
-    private AtomicReference<String> prefixCache = new AtomicReference<>();
-
-    public String getPrefix() {
-
-        String prefix = prefixCache.get();
-        if(!StringUtils.isEmpty(prefix)) {
-            return prefix;
-        }
-
         // init
-        if(!root.startsWith(Consts.PATH_SEPARATOR)) {
-            root = Consts.PATH_SEPARATOR.concat(root);
+        if(!root.startsWith("/")) {
+            root = "/".concat(root);
         }
 
-        if(!root.endsWith(Consts.PATH_SEPARATOR)) {
-            root = root.concat(Consts.PATH_SEPARATOR);
+        if(!root.endsWith("/")) {
+            root = root.concat("/");
         }
-
-        prefix = root.concat(Consts.DEFAULT_ETCD_METADATA_PREFIX);
-        prefixCache.compareAndSet(null, prefix);
-        prefix = prefixCache.get();
-
-        return prefix;
+        this.prefix = root.concat(Consts.APP_PREFIX);
     }
 
     public String withPrefix(String key) {
-
-        if(StringUtils.isEmpty(key)) {
-            return getPrefix();
+        if (!StringUtils.hasText(key)) {
+            return prefix;
         }
 
-        return getPrefix().concat(key);
+        return prefix.concat(key);
     }
 }

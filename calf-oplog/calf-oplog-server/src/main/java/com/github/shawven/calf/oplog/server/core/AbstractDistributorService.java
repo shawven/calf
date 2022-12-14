@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author xw
@@ -30,28 +29,17 @@ public abstract class AbstractDistributorService implements DistributorService {
 
     @Override
     public List<NodeConfig> getAllConfigs() {
-
         return nodeConfigDataSource.getAll();
     }
 
     @Override
     public boolean persistDatasourceConfig(NodeConfig config) {
-
-        boolean res = nodeConfigDataSource.create(config);
-        if(!res) {
-            return false;
-        }
-        return true;
+        return nodeConfigDataSource.create(config);
     }
 
     @Override
     public boolean removeDatasourceConfig(String namespace) {
-
-        NodeConfig removedConfig = nodeConfigDataSource.remove(namespace);
-        if(removedConfig == null) {
-            return false;
-        }
-        return true;
+        return nodeConfigDataSource.remove(namespace);
     }
 
     /**
@@ -66,7 +54,7 @@ public abstract class AbstractDistributorService implements DistributorService {
     public boolean startDatasource(String namespace, String delegatedIp) {
 
         Command command = new Command(namespace, delegatedIp, CommandType.START_DATASOURCE);
-        return clientDataSource.sendBinLogCommand(command);
+        return clientDataSource.sendCommand(command);
     }
 
     /**
@@ -79,7 +67,7 @@ public abstract class AbstractDistributorService implements DistributorService {
     public boolean stopDatasource(String namespace) {
 
         Command command = new Command(namespace, CommandType.STOP_DATASOURCE);
-        return clientDataSource.sendBinLogCommand(command);
+        return clientDataSource.sendCommand(command);
     }
 
     /**

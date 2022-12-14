@@ -63,7 +63,7 @@ public class OplogTaskListener implements TaskListener {
         oplogClient = opLogClientFactory.initClient(nodeConfig);
 
         // 更新Client列表
-        updateClientInfoMap(clientDataSource.listBinLogConsumerClient(nodeConfig));
+        updateClientInfoMap(clientDataSource.listConsumerClient(nodeConfig));
 
         // 监听Client列表变化
         clientDataSource.watcherClientInfo(nodeConfig, this::updateClientInfoMap);
@@ -167,7 +167,7 @@ public class OplogTaskListener implements TaskListener {
      */
     protected void updateOpLogStatus(Document document) {
         BsonTimestamp ts = (BsonTimestamp) document.get(OpLogClientFactory.TIMESTAMP_KEY);
-        clientDataSource.updateBinLogStatus(String.valueOf(ts.getTime()), ts.getInc(), nodeConfig, System.currentTimeMillis());
+        clientDataSource.updateNodeStatus(String.valueOf(ts.getTime()), ts.getInc(), nodeConfig);
     }
 
     private void updateClientInfoMap(Collection<ClientInfo> clientInfos) {

@@ -152,13 +152,11 @@ public class ClientController {
 
     @GetMapping("/namespaceList")
     public List<String> namespaceList() {
-
         return clientService.listNamespace();
     }
 
     @GetMapping("/deleteTopic")
     public Result deleteTopic(String clientInfoKey) {
-
         return clientService.deleteTopic(clientInfoKey);
     }
 }
