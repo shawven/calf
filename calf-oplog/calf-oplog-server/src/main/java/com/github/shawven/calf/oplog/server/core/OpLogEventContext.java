@@ -1,8 +1,8 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
+import com.github.shawven.calf.oplog.register.domain.ClientInfo;
+import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import com.mongodb.client.MongoClient;
 
@@ -16,16 +16,16 @@ public class OpLogEventContext {
 
     private MongoClient mongoClient;
 
-    private NodeConfig nodeConfig;
+    private DataSourceCfg dataSourceCfg;
 
     private DataPublisherManager dataPublisherManager;
 
     private List<ClientInfo> clients;
 
-    public OpLogEventContext(MongoClient mongoClient, NodeConfig nodeConfig,
+    public OpLogEventContext(MongoClient mongoClient, DataSourceCfg dataSourceCfg,
                              DataPublisherManager dataPublisherManager, List<ClientInfo> clients) {
         this.mongoClient = mongoClient;
-        this.nodeConfig = nodeConfig;
+        this.dataSourceCfg = dataSourceCfg;
         this.dataPublisherManager = dataPublisherManager;
         this.clients = clients;
     }
@@ -34,8 +34,8 @@ public class OpLogEventContext {
         return mongoClient;
     }
 
-    public NodeConfig getNodeConfig() {
-        return nodeConfig;
+    public DataSourceCfg getNodeConfig() {
+        return dataSourceCfg;
     }
 
     public DataPublisherManager getDataPublisherManager() {

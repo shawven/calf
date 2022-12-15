@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.publisher.rabbit;
 
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
-import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
+import com.github.shawven.calf.oplog.register.domain.ClientInfo;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

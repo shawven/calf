@@ -1,6 +1,6 @@
 package com.github.shawven.calf.oplog.server.web;
 
-import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
+import com.github.shawven.calf.oplog.register.domain.ClientInfo;
 
 import java.util.List;
 import java.util.Map;

@@ -3,10 +3,10 @@ package com.github.shawven.calf.oplog.server.core;
 import com.github.shawven.calf.oplog.base.DatabaseEvent;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 import com.github.shawven.calf.oplog.server.DocumentUtils;
-import com.github.shawven.calf.oplog.server.mode.DeleteRowsDTO;
-import com.github.shawven.calf.oplog.server.mode.UpdateRow;
-import com.github.shawven.calf.oplog.server.mode.UpdateRowsDTO;
-import com.github.shawven.calf.oplog.server.mode.WriteRowsDTO;
+import com.github.shawven.calf.oplog.server.domain.DeleteRowsDTO;
+import com.github.shawven.calf.oplog.server.domain.UpdateRow;
+import com.github.shawven.calf.oplog.server.domain.UpdateRowsDTO;
+import com.github.shawven.calf.oplog.server.domain.WriteRowsDTO;
 import org.bson.Document;
 
 import java.util.ArrayList;

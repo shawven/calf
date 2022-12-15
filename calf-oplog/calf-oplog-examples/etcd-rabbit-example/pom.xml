@@ -20,13 +20,13 @@
         </dependency>
         <dependency>
             <groupId>com.github.shawven.calf</groupId>
-            <artifactId>calf-oplog-client</artifactId>
+            <artifactId>calf-oplog-register-etcd</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
         <dependency>
-            <groupId>io.etcd</groupId>
-            <artifactId>jetcd-core</artifactId>
+            <groupId>com.github.shawven.calf</groupId>
+            <artifactId>calf-oplog-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

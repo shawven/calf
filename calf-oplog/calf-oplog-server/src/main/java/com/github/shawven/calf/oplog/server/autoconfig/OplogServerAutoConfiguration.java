@@ -1,79 +1,80 @@
 package com.github.shawven.calf.oplog.server.autoconfig;
 
+import com.github.shawven.calf.oplog.register.ElectionFactory;
+import com.github.shawven.calf.oplog.register.Repository;
 import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.server.OplogServer;
-import com.github.shawven.calf.oplog.server.core.DistributorService;
-import com.github.shawven.calf.oplog.server.core.MongoDBDistributorServiceImpl;
+import com.github.shawven.calf.oplog.server.core.ReplicationServer;
+import com.github.shawven.calf.oplog.server.core.MongoReplicationServerImpl;
 import com.github.shawven.calf.oplog.server.core.OpLogClientFactory;
-import com.github.shawven.calf.oplog.server.datasource.*;
-import com.github.shawven.calf.oplog.server.datasource.etcd.EtcdLeaderSelectorFactory;
+import com.github.shawven.calf.oplog.server.dao.*;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
-import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitService;
 import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitServiceImpl;
 import com.github.shawven.calf.oplog.server.web.ClientController;
 import com.github.shawven.calf.oplog.server.web.ClientServiceImpl;
 import com.github.shawven.calf.oplog.server.web.DataSourceController;
-import io.etcd.jetcd.Client;
 import org.redisson.api.RedissonClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
-import java.util.Arrays;
 import java.util.Map;
 
 @Configuration(proxyBeanMethods = false)
-@AutoConfigureAfter({DataSourceAutoConfiguration.class, DataPublisherAutoConfiguration.class})
+@AutoConfigureAfter({DataPublisherAutoConfiguration.class})
 class OplogServerAutoConfiguration {
 
-
     @Bean
-    @ConditionalOnMissingBean(ClientDataSource.class)
-    public ClientDataSource etcdClientDataSource(DataSource dataSource, KeyPrefixUtil keyPrefixUtil,
-                                                 NodeConfigDataSource nodeConfigDataSource) {
-        return new ClientDataSourceImpl(dataSource, keyPrefixUtil, nodeConfigDataSource);
+    public KeyPrefixUtil keyPrefixUtil(@Value("${calf-oplog.root}") String root) {
+        return new KeyPrefixUtil(root);
     }
 
     @Bean
-    @ConditionalOnMissingBean(NodeConfigDataSource.class)
-    public NodeConfigDataSource nodeConfigDataSource(DataSource dataSource, KeyPrefixUtil keyPrefixUtil) {
-        return new NodeConfigDataSourceImpl(dataSource, keyPrefixUtil);
+    @ConditionalOnMissingBean(ClientDAO.class)
+    public ClientDAO clientDAOImpl(Repository repository, KeyPrefixUtil keyPrefixUtil,
+                                   DataSourceCfgDAO dataSourceCfgDAO) {
+        return new ClientDAOImpl(repository, keyPrefixUtil, dataSourceCfgDAO);
     }
 
     @Bean
-    public OpLogClientFactory opLogClientFactory(ClientDataSource clientDataSource,
-                                          NodeConfigDataSource nodeConfigDataSource,
-                                          RedissonClient redissonClient) {
-        return new OpLogClientFactory(clientDataSource, nodeConfigDataSource, redissonClient);
+    @ConditionalOnMissingBean(StatusDAO.class)
+    public StatusDAO statusDAOImpl(Repository repository, KeyPrefixUtil keyPrefixUtil,
+                                   DataSourceCfgDAO dataSourceCfgDAO) {
+        return new StatusDAOImpl(repository, keyPrefixUtil, dataSourceCfgDAO);
     }
 
     @Bean
-    public DistributorService distributorService(OpLogClientFactory opLogClientFactory,
-                                                 LeaderSelectorFactory leaderSelectorFactory,
-                                                 ClientDataSource clientDataSource,
-                                                 NodeConfigDataSource nodeConfigDataSource,
-                                                 KeyPrefixUtil keyPrefixUtil,
-                                                 DataPublisherManager dataPublisherManager) {
-        return new MongoDBDistributorServiceImpl(opLogClientFactory, leaderSelectorFactory, nodeConfigDataSource,
-                keyPrefixUtil, clientDataSource, dataPublisherManager);
+    @ConditionalOnMissingBean(DataSourceCfgDAO.class)
+    public DataSourceCfgDAO dataSourceCfgDAOImpl(Repository repository, KeyPrefixUtil keyPrefixUtil) {
+        return new DataSourceCfgDAOImpl(repository, keyPrefixUtil);
     }
 
     @Bean
-    public OplogServer oplogServer(Map<String, DistributorService> distributorServiceMap,
-                            ClientDataSource clientDataSource,
-                            NodeConfigDataSource nodeConfigDataSource) {
-        return new OplogServer(distributorServiceMap, clientDataSource, nodeConfigDataSource);
+    public OpLogClientFactory opLogClientFactory(StatusDAO statusDAO,
+                                                 DataSourceCfgDAO dataSourceCfgDAO,
+                                                 RedissonClient redissonClient) {
+        return new OpLogClientFactory(statusDAO, dataSourceCfgDAO, redissonClient);
+    }
+
+    @Bean
+    public ReplicationServer mongoReplicationServerImpl(OpLogClientFactory opLogClientFactory,
+                                                        ElectionFactory electionFactory,
+                                                        ClientDAO clientDAO,
+                                                        StatusDAO statusDAO,
+                                                        DataSourceCfgDAO dataSourceCfgDAO,
+                                                        KeyPrefixUtil keyPrefixUtil,
+                                                        DataPublisherManager dataPublisherManager) {
+        return new MongoReplicationServerImpl(opLogClientFactory, electionFactory, dataSourceCfgDAO,
+                clientDAO, statusDAO, keyPrefixUtil, dataPublisherManager);
+    }
+
+    @Bean
+    public OplogServer oplogServer(Map<String, ReplicationServer> distributorServiceMap) {
+        return new OplogServer(distributorServiceMap);
     }
 
     @Bean

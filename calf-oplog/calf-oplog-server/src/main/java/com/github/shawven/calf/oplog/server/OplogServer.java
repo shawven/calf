@@ -1,8 +1,6 @@
 package com.github.shawven.calf.oplog.server;
 
-import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
-import com.github.shawven.calf.oplog.server.core.DistributorService;
+import com.github.shawven.calf.oplog.server.core.ReplicationServer;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 
@@ -14,24 +12,16 @@ import java.util.Map;
  */
 public class OplogServer implements ApplicationRunner {
 
-    private Map<String, DistributorService> distributorServiceMap;
+    private final Map<String, ReplicationServer> distributorServiceMap;
 
-    private ClientDataSource clientDataSource;
-
-    private NodeConfigDataSource nodeConfigDataSource;
-
-    public OplogServer(Map<String, DistributorService> distributorServiceMap,
-                       ClientDataSource clientDataSource,
-                       NodeConfigDataSource nodeConfigDataSource) {
+    public OplogServer(Map<String, ReplicationServer> distributorServiceMap) {
         this.distributorServiceMap = distributorServiceMap;
-        this.clientDataSource = clientDataSource;
-        this.nodeConfigDataSource = nodeConfigDataSource;
     }
 
     @Override
     public void run(ApplicationArguments applicationArguments) {
-        distributorServiceMap.forEach((s, distributorService) -> {
-            distributorService.startDistribute();
+        distributorServiceMap.forEach((s, replicationServer) -> {
+            replicationServer.start();
         });
     }
 }

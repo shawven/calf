@@ -1,10 +1,9 @@
 package com.github.shawven.calf.oplog.server.web;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.shawven.calf.oplog.base.ServiceStatus;
-import com.github.shawven.calf.oplog.server.core.DistributorService;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.github.shawven.calf.oplog.register.domain.InstanceStatus;
+import com.github.shawven.calf.oplog.server.core.ReplicationServer;
+import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,21 +16,21 @@ import java.util.List;
 @RequestMapping("/datasource")
 public class DataSourceController {
 
-    private final DistributorService distributorService;
+    private final ReplicationServer replicationServer;
 
-    public DataSourceController(DistributorService distributorService) {
-        this.distributorService = distributorService;
+    public DataSourceController(ReplicationServer replicationServer) {
+        this.replicationServer = replicationServer;
     }
 
     @GetMapping("/list")
-    public List<NodeConfig> datasourceConfigs() {
-        return distributorService.getAllConfigs();
+    public List<DataSourceCfg> datasourceConfigs() {
+        return replicationServer.getAllConfigs();
     }
 
     @PostMapping("/persist")
-    public Result persistDatasourceConfig(@RequestBody NodeConfig config) {
+    public Result persistDatasourceConfig(@RequestBody DataSourceCfg config) {
 
-        if(distributorService.persistDatasourceConfig(config)) {
+        if(replicationServer.persistDatasourceConfig(config)) {
             return new Result(Result.SUCCESS, "添加数据源成功");
         } else {
             return new Result(Result.ERROR, "添加数据源失败，命名空间已存在");
@@ -41,7 +40,7 @@ public class DataSourceController {
     @PostMapping("/remove")
     public Result removeDatasourceConfig(@RequestBody JSONObject JsonObject) {
 
-        if(distributorService.removeDatasourceConfig(JsonObject.getString("namespace"))) {
+        if(replicationServer.removeDatasourceConfig(JsonObject.getString("namespace"))) {
             return new Result(Result.SUCCESS, "移除数据源成功");
         } else {
             return new Result(Result.ERROR, "移除数据源失败");
@@ -54,7 +53,7 @@ public class DataSourceController {
         String namespace = jsonObject.getString("namespace");
         String delegatedIp = jsonObject.getString("delegatedIp");
 
-        if(distributorService.startDatasource(namespace, delegatedIp)) {
+        if(replicationServer.startDatasource(namespace, delegatedIp)) {
             return new Result(Result.SUCCESS, "发送开启数据源监听命令成功");
         } else {
             return new Result(Result.ERROR, "发送开启数据源监听命令失败");
@@ -64,7 +63,7 @@ public class DataSourceController {
     @PostMapping("/stop")
     public Result stopDatasource(@RequestBody JSONObject JsonObject) {
 
-        if(distributorService.stopDatasource(JsonObject.getString("namespace"))) {
+        if(replicationServer.stopDatasource(JsonObject.getString("namespace"))) {
             return new Result(Result.SUCCESS, "发送关闭数据源监听命令成功");
         } else {
             return new Result(Result.ERROR, "发送关闭数据源监听命令失败");
@@ -72,7 +71,7 @@ public class DataSourceController {
     }
 
     @GetMapping("/service-status")
-    public List<ServiceStatus> getServiceStatus() {
-        return distributorService.getServiceStatus();
+    public List<InstanceStatus> getServiceStatus() {
+        return replicationServer.getServiceStatus();
     }
 }

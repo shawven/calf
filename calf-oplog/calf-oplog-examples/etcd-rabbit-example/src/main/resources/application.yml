@@ -20,6 +20,9 @@ spring:
     endpoints: http://${target-host}:2379
     root: 204
 
+calf-oplog:
+    root: 204
+
 #自动注册客户端(服务端的地址)
 databaseEventServerUrl: http://localhost:8885/client/addAll
 appName: server-etcd-rabbit-example

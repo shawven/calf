@@ -1,9 +1,10 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
-import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
+import com.github.shawven.calf.oplog.server.dao.StatusDAO;
+import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
+import com.github.shawven.calf.oplog.server.dao.DataSourceCfgDAO;
+import com.github.shawven.calf.oplog.register.domain.DataSourceStatus;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import org.bson.BsonTimestamp;
@@ -12,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -25,12 +25,11 @@ public class OpLogClientFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(OpLogClientFactory.class);
 
+    private final StatusDAO statusDAO;
+
+    private final DataSourceCfgDAO dataSourceCfgDAO;
+
     protected final RedissonClient redissonClient;
-
-    private final NodeConfigDataSource nodeConfigDataSource;
-
-    private final ClientDataSource clientDataSource;
-
 
     public volatile AtomicLong eventCount = new AtomicLong(0);
 
@@ -62,21 +61,21 @@ public class OpLogClientFactory {
 
     private long lastEventCount = 0;
 
-    public OpLogClientFactory(ClientDataSource clientDataSource,
-                              NodeConfigDataSource nodeConfigDataSource,
+    public OpLogClientFactory(StatusDAO statusDAO,
+                              DataSourceCfgDAO dataSourceCfgDAO,
                               RedissonClient redissonClient) {
+        this.statusDAO = statusDAO;
+        this.dataSourceCfgDAO = dataSourceCfgDAO;
         this.redissonClient = redissonClient;
-        this.nodeConfigDataSource = nodeConfigDataSource;
-        this.clientDataSource = clientDataSource;
     }
 
-    public OplogClient initClient(NodeConfig nodeConfig) {
-        MongoClient mongoClient = MongoClients.create(nodeConfig.getDataSourceUrl());
+    public OplogClient initClient(DataSourceCfg dataSourceCfg) {
+        MongoClient mongoClient = MongoClients.create(dataSourceCfg.getDataSourceUrl());
 
         OplogClient client = new OplogClient(mongoClient);
 
         // 配置当前位置
-        configOpLogStatus(client, nodeConfig);
+        configOpLogStatus(client, dataSourceCfg);
 
         return client;
     }
@@ -85,13 +84,13 @@ public class OpLogClientFactory {
      * 配置当前binlog位置
      *
      * @param oplogClient
-     * @param nodeConfig
+     * @param dataSourceCfg
      */
-    private void configOpLogStatus(OplogClient oplogClient, NodeConfig nodeConfig) {
-        Map<String, Object> binLogStatus = clientDataSource.getNodeStatus(nodeConfig);
-        if (binLogStatus != null) {
-            int seconds = Integer.parseInt(String.valueOf(binLogStatus.get("binlogFilename")));
-            int inc = Integer.parseInt((String.valueOf(binLogStatus.get("binlogPosition"))));
+    private void configOpLogStatus(OplogClient oplogClient, DataSourceCfg dataSourceCfg) {
+        DataSourceStatus dataSourceStatus = statusDAO.getDataSourceStatus(dataSourceCfg);
+        if (dataSourceStatus != null) {
+            int seconds = Integer.parseInt(String.valueOf(dataSourceStatus.getFilename()));
+            int inc = Integer.parseInt((String.valueOf(dataSourceStatus.getPosition())));
             oplogClient.setTs(new BsonTimestamp(seconds, inc));
         }
     }
@@ -104,11 +103,11 @@ public class OpLogClientFactory {
             logger.error(e.getMessage(), e);
             return true;
         }
-        NodeConfig nodeConfig = nodeConfigDataSource.getByNamespace(namespace);
+        DataSourceCfg dataSourceCfg = dataSourceCfgDAO.getByNamespace(namespace);
         try {
-            while (nodeConfig.isActive()) {
+            while (dataSourceCfg.isActive()) {
                 TimeUnit.SECONDS.sleep(1);
-                nodeConfig = nodeConfigDataSource.getByNamespace(namespace);
+                dataSourceCfg = dataSourceCfgDAO.getByNamespace(namespace);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

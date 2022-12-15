@@ -3,11 +3,12 @@ package com.github.shawven.calf.oplog.server.core;
 import com.github.shawven.calf.oplog.base.DatabaseEvent;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 import com.github.shawven.calf.oplog.server.DocumentUtils;
-import com.github.shawven.calf.oplog.server.datasource.ClientDataSource;
-import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfig;
-import com.github.shawven.calf.oplog.server.datasource.NodeConfigDataSource;
-import com.github.shawven.calf.oplog.server.datasource.leaderselector.TaskListener;
+import com.github.shawven.calf.oplog.server.dao.ClientDAO;
+import com.github.shawven.calf.oplog.server.dao.StatusDAO;
+import com.github.shawven.calf.oplog.register.domain.ClientInfo;
+import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
+import com.github.shawven.calf.oplog.server.dao.DataSourceCfgDAO;
+import com.github.shawven.calf.oplog.register.election.TaskListener;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import io.reactivex.rxjava3.disposables.Disposable;
 import org.bson.BsonTimestamp;
@@ -30,13 +31,15 @@ public class OplogTaskListener implements TaskListener {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final NodeConfig nodeConfig;
+    private final DataSourceCfg dataSourceCfg;
 
     private final OpLogClientFactory opLogClientFactory;
 
-    private final ClientDataSource clientDataSource;
+    private final ClientDAO clientDAO;
 
-    private final NodeConfigDataSource nodeConfigDataSource;
+    private final StatusDAO statusDAO;
+
+    private final DataSourceCfgDAO dataSourceCfgDAO;
 
     private final DataPublisherManager dataPublisherManager;
 
@@ -46,29 +49,31 @@ public class OplogTaskListener implements TaskListener {
 
     private final Map<String, Map<DatabaseEvent, List<ClientInfo>>> clientInfoMap = new ConcurrentHashMap<>();
 
-    public OplogTaskListener(NodeConfig nodeConfig,
+    public OplogTaskListener(DataSourceCfg dataSourceCfg,
                              OpLogClientFactory opLogClientFactory,
-                             ClientDataSource clientDataSource,
-                             NodeConfigDataSource nodeConfigDataSource,
+                             ClientDAO clientDAO,
+                             StatusDAO statusDAO,
+                             DataSourceCfgDAO dataSourceCfgDAO,
                              DataPublisherManager dataPublisherManager) {
-        this.nodeConfig = nodeConfig;
+        this.dataSourceCfg = dataSourceCfg;
         this.opLogClientFactory = opLogClientFactory;
-        this.clientDataSource = clientDataSource;
-        this.nodeConfigDataSource = nodeConfigDataSource;
+        this.clientDAO = clientDAO;
+        this.statusDAO = statusDAO;
+        this.dataSourceCfgDAO = dataSourceCfgDAO;
         this.dataPublisherManager = dataPublisherManager;
     }
 
     @Override
     public void start() {
-        oplogClient = opLogClientFactory.initClient(nodeConfig);
+        oplogClient = opLogClientFactory.initClient(dataSourceCfg);
 
         // 更新Client列表
-        updateClientInfoMap(clientDataSource.listConsumerClient(nodeConfig));
+        updateClientInfoMap(clientDAO.listConsumerClient(dataSourceCfg));
 
         // 监听Client列表变化
-        clientDataSource.watcherClientInfo(nodeConfig, this::updateClientInfoMap);
+        clientDAO.watcherClientInfo(dataSourceCfg, this::updateClientInfoMap);
 
-        OpLogEventFormatterFactory formatterFactory = new OpLogEventFormatterFactory(nodeConfig.getNamespace());
+        OpLogEventFormatterFactory formatterFactory = new OpLogEventFormatterFactory(dataSourceCfg.getNamespace());
 
         // 启动连接
         try {
@@ -85,11 +90,11 @@ public class OplogTaskListener implements TaskListener {
                 // 更新状态
                 updateOpLogStatus(document);
             });
-            nodeConfig.setActive(true);
-            nodeConfig.setVersion(nodeConfig.getVersion() + 1);
-            nodeConfigDataSource.update(nodeConfig);
+            dataSourceCfg.setActive(true);
+            dataSourceCfg.setVersion(dataSourceCfg.getVersion() + 1);
+            dataSourceCfgDAO.update(dataSourceCfg);
         } catch (Exception e) {
-            logger.error("[" + nodeConfig.getNamespace() + "] 处理事件异常，{}", e);
+            logger.error("[" + dataSourceCfg.getNamespace() + "] 处理事件异常，{}", e);
         }
 
     }
@@ -97,9 +102,9 @@ public class OplogTaskListener implements TaskListener {
     @Override
     public void end() {
         disposable.dispose();
-        nodeConfig.setActive(false);
-        nodeConfigDataSource.update(nodeConfig);
-        opLogClientFactory.closeClient(oplogClient, nodeConfig.getNamespace());
+        dataSourceCfg.setActive(false);
+        dataSourceCfgDAO.update(dataSourceCfg);
+        opLogClientFactory.closeClient(oplogClient, dataSourceCfg.getNamespace());
     }
 
     /**
@@ -167,7 +172,7 @@ public class OplogTaskListener implements TaskListener {
      */
     protected void updateOpLogStatus(Document document) {
         BsonTimestamp ts = (BsonTimestamp) document.get(OpLogClientFactory.TIMESTAMP_KEY);
-        clientDataSource.updateNodeStatus(String.valueOf(ts.getTime()), ts.getInc(), nodeConfig);
+        statusDAO.updateDataSourceStatus(String.valueOf(ts.getTime()), ts.getInc(), dataSourceCfg);
     }
 
     private void updateClientInfoMap(Collection<ClientInfo> clientInfos) {

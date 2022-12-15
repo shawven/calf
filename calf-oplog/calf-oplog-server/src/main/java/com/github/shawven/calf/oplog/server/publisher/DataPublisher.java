@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.publisher;
 
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
-import com.github.shawven.calf.oplog.server.datasource.ClientInfo;
+import com.github.shawven.calf.oplog.register.domain.ClientInfo;
 
 /**
  * @author zhenhui
