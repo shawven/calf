@@ -23,6 +23,7 @@
         <module>calf-oplog-server</module>
         <module>calf-oplog-register-base</module>
         <module>calf-oplog-register-etcd</module>
+        <module>calf-oplog-register-zookeeper</module>
         <module>calf-oplog-examples</module>
     </modules>
 
@@ -65,6 +66,11 @@
                 <version>0.7.3</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>5.4.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

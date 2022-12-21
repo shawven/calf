@@ -31,6 +31,7 @@
         <module>shell-practice</module>
         <module>native-practice</module>
         <module>etcd-practice</module>
+        <module>zk-practice</module>
     </modules>
 
 </project>

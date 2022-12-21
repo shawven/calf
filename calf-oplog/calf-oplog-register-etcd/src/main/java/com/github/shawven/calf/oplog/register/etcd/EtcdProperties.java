@@ -10,7 +10,7 @@ import java.util.List;
  * @since 2019/8/2
  **/
 @Data
-@ConfigurationProperties("spring.etcd")
+@ConfigurationProperties("calf-oplog.etcd")
 public class EtcdProperties {
 
     private List<String> endpoints;

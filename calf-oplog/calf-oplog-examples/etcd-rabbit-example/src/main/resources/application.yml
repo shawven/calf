@@ -16,12 +16,14 @@ spring:
     password: bitnami
     virtualHost: /binlog
     apiUrl: http://${target-host}:15672/api/
-  etcd:
-    endpoints: http://${target-host}:2379
-    root: 204
 
 calf-oplog:
-    root: 204
+  root: 204
+  etcd:
+    endpoints: http://${target-host}:2379
+  zookeeper:
+    url: http://${target-host}:2379
+
 
 #自动注册客户端(服务端的地址)
 databaseEventServerUrl: http://localhost:8885/client/addAll

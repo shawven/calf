@@ -33,7 +33,7 @@ public class EtcdRepository implements Repository {
     }
 
     @Override
-    public List<String> list(String key) {
+    public List<String> listChildren(String key) {
         GetResponse response;
         try {
             response = client.getKVClient().get(

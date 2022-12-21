@@ -98,7 +98,7 @@ public class StatusDAOImpl implements StatusDAO {
      */
     @Override
     public List<InstanceStatus> getInstanceStatus() {
-        List<String> strings = repository.list(keyPrefixUtil.withPrefix(Consts.SERVICE_STATUS_PATH));
+        List<String> strings = repository.listChildren(keyPrefixUtil.withPrefix(Consts.SERVICE_STATUS_PATH));
         return strings.stream()
                 .map(str -> JSON.parseObject(str, InstanceStatus.class))
                 .collect(Collectors.toList());

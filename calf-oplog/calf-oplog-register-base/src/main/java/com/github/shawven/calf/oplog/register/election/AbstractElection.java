@@ -101,9 +101,9 @@ public abstract class AbstractElection implements Election {
         }
     }
 
-    protected abstract void startedCallback() throws ExecutionException, InterruptedException;
+    protected abstract void startedCallback() throws Exception;
 
-    protected abstract void lockForStart() throws ExecutionException, InterruptedException;
+    protected abstract void lockForStart() throws Exception;
 
     private enum State {
         //持有领导权

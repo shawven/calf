@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface Repository {
 
-    List<String> list(String key);
+    List<String> listChildren(String key);
 
     String get(String key);
 

@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>etcd-practice</artifactId>
+    <artifactId>zk-practice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>etcd-practice</name>
+    <name>zk-practice</name>
     <description>etcd-practice</description>
     <properties>
         <java.version>17</java.version>
@@ -22,11 +22,15 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.etcd</groupId>
-            <artifactId>jetcd-core</artifactId>
-            <version>0.7.3</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>5.4.0</version>
+        </dependency>
         <!-- @ConfigurationProperties annotation processing (metadata for IDEs) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
