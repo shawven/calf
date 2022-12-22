@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.dao;
 
 import com.alibaba.fastjson.JSON;
-import com.github.shawven.calf.oplog.base.Consts;
+import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.register.Emitter;
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
 import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
@@ -135,7 +135,7 @@ public class DataSourceCfgDAOImpl implements DataSourceCfgDAO {
 
     @Override
     public List<DataSourceCfg> getAll() {
-        String value = repository.get(keyPrefixUtil.withPrefix(Consts.NODE_CONFIG));
+        String value = repository.get(keyPrefixUtil.withPrefix(Const.NODE_CONFIG));
         if (value == null) {
             return Collections.emptyList();
         }
@@ -143,12 +143,12 @@ public class DataSourceCfgDAOImpl implements DataSourceCfgDAO {
     }
 
     private void saveAll(List<DataSourceCfg> dataSourceCfgs) {
-        repository.set(keyPrefixUtil.withPrefix(Consts.NODE_CONFIG), JSON.toJSONString(dataSourceCfgs));
+        repository.set(keyPrefixUtil.withPrefix(Const.NODE_CONFIG), JSON.toJSONString(dataSourceCfgs));
     }
 
     @Override
     public void registerServerWatcher(ServerWatcher watcher) {
-        repository.watch(keyPrefixUtil.withPrefix(Consts.COMMAND), new Emitter<String>() {
+        repository.watch(keyPrefixUtil.withPrefix(Const.COMMAND), new Emitter<String>() {
             @Override
             public void onNext(String value) {
                 Command command = JSON.parseObject(value, Command.class);

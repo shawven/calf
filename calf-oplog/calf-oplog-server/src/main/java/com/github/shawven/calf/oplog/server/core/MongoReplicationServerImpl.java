@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.oplog.base.Consts;
+import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.register.ElectionFactory;
 import com.github.shawven.calf.oplog.server.ServerWatcher;
 import com.github.shawven.calf.oplog.server.dao.ClientDAO;
@@ -91,7 +91,7 @@ public class MongoReplicationServerImpl extends AbstractReplicationServer {
     @Override
     public void startTask(DataSourceCfg dataSourceCfg) {
         executorService.submit(() -> {
-            String path = keyPrefixUtil.withPrefix(Consts.LEADER_PATH);
+            String path = keyPrefixUtil.withPrefix(Const.LEADER_PATH);
             String namespace = dataSourceCfg.getNamespace();
             String uniqueId = NetUtils.getLocalAddress().getHostAddress();
 

@@ -1,6 +1,6 @@
 package com.github.shawven.calf.oplog.server;
 
-import com.github.shawven.calf.oplog.base.Consts;
+import com.github.shawven.calf.oplog.base.Const;
 import org.springframework.util.StringUtils;
 
 /**
@@ -13,14 +13,10 @@ public class KeyPrefixUtil {
 
     public KeyPrefixUtil(String root) {
         // init
-        if(!root.startsWith("/")) {
-            root = "/".concat(root);
-        }
+        root = ensureStartSlash(root);
+        root = ensureEndSlash(root);
 
-        if(!root.endsWith("/")) {
-            root = root.concat("/");
-        }
-        this.prefix = root.concat(Consts.APP_PREFIX);
+        this.prefix = root.concat(ensureEndSlash(Const.APP_PREFIX));
     }
 
     public String withPrefix(String key) {
@@ -28,6 +24,18 @@ public class KeyPrefixUtil {
             return prefix;
         }
 
-        return prefix.concat(key);
+        return prefix.concat(removeStartSlash(key));
+    }
+
+    public static String removeStartSlash(String path) {
+        return path.startsWith("/") ? path.substring(1, path.length() - 1) : path;
+    }
+
+    public static String ensureStartSlash(String path) {
+        return !path.startsWith("/") ? "/".concat(path) : path;
+    }
+
+    public static String ensureEndSlash(String path) {
+        return !path.endsWith("/") ? path.concat("/") : path;
     }
 }

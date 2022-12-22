@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.shawven.calf</groupId>
-            <artifactId>calf-oplog-register-etcd</artifactId>
+            <artifactId>calf-oplog-register-zookeeper</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

@@ -13,7 +13,7 @@ import java.util.List;
 @ConfigurationProperties("calf-oplog.etcd")
 public class EtcdProperties {
 
-    private List<String> endpoints;
+    private String url;
 
     private String authority;
 

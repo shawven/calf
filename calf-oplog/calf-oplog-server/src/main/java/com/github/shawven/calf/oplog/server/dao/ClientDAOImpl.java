@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.dao;
 
 import com.alibaba.fastjson.JSON;
-import com.github.shawven.calf.oplog.base.Consts;
+import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.register.Emitter;
 import com.github.shawven.calf.oplog.register.domain.ClientInfo;
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
@@ -111,7 +111,7 @@ public class ClientDAOImpl implements ClientDAO {
 
     @Override
     public boolean sendCommand(Command command) {
-        repository.set(keyPrefixUtil.withPrefix(Consts.COMMAND), JSON.toJSONString(command));
+        repository.set(keyPrefixUtil.withPrefix(Const.COMMAND), JSON.toJSONString(command));
         return true;
     }
 

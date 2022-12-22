@@ -21,7 +21,7 @@
         <module>calf-oplog-base</module>
         <module>calf-oplog-client</module>
         <module>calf-oplog-server</module>
-        <module>calf-oplog-register-base</module>
+        <module>calf-oplog-register-api</module>
         <module>calf-oplog-register-etcd</module>
         <module>calf-oplog-register-zookeeper</module>
         <module>calf-oplog-examples</module>

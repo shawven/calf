@@ -18,11 +18,11 @@ spring:
     apiUrl: http://${target-host}:15672/api/
 
 calf-oplog:
-  root: 204
+  root: calf
   etcd:
-    endpoints: http://${target-host}:2379
-  zookeeper:
     url: http://${target-host}:2379
+  zookeeper:
+    url: ${target-host}:2181
 
 
 #自动注册客户端(服务端的地址)

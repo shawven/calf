@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.dao;
 
 import com.alibaba.fastjson.JSON;
-import com.github.shawven.calf.oplog.base.Consts;
+import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
 import com.github.shawven.calf.oplog.register.domain.DataSourceStatus;
 import com.github.shawven.calf.oplog.register.domain.InstanceStatus;
@@ -87,7 +87,7 @@ public class StatusDAOImpl implements StatusDAO {
     @Override
     public void updateInstanceStatus(String serviceKey, InstanceStatus status) {
         repository.set(
-                keyPrefixUtil.withPrefix(Consts.SERVICE_STATUS_PATH).concat(serviceKey),
+                keyPrefixUtil.withPrefix(Const.SERVICE_STATUS_PATH) + "/" + serviceKey,
                 JSON.toJSONString(status),
                 20
         );
@@ -98,7 +98,7 @@ public class StatusDAOImpl implements StatusDAO {
      */
     @Override
     public List<InstanceStatus> getInstanceStatus() {
-        List<String> strings = repository.listChildren(keyPrefixUtil.withPrefix(Consts.SERVICE_STATUS_PATH));
+        List<String> strings = repository.listChildren(keyPrefixUtil.withPrefix(Const.SERVICE_STATUS_PATH));
         return strings.stream()
                 .map(str -> JSON.parseObject(str, InstanceStatus.class))
                 .collect(Collectors.toList());

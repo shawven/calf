@@ -5,6 +5,7 @@ import com.github.shawven.calf.oplog.register.Repository;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.CuratorCache;
 import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
+import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
@@ -37,6 +38,11 @@ public class ZookeeperRepository implements Repository {
             }
             return result;
         } catch (Exception e) {
+            if (e instanceof KeeperException) {
+                if (((KeeperException)e).code() == KeeperException.Code.NONODE) {
+                    return Collections.emptyList();
+                }
+            }
             logger.error(e.getMessage(), e);
             return Collections.emptyList();
         }
@@ -48,6 +54,11 @@ public class ZookeeperRepository implements Repository {
             byte[] bytes = client.getData().forPath(key);
             return new String(bytes);
         } catch (Exception e) {
+            if (e instanceof KeeperException) {
+                if (((KeeperException)e).code() == KeeperException.Code.NONODE) {
+                    return null;
+                }
+            }
             logger.error(e.getMessage(), e);
             return null;
         }
@@ -93,14 +104,15 @@ public class ZookeeperRepository implements Repository {
                 update(key, val, stat);
                 return;
             }
-            logger.error("create error");
+            logger.error("create error:{}", e.code());
         }
     }
 
     private void create(String key, String val, long ttl) throws Exception {
         try {
             client.create()
-                    .withTtl(ttl).creatingParentsIfNeeded()
+                    .withTtl(ttl * 1000).creatingParentsIfNeeded()
+                    .withMode(CreateMode.PERSISTENT_WITH_TTL)
                     .forPath(key, val.getBytes(StandardCharsets.UTF_8));
         } catch (KeeperException e) {
             if (e.code() == KeeperException.Code.NODEEXISTS) {
@@ -109,13 +121,14 @@ public class ZookeeperRepository implements Repository {
                 update(key, val, stat);
                 return;
             }
-            logger.error("create error");
+            logger.error("create error:{}", e.code());
         }
     }
 
     private void update(String key, String val, Stat stat) throws Exception {
         client.setData()
                 .withVersion(stat.getVersion())
+
                 .forPath(key, val.getBytes(StandardCharsets.UTF_8));
     }
 

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(Client.class)
@@ -23,7 +24,7 @@ class EtcdConfiguration {
     public Client etcdClient(EtcdProperties etcdProperties) {
         return Client
                 .builder()
-                .endpoints(Util.toURIs(etcdProperties.getEndpoints()))
+                .endpoints(Util.toURIs(Arrays.asList(etcdProperties.getUrl().split(","))))
                 //.authority(authority)
                 //.user(ByteSequence.from(username, StandardCharsets.UTF_8))
                 //.password(ByteSequence.from(password, StandardCharsets.UTF_8))
