@@ -6,7 +6,7 @@ package com.github.shawven.calf.oplog.register.election;
  * @author xw
  * @date 2022-12-08
  */
-public interface TaskListener {
+public interface ElectionListener {
 
     /**
      * 任务开始

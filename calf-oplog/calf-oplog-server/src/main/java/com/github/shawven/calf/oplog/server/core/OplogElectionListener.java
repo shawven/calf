@@ -8,7 +8,7 @@ import com.github.shawven.calf.oplog.server.dao.StatusDAO;
 import com.github.shawven.calf.oplog.register.domain.ClientInfo;
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
 import com.github.shawven.calf.oplog.server.dao.DataSourceCfgDAO;
-import com.github.shawven.calf.oplog.register.election.TaskListener;
+import com.github.shawven.calf.oplog.register.election.ElectionListener;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisherManager;
 import io.reactivex.rxjava3.disposables.Disposable;
 import org.bson.BsonTimestamp;
@@ -27,7 +27,7 @@ import static com.github.shawven.calf.oplog.server.core.OpLogClientFactory.EVENT
  * @author: kl @kailing.pub
  * @date: 2019/8/1
  */
-public class OplogTaskListener implements TaskListener {
+public class OplogElectionListener implements ElectionListener {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -49,12 +49,12 @@ public class OplogTaskListener implements TaskListener {
 
     private final Map<String, Map<DatabaseEvent, List<ClientInfo>>> clientInfoMap = new ConcurrentHashMap<>();
 
-    public OplogTaskListener(DataSourceCfg dataSourceCfg,
-                             OpLogClientFactory opLogClientFactory,
-                             ClientDAO clientDAO,
-                             StatusDAO statusDAO,
-                             DataSourceCfgDAO dataSourceCfgDAO,
-                             DataPublisherManager dataPublisherManager) {
+    public OplogElectionListener(DataSourceCfg dataSourceCfg,
+                                 OpLogClientFactory opLogClientFactory,
+                                 ClientDAO clientDAO,
+                                 StatusDAO statusDAO,
+                                 DataSourceCfgDAO dataSourceCfgDAO,
+                                 DataPublisherManager dataPublisherManager) {
         this.dataSourceCfg = dataSourceCfg;
         this.opLogClientFactory = opLogClientFactory;
         this.clientDAO = clientDAO;

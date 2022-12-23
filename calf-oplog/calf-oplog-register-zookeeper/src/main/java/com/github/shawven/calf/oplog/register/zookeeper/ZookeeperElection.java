@@ -2,13 +2,12 @@ package com.github.shawven.calf.oplog.register.zookeeper;
 
 import com.github.shawven.calf.oplog.register.election.AbstractElection;
 import com.github.shawven.calf.oplog.register.election.Election;
-import com.github.shawven.calf.oplog.register.election.TaskListener;
+import com.github.shawven.calf.oplog.register.election.ElectionListener;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +26,7 @@ class ZookeeperElection extends AbstractElection {
 
 
     public ZookeeperElection(CuratorFramework client, String path, String uniqueId,
-                             Long ttl, boolean autoRequeue, TaskListener listener) {
+                             Long ttl, boolean autoRequeue, ElectionListener listener) {
         super(autoRequeue, listener);
         this.client = client;
         this.path = path;
@@ -35,17 +34,8 @@ class ZookeeperElection extends AbstractElection {
         this.ttl = ttl;
     }
 
-
     @Override
-    protected void startedCallback() throws Exception {
-
-        logger.info("election uses [{}] as uniqueId", uniqueId);
-        client.setData().forPath(path, uniqueId.getBytes(StandardCharsets.UTF_8));
-    }
-
-
-    @Override
-    protected void lockForStart() throws Exception {
+    protected boolean lockForWork() throws Exception {
         InterProcessMutex mutex = new InterProcessMutex(client, path);
         // acquire distributed lock
 
@@ -54,5 +44,9 @@ class ZookeeperElection extends AbstractElection {
         mutex.acquire(ttl, TimeUnit.SECONDS);
 
         logger.debug("election successfully get Lock");
+
+        client.setData().forPath(path, uniqueId.getBytes(StandardCharsets.UTF_8));
+        logger.info("election uses [{}] as uniqueId", uniqueId);
+        return true;
     }
 }

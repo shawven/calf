@@ -2,7 +2,7 @@ package com.github.shawven.calf.oplog.register.etcd;
 
 import com.github.shawven.calf.oplog.register.election.AbstractElection;
 import com.github.shawven.calf.oplog.register.election.Election;
-import com.github.shawven.calf.oplog.register.election.TaskListener;
+import com.github.shawven.calf.oplog.register.election.ElectionListener;
 import io.etcd.jetcd.*;
 import io.etcd.jetcd.lease.LeaseKeepAliveResponse;
 import io.etcd.jetcd.lock.LockResponse;
@@ -35,22 +35,12 @@ class EtcdElection extends AbstractElection {
 
 
     public EtcdElection(Client client, String path, String uniqueId,
-                        Long ttl, boolean autoRequeue, TaskListener listener) {
+                        Long ttl, boolean autoRequeue, ElectionListener listener) {
         super(autoRequeue, listener);
         this.client = client;
         this.path = path;
         this.uniqueId = uniqueId != null ? uniqueId : UUID.randomUUID().toString();
         this.ttl = ttl;
-    }
-
-
-    @Override
-    protected void startedCallback() throws ExecutionException, InterruptedException {
-        ByteSequence pathKey = ByteSequence.from(path, UTF_8);
-        ByteSequence uniqueIdKey = ByteSequence.from(uniqueId, UTF_8);
-
-        logger.info("election uses [{}] as uniqueId", uniqueId);
-        client.getKVClient().put(pathKey, uniqueIdKey).get();
     }
 
     @Override
@@ -61,7 +51,7 @@ class EtcdElection extends AbstractElection {
 
 
     @Override
-    protected void lockForStart() throws ExecutionException, InterruptedException {
+    protected boolean lockForWork() throws ExecutionException, InterruptedException {
         // acquire distributed lock
         long leaseId = client.getLeaseClient().grant(ttl).get().getID();
         logger.debug("election get leaseId:[{}] and ttl:[{}]", leaseId, ttl);
@@ -87,5 +77,13 @@ class EtcdElection extends AbstractElection {
 
         LockResponse lockResponse = client.getLockClient().lock(ByteSequence.from(path, UTF_8), leaseId).get();
         logger.debug("election successfully get Lock [{}]", lockResponse.getKey().toString(UTF_8));
+
+
+        ByteSequence pathKey = ByteSequence.from(path, UTF_8);
+        ByteSequence uniqueIdKey = ByteSequence.from(uniqueId, UTF_8);
+
+        client.getKVClient().put(pathKey, uniqueIdKey).get();
+        logger.info("election uses [{}] as uniqueId", uniqueId);
+        return true;
     }
 }

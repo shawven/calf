@@ -1,3 +1,7 @@
 etcd:
   endpoints: http://localhost:2379
   root: 204
+
+logging:
+  level:
+    com.example.etcdpractice: debug

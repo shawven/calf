@@ -1,10 +1,10 @@
-package com.example.etcdpratice;
+package com.example.etcdpractice;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
-@ConfigurationProperties("spring.etcd")
+@ConfigurationProperties("etcd")
 public class EtcdProperties {
 
     private List<String> endpoints;

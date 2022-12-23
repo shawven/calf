@@ -1,2 +1,6 @@
 zookeeper:
   url: localhost:2181
+
+logging:
+  level:
+    com.example.zkpractice: debug

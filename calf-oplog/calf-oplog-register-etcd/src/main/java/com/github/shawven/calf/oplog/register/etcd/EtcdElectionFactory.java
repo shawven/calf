@@ -2,7 +2,7 @@ package com.github.shawven.calf.oplog.register.etcd;
 
 import com.github.shawven.calf.oplog.register.ElectionFactory;
 import com.github.shawven.calf.oplog.register.election.Election;
-import com.github.shawven.calf.oplog.register.election.TaskListener;
+import com.github.shawven.calf.oplog.register.election.ElectionListener;
 import io.etcd.jetcd.Client;
 
 /**
@@ -21,7 +21,7 @@ public class EtcdElectionFactory implements ElectionFactory {
 
     @Override
     public Election getElection(String path, String namespace, String uniqueId,
-                                long ttl, TaskListener listener) {
+                                long ttl, ElectionListener listener) {
 
         path = path != null
                 ? path.endsWith("/") ? path : path.concat("/")

@@ -1,10 +1,9 @@
-package com.example.etcdpratice;
+package com.example.etcdpractice;
 
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.support.Util;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 

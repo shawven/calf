@@ -95,7 +95,7 @@ public class MongoReplicationServerImpl extends AbstractReplicationServer {
             String namespace = dataSourceCfg.getNamespace();
             String uniqueId = NetUtils.getLocalAddress().getHostAddress();
 
-            OplogTaskListener listener = new OplogTaskListener(dataSourceCfg, opLogClientFactory,
+            OplogElectionListener listener = new OplogElectionListener(dataSourceCfg, opLogClientFactory,
                     clientDAO, statusDAO, dataSourceCfgDAO, dataPublisherManager);
 
             Election election = electionFactory.getElection(path, namespace, uniqueId, 20L, listener);

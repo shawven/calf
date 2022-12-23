@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.register;
 
 import com.github.shawven.calf.oplog.register.election.Election;
-import com.github.shawven.calf.oplog.register.election.TaskListener;
+import com.github.shawven.calf.oplog.register.election.ElectionListener;
 
 /**
  * @author xw
@@ -9,5 +9,5 @@ import com.github.shawven.calf.oplog.register.election.TaskListener;
  */
 public interface ElectionFactory {
 
-    Election getElection(String path, String namespace, String uniqueId, long ttl, TaskListener listener);
+    Election getElection(String path, String namespace, String uniqueId, long ttl, ElectionListener listener);
 }
