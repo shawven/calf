@@ -3,7 +3,11 @@ package com.github.shawven.calf.oplog.register.zookeeper;
 import com.github.shawven.calf.oplog.register.election.AbstractElection;
 import com.github.shawven.calf.oplog.register.election.Election;
 import com.github.shawven.calf.oplog.register.election.ElectionListener;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.leader.LeaderLatch;
+import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
+import org.apache.curator.framework.recipes.leader.Participant;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +16,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-class ZookeeperElection extends AbstractElection {
+class ZookeeperElection extends Election {
 
     private static final Logger logger = LoggerFactory.getLogger(Election.class);
+
+    /**
+     * keep racing for leadership when losing
+     */
+    private final boolean autoRequeue;
+
+    /**
+     * invoke when acquire leadership
+     */
+    private final ElectionListener electionListener;
 
     private final CuratorFramework client;
 
@@ -24,29 +38,56 @@ class ZookeeperElection extends AbstractElection {
 
     private final long ttl;
 
-
-    public ZookeeperElection(CuratorFramework client, String path, String uniqueId,
-                             Long ttl, boolean autoRequeue, ElectionListener listener) {
-        super(autoRequeue, listener);
+        this.electionListener = electionListener;
         this.client = client;
         this.path = path;
-        this.uniqueId = uniqueId != null ? uniqueId : UUID.randomUUID().toString();
+        th
+
+    public ZookeeperElection(CuratorFramework client, String path, String uniqueId,
+                Long ttl, boolean autoRequeue, ElectionListener listener) {
+            this.autoRequeue = autoRequeue;is.uniqueId = uniqueId != null ? uniqueId : UUID.randomUUID().toString();
         this.ttl = ttl;
     }
 
     @Override
-    protected boolean lockForWork() throws Exception {
-        InterProcessMutex mutex = new InterProcessMutex(client, path);
-        // acquire distributed lock
+    public void start() {
+        LeaderLatch leaderLatch = new LeaderLatch(client, path, name);
+        leaderLatch.addListener(new LeaderLatchListener() {
+            @Override
+            public void isLeader() {
+                logger.info("{} isLeader: cost:{}", name, runnerWatch);
+                logger.info("elect cost {}", electWatch);
 
-        logger.debug("election get lock");
+                runnerWatch.reset();
+                runnerWatch.start();
 
-        mutex.acquire(ttl, TimeUnit.SECONDS);
+                logger.info("{} doWork start", name);
+                listener
+                logger.info("{} doWork end cost:{}", name, runnerWatch);
 
-        logger.debug("election successfully get Lock");
+                electWatch.reset();
+                electWatch.start();
 
-        client.setData().forPath(path, uniqueId.getBytes(StandardCharsets.UTF_8));
-        logger.info("election uses [{}] as uniqueId", uniqueId);
-        return true;
+                logger.info("{} hasLeadership:{} cost{} ", name,  leaderLatch.hasLeadership(), runnerWatch);
+            }
+
+            @Override
+            public void notLeader() {
+                try {
+                    Participant leader = leaderLatch.getLeader();
+                    logger.info("{} notLeader, wait for elect, current leader:{}", name, leader);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        leaderLatch.start();
+        leaderLatch.await();
+        leaderLatch.close();
+    }
+
+    @Override
+    public void close() {
+
     }
 }

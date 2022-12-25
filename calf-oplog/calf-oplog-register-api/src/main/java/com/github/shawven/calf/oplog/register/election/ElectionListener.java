@@ -6,15 +6,20 @@ package com.github.shawven.calf.oplog.register.election;
  * @author xw
  * @date 2022-12-08
  */
-public interface ElectionListener {
+public interface ElectionListener extends LeaderLatchListener, LeaderSelectorListener {
 
-    /**
-     * 任务开始
-     */
-    void start();
+    @Override
+    default void isLeader() {
 
-    /**
-     * 任务结束
-     */
-    void end();
+    }
+
+    @Override
+    default void notLeader() {
+
+    }
+
+    @Override
+    default void takeLeadership() {
+
+    }
 }

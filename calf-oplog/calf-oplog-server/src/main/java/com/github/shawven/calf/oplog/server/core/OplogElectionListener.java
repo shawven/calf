@@ -64,7 +64,7 @@ public class OplogElectionListener implements ElectionListener {
     }
 
     @Override
-    public void start() {
+    public void isLeader() {
         oplogClient = opLogClientFactory.initClient(dataSourceCfg);
 
         // 更新Client列表
@@ -100,7 +100,7 @@ public class OplogElectionListener implements ElectionListener {
     }
 
     @Override
-    public void end() {
+    public void notLeader() {
         disposable.dispose();
         dataSourceCfg.setActive(false);
         dataSourceCfgDAO.update(dataSourceCfg);
