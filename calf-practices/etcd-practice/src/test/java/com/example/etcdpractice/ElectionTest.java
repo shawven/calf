@@ -15,6 +15,7 @@ import io.etcd.jetcd.support.CloseableClient;
 import io.grpc.stub.StreamObserver;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -55,8 +56,7 @@ public class ElectionTest extends EtcdPracticeApplicationTests {
 
         try {
             logger.info("{} start elect", name);
-            LeaseGrantResponse leaseGrantResponse = leaseClient.grant(10).get();
-            long id = leaseGrantResponse.getID();
+            long id = leaseClient.grant(10, 5, TimeUnit.SECONDS).get().getID();
 
             ByteSequence elect = ByteSequence.from("elect", UTF_8);
             ByteSequence proposal = ByteSequence.from(name, UTF_8);
@@ -103,7 +103,7 @@ public class ElectionTest extends EtcdPracticeApplicationTests {
             CloseableClient closeableClient = leaseClient.keepAlive(id, new StreamObserver<>() {
                 @Override
                 public void onNext(LeaseKeepAliveResponse leaseKeepAliveResponse) {
-//                    logger.debug("{} lease keepAlive.onNext ts:{}, ttl: {}", name, getCurrentTs(), leaseKeepAliveResponse.getTTL());
+                    logger.debug("{} lease keepAlive.onNext ts:{}, ttl: {}", name, getCurrentTs(), leaseKeepAliveResponse.getTTL());
                 }
 
                 @Override

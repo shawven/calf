@@ -1,22 +1,19 @@
 package com.github.shawven.calf.oplog.register.zookeeper;
 
-import com.github.shawven.calf.oplog.register.election.AbstractElection;
 import com.github.shawven.calf.oplog.register.election.Election;
 import com.github.shawven.calf.oplog.register.election.ElectionListener;
-import com.google.common.util.concurrent.Uninterruptibles;
+import com.google.common.base.Stopwatch;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
 import org.apache.curator.framework.recipes.leader.Participant;
-import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-class ZookeeperElection extends Election {
+class ZookeeperElection implements Election {
 
     private static final Logger logger = LoggerFactory.getLogger(Election.class);
 
@@ -25,69 +22,63 @@ class ZookeeperElection extends Election {
      */
     private final boolean autoRequeue;
 
-    /**
-     * invoke when acquire leadership
-     */
-    private final ElectionListener electionListener;
-
-    private final CuratorFramework client;
-
-    private final String path;
-
     private final String uniqueId;
 
-    private final long ttl;
+    private final LeaderLatch leaderLatch;
 
-        this.electionListener = electionListener;
-        this.client = client;
-        this.path = path;
-        th
+    private final Stopwatch electWatch = Stopwatch.createUnstarted();
 
     public ZookeeperElection(CuratorFramework client, String path, String uniqueId,
                 Long ttl, boolean autoRequeue, ElectionListener listener) {
-            this.autoRequeue = autoRequeue;is.uniqueId = uniqueId != null ? uniqueId : UUID.randomUUID().toString();
-        this.ttl = ttl;
-    }
-
-    @Override
-    public void start() {
-        LeaderLatch leaderLatch = new LeaderLatch(client, path, name);
+        this.uniqueId = uniqueId != null ? uniqueId : UUID.randomUUID().toString();
+        this.autoRequeue = autoRequeue;
+        this.leaderLatch = new LeaderLatch(client, path, this.uniqueId);
         leaderLatch.addListener(new LeaderLatchListener() {
             @Override
             public void isLeader() {
-                logger.info("{} isLeader: cost:{}", name, runnerWatch);
-                logger.info("elect cost {}", electWatch);
+                logger.info("election {} isLeader: cost:{}", uniqueId, electWatch);
 
-                runnerWatch.reset();
-                runnerWatch.start();
-
-                logger.info("{} doWork start", name);
-                listener
-                logger.info("{} doWork end cost:{}", name, runnerWatch);
-
+                listener.isLeader();
                 electWatch.reset();
                 electWatch.start();
-
-                logger.info("{} hasLeadership:{} cost{} ", name,  leaderLatch.hasLeadership(), runnerWatch);
             }
 
             @Override
             public void notLeader() {
                 try {
+                    listener.notLeader();
+
                     Participant leader = leaderLatch.getLeader();
-                    logger.info("{} notLeader, wait for elect, current leader:{}", name, leader);
+                    logger.info("election {} notLeader, wait for elect, current leader:{}", uniqueId, leader);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
         });
-        leaderLatch.start();
-        leaderLatch.await();
-        leaderLatch.close();
+    }
+
+    @Override
+    public void start() {
+        try {
+            leaderLatch.start();
+            leaderLatch.await();
+        } catch (Exception e) {
+            logger.info(String.format("%s error:%s", uniqueId, e.getMessage()));
+        } finally {
+            if (autoRequeue) {
+                logger.info("election {} prepare autoRequeue", uniqueId);
+                start();
+            }
+        }
     }
 
     @Override
     public void close() {
-
+        try {
+            leaderLatch.close();
+            logger.info("election {} closed", uniqueId);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
