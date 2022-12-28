@@ -27,6 +27,6 @@ public class ZkElectionFactory implements ElectionFactory {
                 ? path.endsWith("/") ? path : path.concat("/")
                 : DEFAULT_PATH;
 
-        return new ZookeeperElection(client, path + namespace, uniqueId, ttl, true, listener);
+        return new ZkElection(client, path + namespace, uniqueId, ttl, true, listener);
     }
 }

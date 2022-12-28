@@ -56,7 +56,7 @@ public class ElectionTest extends EtcdPracticeApplicationTests {
 
         try {
             logger.info("{} start elect", name);
-            long id = leaseClient.grant(10, 5, TimeUnit.SECONDS).get().getID();
+            long id = leaseClient.grant(5, 5, TimeUnit.SECONDS).get().getID();
 
             ByteSequence elect = ByteSequence.from("elect", UTF_8);
             ByteSequence proposal = ByteSequence.from(name, UTF_8);
@@ -121,7 +121,7 @@ public class ElectionTest extends EtcdPracticeApplicationTests {
             runnerWatch.start();
 
             logger.info("{} doWork start", name);
-            Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
+            Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
             logger.info("{} doWork end cost:{}", name,  runnerWatch);
 
             electWatch.reset();

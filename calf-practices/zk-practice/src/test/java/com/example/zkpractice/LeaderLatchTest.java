@@ -43,7 +43,7 @@ public class LeaderLatchTest extends ZkPracticeApplicationTests {
 
         }, 0, 2, TimeUnit.SECONDS);
 
-        executorService.awaitTermination(30, TimeUnit.SECONDS);
+        executorService.awaitTermination(300, TimeUnit.SECONDS);
     }
 
 
@@ -78,17 +78,18 @@ public class LeaderLatchTest extends ZkPracticeApplicationTests {
 
                 @Override
                 public void notLeader() {
+                    logger.info("{} notLeader, wait for elect", name);
                     try {
                         Participant leader = leaderLatch.getLeader();
-                        logger.info("{} notLeader, wait for elect, current leader:{}", name, leader);
+                        logger.info("get current leader:{}", leader);
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        logger.info("get current leader error: " + e.getMessage(), e);
                     }
                 }
             });
             leaderLatch.start();
-            leaderLatch.await();
-            leaderLatch.close();
+//            leaderLatch.await();
+//            leaderLatch.close();
 
             logger.info("{} prepare next loop", name);
         } catch (Exception e) {

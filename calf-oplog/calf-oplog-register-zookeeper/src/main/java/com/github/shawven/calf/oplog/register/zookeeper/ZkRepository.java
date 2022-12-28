@@ -16,14 +16,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ZookeeperRepository implements Repository {
+public class ZkRepository implements Repository {
 
-    private final Logger logger = LoggerFactory.getLogger(ZookeeperRepository.class);
+    private final Logger logger = LoggerFactory.getLogger(ZkRepository.class);
 
     private final CuratorFramework client;
 
 
-    public ZookeeperRepository(CuratorFramework client) {
+    public ZkRepository(CuratorFramework client) {
         this.client = client;
     }
 

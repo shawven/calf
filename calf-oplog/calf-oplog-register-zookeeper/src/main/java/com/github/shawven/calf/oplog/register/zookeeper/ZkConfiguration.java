@@ -36,6 +36,6 @@ class ZkConfiguration {
 
     @Bean
     public Repository etcdDataSource(CuratorFramework client) {
-        return new ZookeeperRepository(client);
+        return new ZkRepository(client);
     }
 }
