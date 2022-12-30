@@ -3,6 +3,7 @@ package com.github.shawven.calf.oplog.server.web;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.register.domain.ClientInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class ClientController {
                     clientInfo.getQueueType(),
                     clientInfo.getNamespace(),
                     clientInfo.getDatabaseName(),
-                    clientInfo.getTableName(), clientInfo.getDatabaseEvent(), clientInfo.getLockLevel(), clientInfo.getColumnName());
+                    clientInfo.getTableName(), clientInfo.getDatabaseEvent());
 
             clientService.addClient(clientInfo, partitions, replication);
         }
@@ -56,7 +57,7 @@ public class ClientController {
     public Result addAll(@RequestBody String data) {
         log.info(data);
         List<ClientInfo> clientInfos = JSON.parseArray(data, ClientInfo.class);
-        clientInfos.stream().forEach(clientInfo -> clientService.addClient(clientInfo, null, null));
+        clientInfos.forEach(clientInfo -> clientService.addClient(clientInfo, null, null));
         return Result.success("添加成功");
     }
 
@@ -84,7 +85,7 @@ public class ClientController {
      */
     @RequestMapping(value = "/listRedis", method = GET)
     public List<ClientInfo> listRedis() {
-        return clientService.listClient(ClientInfo.QUEUE_TYPE_REDIS);
+        return clientService.listClient(Const.QUEUE_TYPE_REDIS);
     }
 
     /**
@@ -93,7 +94,7 @@ public class ClientController {
      */
     @RequestMapping(value = "/listRabbit", method = GET)
     public List<ClientInfo> listRabbit() {
-        return clientService.listClient(ClientInfo.QUEUE_TYPE_RABBIT);
+        return clientService.listClient(Const.QUEUE_TYPE_RABBIT);
     }
 
     /**
@@ -102,7 +103,7 @@ public class ClientController {
      */
     @RequestMapping(value = "/listKafka", method = GET)
     public List<ClientInfo> listKafka() {
-        return clientService.listClient(ClientInfo.QUEUE_TYPE_KAFKA);
+        return clientService.listClient(Const.QUEUE_TYPE_KAFKA);
     }
 
     /**

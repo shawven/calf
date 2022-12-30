@@ -3,7 +3,6 @@ package com.github.shawven.calf.oplog.client.rabbit;
 
 import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
-import com.github.shawven.calf.oplog.base.LockLevel;
 import com.github.shawven.calf.oplog.client.DatabaseEventHandler;
 import com.github.shawven.calf.oplog.client.EventBaseErrorDTO;
 import com.rabbitmq.client.Channel;
@@ -33,31 +32,17 @@ import java.util.logging.Logger;
 public class RabbitDataHandler implements Runnable {
     private final static Logger log = Logger.getLogger(RabbitDataHandler.class.toString());
 
-    /**
-     * 识别本线程，暂时未使用
-     */
-    private String uuid = UUID.randomUUID().toString();
-    private static String noneLock = LockLevel.NONE.name();
-    private String dataKey;
-    private String clientId;
-    private Function<String, DatabaseEventHandler> handlerFunction;
-    private RedissonClient redissonClient;
-    private String errMapKey;
-    private String dataKeyLock;
-    private ConnectionFactory connectionFactory;
+    private final String dataKey;
+    private final Function<String, DatabaseEventHandler> handlerFunction;
+    private final RedissonClient redissonClient;
+    private final String errMapKey;
+    private final String dataKeyLock;
+    private final ConnectionFactory connectionFactory;
     private Channel channel;
-    /**
-     * 重试次数
-     */
-    private int retryTimes = 3;
-    /**
-     * 重试间隔,单位毫秒
-     */
-    private long retryInterval = 10 * 1000;
     /**
      * 正在处理的队列
      */
-    public transient static Set<String> DATA_KEY_IN_PROCESS = new ConcurrentHashMap<String, String>().keySet("");
+    public static Set<String> DATA_KEY_IN_PROCESS = new ConcurrentHashMap<String, String>().keySet("");
 
     public RabbitDataHandler(String dataKey,
                              String clientId,
@@ -65,7 +50,6 @@ public class RabbitDataHandler implements Runnable {
                              ConnectionFactory connectionFactory,
                              Function<String, DatabaseEventHandler> handlerFunction) {
         this.dataKey = dataKey;
-        this.clientId = clientId;
         this.redissonClient = redissonClient;
         this.connectionFactory = connectionFactory;
         this.errMapKey = Const.REDIS_PREFIX.concat("BIN-LOG-ERR-MAP-").concat(clientId);
@@ -84,31 +68,9 @@ public class RabbitDataHandler implements Runnable {
             log.severe("接收处理数据失败：" + e.toString());
         }
 
-        if (dataKey.contains(noneLock)) {
-            doRunWithoutLock();
-        } else {
-            doRunWithLock();
-        }
+        doRunWithLock();
     }
 
-    private void doRunWithoutLock() {
-        try {
-            EventBaseDTO dto;
-            GetResponse getResponse;
-            while ((getResponse = channel.basicGet(dataKey, false)) != null) {
-                //反序列化对象
-                ByteArrayInputStream bais = new ByteArrayInputStream(getResponse.getBody());
-                ObjectInputStream ois = new ObjectInputStream(bais);
-                dto = (EventBaseDTO) ois.readObject();
-                doHandleWithoutLock(dto, retryTimes);
-                channel.basicAck(getResponse.getEnvelope().getDeliveryTag(), false);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.severe("接收处理数据失败：" + e.toString());
-        }
-
-    }
 
     private void doRunWithLock() {
         RLock rLock = redissonClient.getLock(dataKeyLock);
@@ -150,33 +112,6 @@ public class RabbitDataHandler implements Runnable {
      * handle及处理异常，出现异常未成功处理返回false，处理成功返回true
      *
      * @param dto
-     * @param leftRetryTimes
-     */
-    private void doHandleWithoutLock(EventBaseDTO dto, int leftRetryTimes) {
-        try {
-            handle(dto);
-        } catch (Exception e) {
-            log.severe(e.toString());
-            e.printStackTrace();
-            if (leftRetryTimes == 1) {
-                RMap<String, EventBaseErrorDTO> errMap = redissonClient.getMap(errMapKey, new JsonJacksonCodec());
-                errMap.put(dto.getUuid(), new EventBaseErrorDTO(dto, e, dataKey));
-            } else {
-                try {
-                    Thread.sleep(retryInterval);
-                } catch (InterruptedException e1) {
-                    log.severe(e1.toString());
-                }
-                log.log(Level.SEVERE, "还剩{}次重试", --leftRetryTimes);
-                doHandleWithoutLock(dto, leftRetryTimes);
-            }
-        }
-    }
-
-    /**
-     * handle及处理异常，出现异常未成功处理返回false，处理成功返回true
-     *
-     * @param dto
      * @param retryTimes
      */
     private boolean doHandleWithLock(final EventBaseDTO dto, Integer retryTimes) {
@@ -189,7 +124,7 @@ public class RabbitDataHandler implements Runnable {
             }
             return true;
         } catch (Exception e) {
-            if (retryTimes.intValue() >= 5) {
+            if (retryTimes >= 5) {
                 log.log(Level.SEVERE, "全部重试失败，请及时处理！", e);
                 return true;
             }
@@ -197,7 +132,8 @@ public class RabbitDataHandler implements Runnable {
             RMap<String, EventBaseErrorDTO> errMap = redissonClient.getMap(errMapKey, new JsonJacksonCodec());
             errMap.put(dto.getUuid(), new EventBaseErrorDTO(dto, e, dataKey));
             try {
-                Thread.sleep(retryInterval);
+                // 重试间隔,单位毫秒
+                Thread.sleep(10 * 1000);
             } catch (InterruptedException e1) {
                 log.severe(e1.toString());
             }
@@ -206,16 +142,12 @@ public class RabbitDataHandler implements Runnable {
     }
 
     public void handle(EventBaseDTO dto) {
-        String key = getKey(dto);
+        String key = dto.getNamespace() + dto.getDatabase() + dto.getTable() + dto.getEventType();;
         DatabaseEventHandler eventHandler = handlerFunction.apply(key);
         if (eventHandler != null) {
             eventHandler.handle(dto);
         } else {
             log.warning("no " + key + " handler");
         }
-    }
-
-    private String getKey(EventBaseDTO dto) {
-        return dto.getNamespace() + dto.getDatabase() + dto.getTable() + dto.getEventType();
     }
 }

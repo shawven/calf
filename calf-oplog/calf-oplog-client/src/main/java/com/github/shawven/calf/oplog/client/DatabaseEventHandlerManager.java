@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
  */
 public class DatabaseEventHandlerManager {
     private final static Logger log = Logger.getLogger(DatabaseEventHandlerManager.class.toString());
-    private Set<Class<? extends DatabaseEventHandler>> handlers = new HashSet<>();
+    private final Set<Class<? extends DatabaseEventHandler>> handlers = new HashSet<>();
 
     public final static Map<String, DatabaseEventHandler> HANDLER_MAP = new ConcurrentHashMap<>();
     private String serverUrl;
     private String queueType;
     private String clientId;
-    private DataSubscriber dataSubscriber;
+    private final DataSubscriber dataSubscriber;
 
     public DatabaseEventHandlerManager(String clientId, DataSubscriber dataSubscriber) {
         this.clientId = clientId;

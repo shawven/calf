@@ -2,8 +2,8 @@ package com.github.shawven.calf.oplog.client;
 
 
 
+import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.base.DatabaseEvent;
-import com.github.shawven.calf.oplog.base.LockLevel;
 
 import java.lang.annotation.*;
 
@@ -18,15 +18,11 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface HandleDatabaseEvent {
 
-    String namespace() default "default";
+    String namespace() default Const.DEFAULT_NAMESPACE;
 
     String database();
 
     String table();
 
     DatabaseEvent[] events();
-
-    LockLevel lockLevel() default LockLevel.NONE;
-
-    String columnName() default "";
 }

@@ -7,6 +7,7 @@ import com.github.shawven.calf.oplog.examples.handler.ExampleDataEventHadler;
 import com.rabbitmq.http.client.Client;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,9 @@ public class ExampleEventListener {
     private Client rabbitHttpClient;
 
     @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
     private RedissonClient redissonClient;
 
     @Value("${databaseEventServerUrl}")
@@ -42,7 +46,7 @@ public class ExampleEventListener {
     @PostConstruct
     public void start() throws Exception {
         //初始化订阅的实现
-        DataSubscriber dataSubscriber = new RabbitDataSubscriber(connectionFactory, rabbitHttpClient, redissonClient);
+        DataSubscriber dataSubscriber = new RabbitDataSubscriber(rabbitHttpClient,rabbitTemplate, redissonClient);
         new DatabaseEventHandlerManager(appName, dataSubscriber)
                 //在binlog中注册handler
                 .registerHandler(exampleDatabaseEventHandler)

@@ -55,7 +55,7 @@ public class ClientServiceImpl implements ClientService {
 
         clientDAO.addConsumerClient(clientInfo);
 
-        if(ClientInfo.QUEUE_TYPE_KAFKA.equals(clientInfo.getQueueType())){
+        if(Const.QUEUE_TYPE_KAFKA.equals(clientInfo.getQueueType())){
 //            kafkaService.createKafkaTopic(clientInfo, partitions, replication);
         }
 
@@ -105,16 +105,16 @@ public class ClientServiceImpl implements ClientService {
 
         JSONObject object = new JSONObject();
         String ClientId;
-        if (ClientInfo.QUEUE_TYPE_REDIS.equals(type)) {
+        if (Const.QUEUE_TYPE_REDIS.equals(type)) {
                 ClientId="BIN-LOG-DATA-".concat(clientName);
                 object.put("queueSize",redissonClient.getList(ClientId).size());
                 object.put("queue",redissonClient.getList(ClientId)
                         .get(repage,repage+1,repage+2,repage+3,repage +4,repage+5,repage+6,repage+7,repage+8,repage+9));
                 return object.toJSONString();
-        } else if (ClientInfo.QUEUE_TYPE_RABBIT.equals(type)) {
+        } else if (Const.QUEUE_TYPE_RABBIT.equals(type)) {
                 ClientId="BIN-LOG-DATA-".concat(clientName);
                 QueueInfo queueInfo = rabbitService.getQueue(ClientId);
-                if (queueInfo == null || new Long(0L).equals(queueInfo.getMessagesReady())) {
+                if (queueInfo == null || 0 == queueInfo.getMessagesReady()) {
                     object.put("queueSize", 0);
                     object.put("queue", new ArrayList<>());
                     return object.toJSONString();
@@ -127,7 +127,7 @@ public class ClientServiceImpl implements ClientService {
                     object.put("queue", list);
                     return object.toJSONString();
                 }
-        } else if (ClientInfo.QUEUE_TYPE_KAFKA.equals(type)) {
+        } else if (Const.QUEUE_TYPE_KAFKA.equals(type)) {
 
                 // TODO 增加Kafka队列查询
                 object.put("queueSize", 0);

@@ -2,7 +2,6 @@ package com.github.shawven.calf.oplog.examples.handler;
 
 import com.github.shawven.calf.oplog.base.DatabaseEvent;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
-import com.github.shawven.calf.oplog.base.LockLevel;
 import com.github.shawven.calf.oplog.client.DatabaseEventHandler;
 import com.github.shawven.calf.oplog.client.HandleDatabaseEvent;
 import org.slf4j.Logger;
@@ -27,8 +26,7 @@ import org.springframework.stereotype.Service;
         namespace = "test",
         database = "test",
         table = "t_user",
-        events = {DatabaseEvent.WRITE_ROWS,DatabaseEvent.UPDATE_ROWS, DatabaseEvent.DELETE_ROWS},
-        lockLevel = LockLevel.TABLE)
+        events = {DatabaseEvent.WRITE_ROWS,DatabaseEvent.UPDATE_ROWS, DatabaseEvent.DELETE_ROWS})
 public class ExampleDataEventHadler implements DatabaseEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExampleDataEventHadler.class);

@@ -79,7 +79,9 @@ public class ClientDAOImpl implements ClientDAO {
     public void addConsumerClient(ClientInfo clientInfo) {
         String namespace = clientInfo.getNamespace();
         DataSourceCfg config = dataSourceCfgDAO.getByNamespace(namespace);
-
+        if (config == null) {
+            throw new RuntimeException("not exist namespace: " + namespace);
+        }
         String metaData = repository.get(joinKey(namespace, config.getClientSetKey()));
 
         Set<ClientInfo> clientSet = null;
