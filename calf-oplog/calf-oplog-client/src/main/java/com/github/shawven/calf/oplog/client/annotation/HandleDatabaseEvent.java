@@ -1,9 +1,9 @@
-package com.github.shawven.calf.oplog.client;
+package com.github.shawven.calf.oplog.client.annotation;
 
 
 
 import com.github.shawven.calf.oplog.base.Const;
-import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventAction;
 
 import java.lang.annotation.*;
 
@@ -24,5 +24,5 @@ public @interface HandleDatabaseEvent {
 
     String table();
 
-    DatabaseEvent[] events();
+    EventAction[] events();
 }

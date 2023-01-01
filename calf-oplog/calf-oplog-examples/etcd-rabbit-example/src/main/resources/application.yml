@@ -9,13 +9,12 @@ spring:
     redisson:
       file: classpath:redisson.yml
 
-  rabbit:
+  rabbitmq:
+    apiUrl: http://${target-host}:15672/api/
     host: ${target-host}
     port: 5672
     username: user
     password: bitnami
-    virtualHost: /binlog
-    apiUrl: http://${target-host}:15672/api/
 
 calf-oplog:
   root: calf
@@ -27,5 +26,6 @@ calf-oplog:
 
 #自动注册客户端(服务端的地址)
 databaseEventServerUrl: http://localhost:8885/client/addAll
-appName: server-etcd-rabbit-example
+appName: etcd-rabbit
 
+#debug: true

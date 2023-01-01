@@ -1,9 +1,9 @@
 package com.github.shawven.calf.oplog.server.core;
 
 
-import com.github.shawven.calf.oplog.server.dao.StatusDAO;
+import com.github.shawven.calf.oplog.server.ops.StatusOps;
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
-import com.github.shawven.calf.oplog.server.dao.DataSourceCfgDAO;
+import com.github.shawven.calf.oplog.server.ops.DataSourceCfgOps;
 import com.github.shawven.calf.oplog.register.domain.DataSourceStatus;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -25,9 +25,9 @@ public class OpLogClientFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(OpLogClientFactory.class);
 
-    private final StatusDAO statusDAO;
+    private final StatusOps statusOps;
 
-    private final DataSourceCfgDAO dataSourceCfgDAO;
+    private final DataSourceCfgOps dataSourceCfgOps;
 
     protected final RedissonClient redissonClient;
 
@@ -61,11 +61,11 @@ public class OpLogClientFactory {
 
     private long lastEventCount = 0;
 
-    public OpLogClientFactory(StatusDAO statusDAO,
-                              DataSourceCfgDAO dataSourceCfgDAO,
+    public OpLogClientFactory(StatusOps statusOps,
+                              DataSourceCfgOps dataSourceCfgOps,
                               RedissonClient redissonClient) {
-        this.statusDAO = statusDAO;
-        this.dataSourceCfgDAO = dataSourceCfgDAO;
+        this.statusOps = statusOps;
+        this.dataSourceCfgOps = dataSourceCfgOps;
         this.redissonClient = redissonClient;
     }
 
@@ -87,7 +87,7 @@ public class OpLogClientFactory {
      * @param dataSourceCfg
      */
     private void configOpLogStatus(OplogClient oplogClient, DataSourceCfg dataSourceCfg) {
-        DataSourceStatus dataSourceStatus = statusDAO.getDataSourceStatus(dataSourceCfg);
+        DataSourceStatus dataSourceStatus = statusOps.getDataSourceStatus(dataSourceCfg);
         if (dataSourceStatus != null) {
             int seconds = Integer.parseInt(String.valueOf(dataSourceStatus.getFilename()));
             int inc = Integer.parseInt((String.valueOf(dataSourceStatus.getPosition())));
@@ -103,11 +103,11 @@ public class OpLogClientFactory {
             logger.error(e.getMessage(), e);
             return true;
         }
-        DataSourceCfg dataSourceCfg = dataSourceCfgDAO.getByNamespace(namespace);
+        DataSourceCfg dataSourceCfg = dataSourceCfgOps.getByNamespace(namespace);
         try {
             while (dataSourceCfg.isActive()) {
                 TimeUnit.SECONDS.sleep(1);
-                dataSourceCfg = dataSourceCfgDAO.getByNamespace(namespace);
+                dataSourceCfg = dataSourceCfgOps.getByNamespace(namespace);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

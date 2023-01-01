@@ -1,12 +1,12 @@
-package com.github.shawven.calf.oplog.server.dao;
+package com.github.shawven.calf.oplog.server.ops;
 
 import com.alibaba.fastjson.JSON;
 import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.register.Emitter;
 import com.github.shawven.calf.oplog.register.domain.ClientInfo;
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
-import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
 import com.github.shawven.calf.oplog.register.Repository;
+import com.github.shawven.calf.oplog.server.support.KeyUtils;
 import com.github.shawven.calf.oplog.server.domain.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,27 +20,23 @@ import java.util.stream.Collectors;
  * @author wanglaomo
  * @since 2019/8/6
  **/
-public class ClientDAOImpl implements ClientDAO {
+public class ClientOpsImpl implements ClientOps {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientDAOImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClientOpsImpl.class);
 
     private final Repository repository;
 
-    private final KeyPrefixUtil keyPrefixUtil;
+    private final DataSourceCfgOps dataSourceCfgOps;
 
-    private final DataSourceCfgDAO dataSourceCfgDAO;
-
-    public ClientDAOImpl(Repository repository, KeyPrefixUtil keyPrefixUtil, DataSourceCfgDAO dataSourceCfgDAO) {
+    public ClientOpsImpl(Repository repository, DataSourceCfgOps dataSourceCfgOps) {
         this.repository = repository;
-        this.keyPrefixUtil = keyPrefixUtil;
-        this.dataSourceCfgDAO = dataSourceCfgDAO;
+        this.dataSourceCfgOps = dataSourceCfgOps;
     }
 
     @Override
     public List<ClientInfo> listConsumerClient(DataSourceCfg dataSourceCfg) {
         String namespace = dataSourceCfg.getNamespace();
-        String binLogClientSetKey = dataSourceCfg.getClientSetKey();
-        String binLogClientSetStr = repository.get(joinKey(namespace, binLogClientSetKey));
+        String binLogClientSetStr = repository.get(joinKey(namespace));
 
         if(!StringUtils.hasText(binLogClientSetStr)) {
             return new ArrayList<>();
@@ -50,8 +46,8 @@ public class ClientDAOImpl implements ClientDAO {
 
     @Override
     public List<ClientInfo> listConsumerClient(String queryType) {
-        return dataSourceCfgDAO.getAll().stream()
-                .map(config -> repository.get(joinKey(config.getNamespace(), config.getClientSetKey())))
+        return dataSourceCfgOps.listCfgs().stream()
+                .map(config -> repository.get(joinKey(config.getNamespace())))
                 .map(str -> {
                     List<ClientInfo> clientInfos = JSON.parseArray(str, ClientInfo.class);
                     return clientInfos == null ? new ArrayList<ClientInfo>() : clientInfos;
@@ -78,11 +74,11 @@ public class ClientDAOImpl implements ClientDAO {
     @Override
     public void addConsumerClient(ClientInfo clientInfo) {
         String namespace = clientInfo.getNamespace();
-        DataSourceCfg config = dataSourceCfgDAO.getByNamespace(namespace);
+        DataSourceCfg config = dataSourceCfgOps.getByNamespace(namespace);
         if (config == null) {
             throw new RuntimeException("not exist namespace: " + namespace);
         }
-        String metaData = repository.get(joinKey(namespace, config.getClientSetKey()));
+        String metaData = repository.get(joinKey(namespace));
 
         Set<ClientInfo> clientSet = null;
         if(!StringUtils.hasText(metaData)) {
@@ -92,7 +88,9 @@ public class ClientDAOImpl implements ClientDAO {
             clientSet = new HashSet<>(clientList);
         }
         clientSet.add(clientInfo);
-        repository.set(joinKey(namespace, config.getClientSetKey()), JSON.toJSONString(clientSet));
+        repository.set(joinKey(namespace), JSON.toJSONString(clientSet));
+
+        logger.info("addConsumerClient success namespace:{} client: {}", namespace, clientInfo);
     }
 
     @Override
@@ -100,27 +98,29 @@ public class ClientDAOImpl implements ClientDAO {
         Map<String, List<ClientInfo>> clientMap = clientInfos.stream().collect(Collectors.groupingBy(ClientInfo::getNamespace));
         clientMap.forEach((namespace, clientList) -> {
 
-            DataSourceCfg config = dataSourceCfgDAO.getByNamespace(namespace);
-            String metaData = repository.get(joinKey(namespace, config.getClientSetKey()));
+            DataSourceCfg config = dataSourceCfgOps.getByNamespace(namespace);
+            String metaData = repository.get(joinKey(namespace));
             if(StringUtils.hasText(metaData)) {
                 List<ClientInfo> currentList = JSON.parseArray(metaData, ClientInfo.class);
                 Set<ClientInfo> clientSet = new HashSet<>(currentList);
                 clientList.forEach(clientSet::remove);
-                repository.set(joinKey(namespace, config.getClientSetKey()), JSON.toJSONString(clientSet));
+                repository.set(joinKey(namespace), JSON.toJSONString(clientSet));
+
+                logger.info("removeConsumerClient success namespace:{} clients: {}", namespace, currentList);
             }
         });
     }
 
     @Override
     public boolean sendCommand(Command command) {
-        repository.set(keyPrefixUtil.withPrefix(Const.COMMAND), JSON.toJSONString(command));
+        repository.set(KeyUtils.withPrefix(Const.COMMAND), JSON.toJSONString(command));
         return true;
     }
 
 
     @Override
     public void watcherClientInfo(DataSourceCfg dataSourceCfg, Consumer<List<ClientInfo>> consumer) {
-        repository.watch(joinKey(dataSourceCfg.getNamespace(), dataSourceCfg.getClientSetKey()), new Emitter<String>() {
+        repository.watch(joinKey(dataSourceCfg.getNamespace()), new Emitter<String>() {
             @Override
             public void onNext(String value) {
                 List<ClientInfo> clientInfos = JSON.parseArray(value, ClientInfo.class);
@@ -139,7 +139,7 @@ public class ClientDAOImpl implements ClientDAO {
         });
     }
 
-    private String joinKey(String namespace, String key) {
-        return keyPrefixUtil.withPrefix(namespace) + "/" + key;
+    private String joinKey(String namespace) {
+        return KeyUtils.withPrefix(namespace) + "/" + Const.CLIENT_SET_KEY;
     }
 }

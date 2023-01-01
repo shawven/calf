@@ -1,5 +1,6 @@
-package com.github.shawven.calf.oplog.server;
+package com.github.shawven.calf.oplog.server.support;
 
+import com.github.shawven.calf.oplog.base.EventBaseDTO;
 import com.github.shawven.calf.oplog.server.core.OpLogClientFactory;
 import org.bson.Document;
 
@@ -9,7 +10,7 @@ import org.bson.Document;
  */
 public class DocumentUtils {
 
-    public static String getDataBase(Document event){
+    public static String getDataBase(Document event) {
         String dataBaseTable = event.getString(OpLogClientFactory.DATABASE_KEY);
         return dataBaseTable.split("\\.")[0];
     }

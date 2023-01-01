@@ -1,11 +1,17 @@
 package com.github.shawven.calf.oplog.server.publisher.rabbit;
 
+import com.alibaba.fastjson.JSON;
+import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 import com.github.shawven.calf.oplog.register.domain.ClientInfo;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * @auther: chenjh
@@ -14,64 +20,36 @@ import org.springframework.amqp.core.*;
  */
 public class RabbitDataPublisher implements DataPublisher {
 
-    private static final Logger log = LoggerFactory.getLogger(RabbitDataPublisher.class);
+    private static final Logger logger = LoggerFactory.getLogger(RabbitDataPublisher.class);
 
-    public static final String NOTIFIER = "BIN-LOG-NOTIFIER-";
+    private final RabbitTemplate rabbitTemplate;
 
-    private AmqpAdmin amqpAdmin;
-
-    private AmqpTemplate amqpTemplate;
-
-    private DirectExchange notifyExchange;
-
-    private TopicExchange dataExchange;
-
-    public RabbitDataPublisher(AmqpAdmin amqpAdmin,
-                               AmqpTemplate amqpTemplate,
-                               DirectExchange notifyExchange,
-                               TopicExchange dataExchange) {
-        this.amqpAdmin = amqpAdmin;
-        this.amqpTemplate = amqpTemplate;
-        this.notifyExchange = notifyExchange;
-        this.dataExchange = dataExchange;
+    public RabbitDataPublisher(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Override
-    public void publish(String clientId, String dataKey, EventBaseDTO data) {
+    public void publish(EventBaseDTO data) {
+        String msg = JSON.toJSONString(data);
         try {
-            sendData(dataKey, data);
-            log.info("推送信息,{}", data);
-            String notifier = NOTIFIER.concat(clientId);
-            sendNoftify(notifier, dataKey);
+            String routingKey = Const.withEventQueue(data.key());
+
+            sendData(routingKey, msg);
+            logger.info("推送信息 {}", msg);
         } catch (Exception e) {
-            log.error("推送信息, " + data + " 失败", e);
+            logger.error("推送信息  " + msg + " 失败", e);
         }
     }
 
-    private void sendData(String queueName, Object msg) {
-        Queue queue = new Queue(queueName, true, false, true);
-        amqpAdmin.declareQueue(queue);
-        Binding binding = BindingBuilder.bind(queue).to(dataExchange).with(queueName);
-        amqpAdmin.declareBinding(binding);
-        amqpTemplate.convertAndSend(dataExchange.getName(),queueName, msg);
+    private void sendData(String routingKey, String msg) {
+        rabbitTemplate.convertAndSend(Const.RABBIT_EVENT_EXCHANGE, routingKey, msg);
     }
 
-    private void sendNoftify(String queueName, Object msg) {
-        Queue queue = new Queue(queueName, true, false, true);
-        amqpAdmin.declareQueue(queue);
-        Binding binding = BindingBuilder.bind(queue).to(notifyExchange).withQueueName();
-        amqpAdmin.declareBinding(binding);
-        amqpTemplate.convertAndSend(notifyExchange.getName(),queueName, msg);
-    }
 
     @Override
     public boolean destroy(ClientInfo clientInfo) {
-        String topicName = DATA.concat(clientInfo.getKey());
-        Queue queue = new Queue(topicName, true, false, true);
-        amqpAdmin.declareQueue(queue);
-        Binding binding = BindingBuilder.bind(queue).to(dataExchange).with(topicName);
-        amqpAdmin.declareBinding(binding);
-        return amqpAdmin.deleteQueue(topicName);
+        rabbitTemplate.destroy();
+        return true;
     }
 
 }

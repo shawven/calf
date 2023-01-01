@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.client.EventBaseErrorDTO;
-import com.github.shawven.calf.oplog.server.dao.ClientDAO;
-import com.github.shawven.calf.oplog.server.dao.StatusDAO;
+import com.github.shawven.calf.oplog.server.ops.ClientOps;
+import com.github.shawven.calf.oplog.server.ops.StatusOps;
 import com.github.shawven.calf.oplog.register.domain.ClientInfo;
-import com.github.shawven.calf.oplog.server.dao.DataSourceCfgDAO;
+import com.github.shawven.calf.oplog.server.ops.DataSourceCfgOps;
 import com.github.shawven.calf.oplog.server.publisher.DataPublisher;
 import com.github.shawven.calf.oplog.server.publisher.rabbit.RabbitService;
 import com.rabbitmq.http.client.domain.QueueInfo;
@@ -36,13 +36,13 @@ public class ClientServiceImpl implements ClientService {
     private RabbitService rabbitService;
 
     @Autowired
-    private DataSourceCfgDAO dataSourceCfgDAO;
+    private DataSourceCfgOps dataSourceCfgOps;
 
     @Autowired
-    private ClientDAO clientDAO;
+    private ClientOps clientOps;
 
     @Autowired
-    private StatusDAO statusDAO;
+    private StatusOps statusOps;
 
     @Autowired
     private DataPublisher dataPublisher;
@@ -53,7 +53,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public void addClient(ClientInfo clientInfo, Integer partitions, Integer replication) {
 
-        clientDAO.addConsumerClient(clientInfo);
+        clientOps.addConsumerClient(clientInfo);
 
         if(Const.QUEUE_TYPE_KAFKA.equals(clientInfo.getQueueType())){
 //            kafkaService.createKafkaTopic(clientInfo, partitions, replication);
@@ -64,7 +64,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public List<ClientInfo> listClient(String queryType) {
 
-        return clientDAO.listConsumerClient(queryType);
+        return clientOps.listConsumerClient(queryType);
     }
 
     @Override
@@ -91,12 +91,12 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void deleteClient(ClientInfo clientInfo) {
-        clientDAO.removeConsumerClient(Collections.singletonList(clientInfo));
+        clientOps.removeConsumerClient(Collections.singletonList(clientInfo));
     }
 
     @Override
     public String getLogStatus() {
-        return JSONArray.toJSONString(statusDAO.listStatus());
+        return JSONArray.toJSONString(statusOps.listStatus());
     }
 
     @Override
@@ -155,15 +155,15 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<String> listNamespace() {
-        return dataSourceCfgDAO.getNamespaceList();
+        return dataSourceCfgOps.getNamespaceList();
     }
 
     @Override
     public Result deleteTopic(String clientInfoKey) {
-        List<ClientInfo> clientInfos = clientDAO.listConsumerClientsByKey(clientInfoKey);
+        List<ClientInfo> clientInfos = clientOps.listConsumerClientsByKey(clientInfoKey);
 
         // 从EventHandler的发送列表中删除
-        clientDAO.removeConsumerClient(clientInfos);
+        clientOps.removeConsumerClient(clientInfos);
 
         // 刪除对应队列中的topic
         Set<String> clientInfoSet = new HashSet<>();

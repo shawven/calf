@@ -1,4 +1,4 @@
-package com.github.shawven.calf.oplog.server;
+package com.github.shawven.calf.oplog.server.support;
 
 import com.github.shawven.calf.oplog.base.Const;
 import org.springframework.util.StringUtils;
@@ -7,19 +7,21 @@ import org.springframework.util.StringUtils;
  * @author wanglaomo
  * @since 2019/10/16
  **/
-public class KeyPrefixUtil {
+public class KeyUtils {
 
-    private final String prefix;
+    private static String prefix;
 
-    public KeyPrefixUtil(String root) {
+    public static void setRoot(String root) {
         // init
         root = ensureStartSlash(root);
         root = ensureEndSlash(root);
 
-        this.prefix = root.concat(ensureEndSlash(Const.APP_PREFIX));
+        KeyUtils.prefix = root.concat(ensureEndSlash(Const.DATA_SOURCE));
     }
 
-    public String withPrefix(String key) {
+    private KeyUtils() {}
+
+    public static String withPrefix(String key) {
         if (!StringUtils.hasText(key)) {
             return prefix;
         }

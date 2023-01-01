@@ -2,7 +2,7 @@ package com.github.shawven.calf.oplog.register.domain;
 
 
 import com.github.shawven.calf.oplog.base.Const;
-import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventAction;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -45,7 +45,7 @@ public class ClientInfo implements Serializable {
     /**
      * 关注的表的事件
      */
-    private DatabaseEvent databaseEvent;
+    private EventAction eventAction;
 
     /**
      * 拼接key，避免频繁拼接
@@ -56,13 +56,13 @@ public class ClientInfo implements Serializable {
 
     public ClientInfo(String clientId, String queueType,
                       String namespace, String databaseName,
-                      String tableName, DatabaseEvent databaseEvent) {
+                      String tableName, EventAction eventAction) {
         this.clientId = clientId;
         this.queueType = queueType;
         this.namespace = namespace == null ? Const.DEFAULT_NAMESPACE : namespace;
         this.databaseName = databaseName;
         this.tableName = tableName;
-        this.databaseEvent = databaseEvent;
-        this.key = clientId + "-" + this.namespace + "-" + databaseName;
+        this.eventAction = eventAction;
+        this.key = this.namespace + "_" + databaseName + "_" + tableName;
     }
 }

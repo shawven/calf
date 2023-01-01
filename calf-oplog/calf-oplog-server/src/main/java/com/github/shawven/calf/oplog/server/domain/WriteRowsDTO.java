@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.domain;
 
 
-import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventAction;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 
 import java.util.List;
@@ -22,8 +22,8 @@ public class WriteRowsDTO extends EventBaseDTO {
     }
 
     public WriteRowsDTO(EventBaseDTO eventBaseDTO, List<Map<String, Object>> rowMaps) {
-        super(eventBaseDTO);
-        super.setEventType(DatabaseEvent.WRITE_ROWS);
+        super(eventBaseDTO.getNamespace(), eventBaseDTO.getEventAction(), eventBaseDTO.getDatabase(), eventBaseDTO.getTable());
+        super.setEventAction(EventAction.INSERT);
         this.rowMaps = rowMaps;
     }
 

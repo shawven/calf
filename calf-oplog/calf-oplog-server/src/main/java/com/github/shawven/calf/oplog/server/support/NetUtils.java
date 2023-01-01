@@ -1,4 +1,4 @@
-package com.github.shawven.calf.oplog.server;
+package com.github.shawven.calf.oplog.server.support;
 
 import java.io.IOException;
 import java.net.Inet6Address;

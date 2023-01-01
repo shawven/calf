@@ -1,6 +1,6 @@
 package com.github.shawven.calf.oplog.client;
 
-import java.util.function.Function;
+import java.util.Map;
 
 /**
  * @author zhenhui
@@ -9,5 +9,5 @@ import java.util.function.Function;
  */
 public interface DataSubscriber {
 
-    void subscribe(String clientId, Function<String, DatabaseEventHandler> handlerFunc);
+    void subscribe(String clientId, Map<String, DatabaseEventHandler> handlerMap);
 }

@@ -1,12 +1,11 @@
 package com.github.shawven.calf.oplog.examples.listener;
 
+import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.client.DataSubscriber;
 import com.github.shawven.calf.oplog.client.DatabaseEventHandlerManager;
 import com.github.shawven.calf.oplog.client.rabbit.RabbitDataSubscriber;
 import com.github.shawven.calf.oplog.examples.handler.ExampleDataEventHadler;
 import com.rabbitmq.http.client.Client;
-import org.redisson.api.RedissonClient;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,16 +22,10 @@ import javax.annotation.PostConstruct;
 public class ExampleEventListener {
 
     @Autowired
-    private ConnectionFactory connectionFactory;
-
-    @Autowired
     private Client rabbitHttpClient;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    private RedissonClient redissonClient;
 
     @Value("${databaseEventServerUrl}")
     private String serverUrl;
@@ -46,11 +39,11 @@ public class ExampleEventListener {
     @PostConstruct
     public void start() throws Exception {
         //初始化订阅的实现
-        DataSubscriber dataSubscriber = new RabbitDataSubscriber(rabbitHttpClient,rabbitTemplate, redissonClient);
-        new DatabaseEventHandlerManager(appName, dataSubscriber)
-                //在binlog中注册handler
+        new DatabaseEventHandlerManager(appName, new RabbitDataSubscriber(rabbitTemplate))
                 .registerHandler(exampleDatabaseEventHandler)
-                .setQueueType("rabbit")
-                .setServerUrl(serverUrl).autoRegisterClient().start();
+                .setQueueType(Const.QUEUE_TYPE_RABBIT)
+                .setServerUrl(serverUrl)
+                .autoRegisterClient()
+                .start();
     }
 }

@@ -10,9 +10,7 @@ import com.github.shawven.calf.oplog.register.domain.ClientInfo;
  */
 public interface DataPublisher {
 
-    String DATA = "BIN-LOG-DATA-";
-
-    void publish(String clientId, String dataKey, EventBaseDTO data);
+    void publish(EventBaseDTO data);
 
     boolean destroy(ClientInfo clientInfo);
 }

@@ -3,6 +3,7 @@ package com.github.shawven.calf.oplog.register.zookeeper;
 import com.github.shawven.calf.oplog.register.election.Election;
 import com.github.shawven.calf.oplog.register.election.ElectionListener;
 import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 class ZkElection implements Election {
@@ -47,7 +49,9 @@ class ZkElection implements Election {
                 @Override
                 public void isLeader() {
                     running.set(true);
+                    electWatch.stop();
                     logger.info("election {} isLeader: cost:{}", name, electWatch);
+                    electWatch.reset();
 
                     try {
                         listener.isLeader();
@@ -55,9 +59,6 @@ class ZkElection implements Election {
                     } catch (Exception e) {
                         logger.error(name + " election exec isLeader error: " + e.getMessage(), e);
                     }
-
-                    electWatch.reset();
-                    electWatch.start();
                 }
 
                 @Override
@@ -88,6 +89,13 @@ class ZkElection implements Election {
 
     private void requeue() {
         if (running.compareAndSet(true, false)) {
+
+            try {
+                leaderLatch.close();
+            } catch (IOException e) {
+                logger.info(name +"election closed error" + e.getMessage(), e);
+            }
+
             try {
                 listener.notLeader();
                 logger.debug(name + " election has successfully exec notLeader");
@@ -97,7 +105,8 @@ class ZkElection implements Election {
         }
 
         if (requeue) {
-            logger.info("election {} prepare autoRequeue", name);
+            logger.info("{} prepare enqueue", name);
+            Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
             start();
         }
     }
@@ -108,17 +117,17 @@ class ZkElection implements Election {
 
         if (running.compareAndSet(true, false)) {
             try {
+                leaderLatch.close();
+            } catch (IOException e) {
+                logger.info(name +"election closed error" + e.getMessage(), e);
+            }
+
+            try {
                 listener.notLeader();
                 logger.info(name + " election has successfully exec notLeader");
             } catch (Exception e) {
                 logger.error(name + " election exec notLeader error: " + e.getMessage(), e);
             }
-        }
-
-        try {
-            leaderLatch.close();
-        } catch (IOException e) {
-            logger.info(name +"election closed error" + e.getMessage(), e);
         }
 
         logger.info("{} election closed", name);

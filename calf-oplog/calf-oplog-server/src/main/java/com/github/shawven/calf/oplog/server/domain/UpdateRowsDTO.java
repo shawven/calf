@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.domain;
 
 
-import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventAction;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 
 import java.io.Serializable;
@@ -22,8 +22,8 @@ public class UpdateRowsDTO extends EventBaseDTO implements Serializable {
     }
 
     public UpdateRowsDTO(EventBaseDTO eventBaseDTO, List<UpdateRow> rows) {
-        super(eventBaseDTO);
-        super.setEventType(DatabaseEvent.UPDATE_ROWS);
+        super(eventBaseDTO.getNamespace(), eventBaseDTO.getEventAction(), eventBaseDTO.getDatabase(), eventBaseDTO.getTable());
+        super.setEventAction(EventAction.UPDATE);
         this.rows = rows;
     }
 

@@ -1,6 +1,9 @@
 package com.github.shawven.calf.oplog.client;
 
 
+import com.github.shawven.calf.oplog.base.Const;
+import com.github.shawven.calf.oplog.client.annotation.HandleDatabaseEvent;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -99,7 +102,10 @@ public class DatabaseEventHandlerManager {
         HandleDatabaseEvent ann = clazz.getAnnotation(HandleDatabaseEvent.class);
         if (ann != null) {
             handlers.add(clazz);
-            return Arrays.stream(ann.events()).map(e -> ann.namespace() + ann.database() + ann.table() + e).collect(Collectors.toList());
+
+            return Arrays.stream(ann.events())
+                    .map(e -> Const.DATA_SOURCE + "_" + ann.namespace() + "_" + ann.database() + "_" + ann.table())
+                    .collect(Collectors.toList());
         }
         return new ArrayList<>(0);
     }
@@ -126,7 +132,7 @@ public class DatabaseEventHandlerManager {
      * 执行监听
      */
     public void start() {
-        dataSubscriber.subscribe(clientId, HANDLER_MAP::get);
+        dataSubscriber.subscribe(clientId, HANDLER_MAP);
     }
 
 }

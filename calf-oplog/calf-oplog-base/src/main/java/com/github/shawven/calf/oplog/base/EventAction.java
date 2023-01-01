@@ -5,23 +5,17 @@ package com.github.shawven.calf.oplog.base;
  * @date Created in 2018/17/01/2018/4:06 PM
  * @modified by
  */
-public enum DatabaseEvent {
-
+public enum EventAction {
     /**
      * 增
      */
-    WRITE_ROWS,
+    INSERT,
     /**
      * 改
      */
-    UPDATE_ROWS,
+    UPDATE,
     /**
      * 删
      */
-    DELETE_ROWS,
-    /**
-     * 阻塞，向下分发时使用
-     */
-    BLOCKING_ROWS;
-
+    DELETE,
 }

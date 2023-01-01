@@ -1,12 +1,8 @@
 package com.github.shawven.calf.oplog.server.publisher;
 
-import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
-import com.github.shawven.calf.oplog.register.domain.ClientInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -16,10 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class DataPublisherManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataPublisherManager.class);
-
     private final Map<String, DataPublisher> dataPublisherMap;
-
 
     private final AtomicLong publishCount = new AtomicLong(0);
 
@@ -29,19 +22,17 @@ public class DataPublisherManager {
         this.dataPublisherMap = dataPublisherMap;
     }
 
-    public void publish(Collection<ClientInfo> clientInfos, EventBaseDTO data) {
-        for (ClientInfo clientInfo : clientInfos) {
-            String topicName = Const.TOPIC_EVENT_DATA.concat(clientInfo.getKey());
-
-            doPublish(clientInfo, topicName, data);
-
-            publishCount.incrementAndGet();
+    public void publish(EventBaseDTO data) {
+        String destQueue = data.getDestQueue();
+        DataPublisher publisher = selectDataPublisher(destQueue);
+        if (publisher == null) {
+            throw new RuntimeException("The queue publisher was not found: " + destQueue);
         }
+        publisher.publish(data);
+
+        publishCount.incrementAndGet();
     }
 
-    private void doPublish(ClientInfo clientInfo, String dataKey, EventBaseDTO data) {
-        selectDataPublisher(clientInfo).publish(clientInfo.getClientId(), dataKey, data);
-    }
 
     public long getPublishCount() {
         return publishCount.get();
@@ -56,7 +47,7 @@ public class DataPublisherManager {
         return res;
     }
 
-    public DataPublisher selectDataPublisher(ClientInfo clientInfo) {
-        return dataPublisherMap.get(clientInfo.getQueueType().toLowerCase() + "DataPublisher");
+    public DataPublisher selectDataPublisher(String queueType) {
+        return dataPublisherMap.get(queueType.toLowerCase() + "DataPublisher");
     }
 }

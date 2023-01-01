@@ -1,4 +1,4 @@
-package com.github.shawven.calf.oplog.server.dao;
+package com.github.shawven.calf.oplog.server.ops;
 
 
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
@@ -7,7 +7,7 @@ import com.github.shawven.calf.oplog.register.domain.InstanceStatus;
 
 import java.util.List;
 
-public interface StatusDAO {
+public interface StatusOps {
 
     List<DataSourceStatus> listStatus();
 

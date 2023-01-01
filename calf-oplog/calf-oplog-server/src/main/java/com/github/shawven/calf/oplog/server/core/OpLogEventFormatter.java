@@ -1,8 +1,8 @@
 package com.github.shawven.calf.oplog.server.core;
 
-import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventAction;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
-import com.github.shawven.calf.oplog.server.DocumentUtils;
+import com.github.shawven.calf.oplog.server.support.DocumentUtils;
 import com.github.shawven.calf.oplog.server.domain.DeleteRowsDTO;
 import com.github.shawven.calf.oplog.server.domain.UpdateRow;
 import com.github.shawven.calf.oplog.server.domain.UpdateRowsDTO;
@@ -38,7 +38,7 @@ public interface OpLogEventFormatter {
         @Override
         public EventBaseDTO format(Document event) {
             WriteRowsDTO writeRowsDTO = new WriteRowsDTO();
-            writeRowsDTO.setEventType(DatabaseEvent.WRITE_ROWS);
+            writeRowsDTO.setEventAction(EventAction.INSERT);
             //添加表信息
             writeRowsDTO.setDatabase(DocumentUtils.getDataBase(event));
             writeRowsDTO.setTable(DocumentUtils.getTable(event));
@@ -63,7 +63,7 @@ public interface OpLogEventFormatter {
         @Override
         public EventBaseDTO format(Document event) {
             UpdateRowsDTO updateRowsDTO = new UpdateRowsDTO();
-            updateRowsDTO.setEventType(DatabaseEvent.UPDATE_ROWS);
+            updateRowsDTO.setEventAction(EventAction.UPDATE);
             //添加表信息
             updateRowsDTO.setDatabase(DocumentUtils.getDataBase(event));
             updateRowsDTO.setTable(DocumentUtils.getTable(event));
@@ -91,7 +91,7 @@ public interface OpLogEventFormatter {
         @Override
         public EventBaseDTO format(Document event) {
             DeleteRowsDTO deleteRowsDTO = new DeleteRowsDTO();
-            deleteRowsDTO.setEventType(DatabaseEvent.DELETE_ROWS);
+            deleteRowsDTO.setEventAction(EventAction.DELETE);
             //添加表信息
             deleteRowsDTO.setDatabase(DocumentUtils.getDataBase(event));
             deleteRowsDTO.setTable(DocumentUtils.getTable(event));

@@ -31,14 +31,12 @@ public class ClientController {
     @PostMapping(value = "/add")
     public Result add(@RequestBody String data) {
         JSONObject jsonObject = JSON.parseObject(data);
-        JSONArray databaseEventList = jsonObject.getJSONArray("databaseEvent");
+        JSONArray eventActions = jsonObject.getJSONArray("eventAction");
         Integer partitions = jsonObject.getInteger("partitions");
         Integer replication = jsonObject.getInteger("replication");
-        for (int i = 0; i < databaseEventList.size(); i++) {
+        for (int i = 0; i < eventActions.size(); i++) {
             JSONObject object = JSON.parseObject(data);
-            object.put("databaseEvent", databaseEventList.getString(i));
-            //前端页面添加的默认都是表级锁
-            object.put("lockLevel", "TABLE");
+            object.put("eventAction", eventActions.getString(i));
             ClientInfo clientInfo = JSON.parseObject(JSON.toJSONString(object), ClientInfo.class);
             //生成key字符串
             clientInfo = new ClientInfo(
@@ -46,7 +44,7 @@ public class ClientController {
                     clientInfo.getQueueType(),
                     clientInfo.getNamespace(),
                     clientInfo.getDatabaseName(),
-                    clientInfo.getTableName(), clientInfo.getDatabaseEvent());
+                    clientInfo.getTableName(), clientInfo.getEventAction());
 
             clientService.addClient(clientInfo, partitions, replication);
         }

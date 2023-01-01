@@ -1,11 +1,11 @@
-package com.github.shawven.calf.oplog.server.dao;
+package com.github.shawven.calf.oplog.server.ops;
 
 import com.alibaba.fastjson.JSON;
 import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
 import com.github.shawven.calf.oplog.register.domain.DataSourceStatus;
 import com.github.shawven.calf.oplog.register.domain.InstanceStatus;
-import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
+import com.github.shawven.calf.oplog.server.support.KeyUtils;
 import com.github.shawven.calf.oplog.register.Repository;
 import org.springframework.util.StringUtils;
 
@@ -16,18 +16,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class StatusDAOImpl implements StatusDAO {
+public class StatusOpsImpl implements StatusOps {
 
     private final Repository repository;
 
-    private final KeyPrefixUtil keyPrefixUtil;
+    private final DataSourceCfgOps dataSourceCfgOps;
 
-    private final DataSourceCfgDAO dataSourceCfgDAO;
-
-    public StatusDAOImpl(Repository repository, KeyPrefixUtil keyPrefixUtil, DataSourceCfgDAO dataSourceCfgDAO) {
+    public StatusOpsImpl(Repository repository, DataSourceCfgOps dataSourceCfgOps) {
         this.repository = repository;
-        this.keyPrefixUtil = keyPrefixUtil;
-        this.dataSourceCfgDAO = dataSourceCfgDAO;
+        this.dataSourceCfgOps = dataSourceCfgOps;
     }
 
     @Override
@@ -37,9 +34,8 @@ public class StatusDAOImpl implements StatusDAO {
                 .format(DateTimeFormatter.ISO_DATE_TIME);
 
         String namespace = config.getNamespace();
-        String statusKey = config.getStatusKey();
 
-        String metaData = repository.get(getKey(namespace, statusKey));
+        String metaData = repository.get(getKey(namespace));
         DataSourceStatus status;
         if(!StringUtils.hasText(metaData)) {
             status = new DataSourceStatus();
@@ -53,14 +49,14 @@ public class StatusDAOImpl implements StatusDAO {
         status.setTimestamp(now);
         status.setDateTime(dateTime);
 
-        repository.set(getKey(namespace, statusKey), JSON.toJSONString(status));
+        repository.set(getKey(namespace), JSON.toJSONString(status));
     }
 
     @Override
     public List<DataSourceStatus> listStatus() {
-        return dataSourceCfgDAO.getAll().stream()
+        return dataSourceCfgOps.listCfgs().stream()
                 .map(config -> {
-                    String metaData = repository.get(getKey(config.getNamespace(), config.getStatusKey()));
+                    String metaData = repository.get(getKey(config.getNamespace()));
                     if (metaData == null) {
                         return null;
                     }
@@ -74,9 +70,8 @@ public class StatusDAOImpl implements StatusDAO {
     @Override
     public DataSourceStatus getDataSourceStatus(DataSourceCfg dataSourceCfg) {
         String namespace = dataSourceCfg.getNamespace();
-        String statusKey = dataSourceCfg.getStatusKey();
 
-        String metaData = repository.get(getKey(namespace, statusKey));
+        String metaData = repository.get(getKey(namespace));
         if(!StringUtils.hasText(metaData)) {
             return null;
         }
@@ -87,7 +82,7 @@ public class StatusDAOImpl implements StatusDAO {
     @Override
     public void updateInstanceStatus(String serviceKey, InstanceStatus status) {
         repository.set(
-                keyPrefixUtil.withPrefix(Const.SERVICE_STATUS_PATH) + "/" + serviceKey,
+                KeyUtils.withPrefix(Const.SERVICE_STATUS_PATH) + "/" + serviceKey,
                 JSON.toJSONString(status),
                 20
         );
@@ -98,13 +93,13 @@ public class StatusDAOImpl implements StatusDAO {
      */
     @Override
     public List<InstanceStatus> getInstanceStatus() {
-        List<String> strings = repository.listChildren(keyPrefixUtil.withPrefix(Const.SERVICE_STATUS_PATH));
+        List<String> strings = repository.listChildren(KeyUtils.withPrefix(Const.SERVICE_STATUS_PATH));
         return strings.stream()
                 .map(str -> JSON.parseObject(str, InstanceStatus.class))
                 .collect(Collectors.toList());
     }
 
-    private String getKey(String namespace, String key) {
-        return keyPrefixUtil.withPrefix(namespace) + "/" + key;
+    private String getKey(String namespace) {
+        return KeyUtils.withPrefix(namespace) + "/" + Const.STATUS_KEY;
     }
 }

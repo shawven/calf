@@ -1,14 +1,15 @@
-package com.github.shawven.calf.oplog.server.dao;
+package com.github.shawven.calf.oplog.server.ops;
 
 import com.alibaba.fastjson.JSON;
 import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.register.Emitter;
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
-import com.github.shawven.calf.oplog.server.KeyPrefixUtil;
+import com.github.shawven.calf.oplog.server.support.KeyUtils;
 import com.github.shawven.calf.oplog.server.ServerWatcher;
 import com.github.shawven.calf.oplog.register.Repository;
 import com.github.shawven.calf.oplog.server.domain.Command;
 import com.github.shawven.calf.oplog.server.domain.CommandType;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -18,23 +19,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-public class DataSourceCfgDAOImpl implements DataSourceCfgDAO {
+public class DataSourceCfgOpsImpl implements DataSourceCfgOps {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceCfgDAOImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataSourceCfgOpsImpl.class);
 
     private final Repository repository;
 
-    private final KeyPrefixUtil keyPrefixUtil;
-
-
-    public DataSourceCfgDAOImpl(Repository repository, KeyPrefixUtil keyPrefixUtil) {
+    public DataSourceCfgOpsImpl(Repository repository) {
         this.repository = repository;
-        this.keyPrefixUtil = keyPrefixUtil;
     }
 
     @Override
-    public List<DataSourceCfg> init(String type) {
-        List<DataSourceCfg> dataSourceCfgs = getAll();
+    public List<DataSourceCfg> getByDataSourceType(String type) {
+        List<DataSourceCfg> dataSourceCfgs = listCfgs();
 
         if(dataSourceCfgs.isEmpty()) {
             logger.warn("There is no available datasource Configs!");
@@ -58,12 +55,14 @@ public class DataSourceCfgDAOImpl implements DataSourceCfgDAO {
 
     @Override
     public boolean create(DataSourceCfg newConfig) {
-        List<DataSourceCfg> dataSourceCfgs = getAll();
+        List<DataSourceCfg> dataSourceCfgs = listCfgs();
 
-        boolean exist = dataSourceCfgs.stream().anyMatch(c -> c.getNamespace().equals(newConfig.getNamespace()));
+        boolean exist = dataSourceCfgs.stream().anyMatch(c -> Objects.equals(newConfig.getId(), c.getId()));
         if(exist) {
             return false;
         }
+
+        newConfig.setId(ObjectId.get().toHexString());
         if (dataSourceCfgs.isEmpty()) {
             dataSourceCfgs = Collections.singletonList(newConfig);
         } else {
@@ -75,67 +74,70 @@ public class DataSourceCfgDAOImpl implements DataSourceCfgDAO {
     }
 
     @Override
-    public void update(DataSourceCfg newConfig) {
+    public boolean update(DataSourceCfg newConfig) {
         if(Thread.currentThread().isInterrupted()) {
-            return;
+            return false;
         }
-        List<DataSourceCfg> configList = getAll();
+        List<DataSourceCfg> configList = listCfgs();
 
         AtomicBoolean modifyFlag = new AtomicBoolean(false);
-        configList = configList.stream().map((c) -> {
-            if(newConfig.getNamespace().equalsIgnoreCase(c.getNamespace())) {
-
-                // 版本号小于集群中版本号则忽略
-                if(newConfig.getVersion() < c.getVersion()) {
-                    logger.warn("Ignore BinLogConfig[{}] Modify case local version [{}] < current version [{}]", newConfig.getNamespace(), newConfig.getVersion(), c.getVersion());
+        configList = configList.stream()
+                .map((c) -> {
+                    if(Objects.equals(newConfig.getId(), c.getId())) {
+                        // 版本号小于集群中版本号则忽略
+                        if(newConfig.getVersion() < c.getVersion()) {
+                            logger.warn("Ignore BinLogConfig[{}] Modify case local version [{}] < current version [{}]", newConfig.getNamespace(), newConfig.getVersion(), c.getVersion());
+                            return c;
+                        } else {
+                            modifyFlag.set(true);
+                            return newConfig;
+                        }
+                    }
                     return c;
-                } else {
-                    modifyFlag.set(true);
-
-                    return newConfig;
-                }
-            }
-            return c;
-        }).collect(Collectors.toList());
+                }).collect(Collectors.toList());
 
         if(modifyFlag.get()) {
             saveAll(configList);
+            return true;
         }
+        return false;
     }
 
     @Override
-    public boolean remove(String namespace) {
-        if(!StringUtils.hasText(namespace)) {
+    public boolean remove(String id) {
+        if(!StringUtils.hasText(id)) {
             return false;
         }
 
-        List<DataSourceCfg> dataSourceCfgs = getAll();
-        boolean removed = dataSourceCfgs.removeIf(config -> config.getNamespace().equals(namespace));
+        List<DataSourceCfg> dataSourceCfgs = listCfgs();
+        dataSourceCfgs.removeIf(c -> Objects.equals(id, c.getId()));
 
         saveAll(dataSourceCfgs);
 
-        return removed;
+        return true;
     }
 
     @Override
     public DataSourceCfg getByNamespace(String namespace) {
-        List<DataSourceCfg> dataSourceCfgs = getAll();
-        Optional<DataSourceCfg> optional = dataSourceCfgs.stream().filter(config -> namespace.equals(config.getNamespace())).findAny();
+        List<DataSourceCfg> dataSourceCfgs = listCfgs();
+        Optional<DataSourceCfg> optional = dataSourceCfgs.stream()
+                .filter(config -> namespace.equals(config.getNamespace()))
+                .findAny();
 
         return optional.orElse(null);
 
     }
     @Override
     public List<String> getNamespaceList() {
-        return getAll().stream()
+        return listCfgs().stream()
                 .map(DataSourceCfg::getNamespace)
                 .collect(Collectors.toList());
     }
 
 
     @Override
-    public List<DataSourceCfg> getAll() {
-        String value = repository.get(keyPrefixUtil.withPrefix(Const.NODE_CONFIG));
+    public List<DataSourceCfg> listCfgs() {
+        String value = repository.get(KeyUtils.withPrefix(Const.NODE_CONFIG));
         if (value == null) {
             return Collections.emptyList();
         }
@@ -143,12 +145,12 @@ public class DataSourceCfgDAOImpl implements DataSourceCfgDAO {
     }
 
     private void saveAll(List<DataSourceCfg> dataSourceCfgs) {
-        repository.set(keyPrefixUtil.withPrefix(Const.NODE_CONFIG), JSON.toJSONString(dataSourceCfgs));
+        repository.set(KeyUtils.withPrefix(Const.NODE_CONFIG), JSON.toJSONString(dataSourceCfgs));
     }
 
     @Override
     public void registerServerWatcher(ServerWatcher watcher) {
-        repository.watch(keyPrefixUtil.withPrefix(Const.COMMAND), new Emitter<String>() {
+        repository.watch(KeyUtils.withPrefix(Const.COMMAND), new Emitter<String>() {
             @Override
             public void onNext(String value) {
                 Command command = JSON.parseObject(value, Command.class);

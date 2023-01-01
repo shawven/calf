@@ -1,7 +1,7 @@
 package com.github.shawven.calf.oplog.server.domain;
 
 
-import com.github.shawven.calf.oplog.base.DatabaseEvent;
+import com.github.shawven.calf.oplog.base.EventAction;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 
 import java.io.Serializable;
@@ -23,8 +23,8 @@ public class DeleteRowsDTO extends EventBaseDTO implements Serializable {
     }
 
     public DeleteRowsDTO(EventBaseDTO eventBaseDTO, List<Map<String, Object>> rowMaps) {
-        super(eventBaseDTO);
-        super.setEventType(DatabaseEvent.DELETE_ROWS);
+        super(eventBaseDTO.getNamespace(), eventBaseDTO.getEventAction(), eventBaseDTO.getDatabase(), eventBaseDTO.getTable());
+        super.setEventAction(EventAction.DELETE);
         this.rowMaps = rowMaps;
     }
 

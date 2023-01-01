@@ -1,4 +1,4 @@
-package com.github.shawven.calf.oplog.server.dao;
+package com.github.shawven.calf.oplog.server.ops;
 
 import com.github.shawven.calf.oplog.register.domain.ClientInfo;
 import com.github.shawven.calf.oplog.register.domain.DataSourceCfg;
@@ -11,7 +11,7 @@ import java.util.function.Consumer;
  * @author xw
  * @date 2021/11/15
  */
-public interface ClientDAO {
+public interface ClientOps {
 
     List<ClientInfo> listConsumerClient(String queryType);
 

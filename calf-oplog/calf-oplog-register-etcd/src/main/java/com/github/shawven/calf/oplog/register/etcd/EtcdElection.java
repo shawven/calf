@@ -3,6 +3,7 @@ package com.github.shawven.calf.oplog.register.etcd;
 import com.github.shawven.calf.oplog.register.election.Election;
 import com.github.shawven.calf.oplog.register.election.ElectionListener;
 import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.Uninterruptibles;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KeyValue;
@@ -67,6 +68,7 @@ class EtcdElection implements Election {
 
         try {
             long id = getLeaseId();
+            logger.info("{} getLeaseId {}", name, id);
 
             observer(name, elect, proposal);
 
@@ -74,7 +76,9 @@ class EtcdElection implements Election {
 
             leaderKey = campaignResponse.getLeader();
 
-            logger.info("{} campaignResponse elect:{} LeaderKey:{}", name, leaderKey.getName(), leaderKey.getKey());
+            electWatch.stop();
+            logger.info("{} campaignResponse elect:{} LeaderKey:{}, cost:{}", name, leaderKey.getName(), leaderKey.getKey(), electWatch);
+            electWatch.reset();
 
             running.set(true);
 
@@ -85,6 +89,7 @@ class EtcdElection implements Election {
                 logger.info(name + " election has successfully exec isLeader");
             } catch (Exception e) {
                 logger.error(name + " election exec isLeader error: " + e.getMessage(), e);
+                throw e;
             }
 
         } catch (Exception e) {
@@ -96,6 +101,13 @@ class EtcdElection implements Election {
     private void requeue() {
         if (running.compareAndSet(true, false)) {
             try {
+                closeableClient.close();
+                client.getElectionClient().resign(leaderKey);
+            } catch (Exception e) {
+                logger.error(name + " election prepare requeue error: " + e.getMessage(), e);
+            }
+
+            try {
                 listener.notLeader();
                 logger.info(name + " election has successfully exec notLeader");
             } catch (Exception e) {
@@ -105,6 +117,7 @@ class EtcdElection implements Election {
 
         if (requeue) {
             logger.info("{} prepare enqueue", name);
+            Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
             start();
         }
     }
@@ -165,14 +178,18 @@ class EtcdElection implements Election {
 
         if (running.compareAndSet(true, false)) {
             try {
+                closeableClient.close();
+                client.getElectionClient().resign(leaderKey);
+            } catch (Exception e) {
+                logger.error(name + " election closed error: " + e.getMessage(), e);
+            }
+
+            try {
                 listener.notLeader();
                 logger.info("{}  election has successfully exec notLeader", name);
             } catch (Exception e) {
                 logger.error(name + " election exec notLeader error: " + e.getMessage(), e);
             }
-
-            closeableClient.close();
-            client.getElectionClient().resign(leaderKey);
         }
 
         logger.info("{} election closed", name);

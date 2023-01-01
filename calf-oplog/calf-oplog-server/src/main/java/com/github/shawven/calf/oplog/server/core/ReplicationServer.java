@@ -13,21 +13,16 @@ import java.util.List;
  **/
 public interface ReplicationServer {
 
+    /**
+     * 数据源类型
+     *
+     * @return
+     */
+    String dataSourceType();
+
     void start();
 
-    boolean persistDatasourceConfig(DataSourceCfg config);
+    void stop(String namespace);
 
-    boolean removeDatasourceConfig(String namespace);
 
-    void startTask(DataSourceCfg config);
-
-    void stopTask(String namespace);
-
-    List<DataSourceCfg> getAllConfigs();
-
-    boolean startDatasource(String namespace, String delegatedIp);
-
-    boolean stopDatasource(String namespace);
-
-    List<InstanceStatus> getServiceStatus();
 }
