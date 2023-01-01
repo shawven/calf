@@ -67,6 +67,11 @@ public class MongoReplicationServerImpl extends AbstractReplicationServer {
 
             Election election = electionFactory.getElection(path, namespace, uniqueId, 20L, listener);
 
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.info("shutdownHook trigger close");
+                election.close();
+            }));
+
             electionMap.put(namespace, election);
             election.start();
         });

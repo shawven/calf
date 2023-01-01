@@ -50,39 +50,39 @@ class ZkElection implements Election {
                 public void isLeader() {
                     running.set(true);
                     electWatch.stop();
-                    logger.info("election {} isLeader: cost:{}", name, electWatch);
+                    logger.info("{} isLeader: cost:{}", name, electWatch);
                     electWatch.reset();
 
                     try {
                         listener.isLeader();
-                        logger.info(name + " election has successfully exec isLeader");
+                        logger.info(name + " has successfully exec isLeader");
                     } catch (Exception e) {
-                        logger.error(name + " election exec isLeader error: " + e.getMessage(), e);
+                        logger.error(name + " exec isLeader error: " + e.getMessage(), e);
                     }
                 }
 
                 @Override
                 public void notLeader() {
-                    if(running.compareAndSet(true, false)) {
+                    if (running.compareAndSet(true, false)) {
                         try {
                             listener.notLeader();
-                            logger.info(name + " election has successfully exec notLeader");
+                            logger.info(name + " has successfully exec notLeader");
                         } catch (Exception e) {
-                            logger.error(name + " election exec notLeader error: " + e.getMessage(), e);
+                            logger.error(name + " exec notLeader error: " + e.getMessage(), e);
                         }
                     }
 
                     try {
                         Participant leader = leaderLatch.getLeader();
-                        logger.info("get current leader:{}", leader);
+                        logger.info(name + " get current leader:{}", leader);
                     } catch (Exception e) {
-                        logger.info("get current leader error: " + e.getMessage(), e);
+                        logger.info(name + " get current leader error: " + e.getMessage(), e);
                     }
                 }
             });
             leaderLatch.start();
         } catch (Exception e) {
-            logger.info(String.format("%s election error:%s", name, e.getMessage()));
+            logger.info(String.format("%s elect error:%s", name, e.getMessage()));
             requeue();
         }
     }
@@ -93,14 +93,14 @@ class ZkElection implements Election {
             try {
                 leaderLatch.close();
             } catch (IOException e) {
-                logger.info(name +"election closed error" + e.getMessage(), e);
+                logger.info(name + " closed error" + e.getMessage(), e);
             }
 
             try {
                 listener.notLeader();
-                logger.debug(name + " election has successfully exec notLeader");
+                logger.debug(name + " has successfully exec notLeader");
             } catch (Exception e) {
-                logger.error(name + " election exec notLeader error: " + e.getMessage(), e);
+                logger.error(name + " exec notLeader error: " + e.getMessage(), e);
             }
         }
 
@@ -113,23 +113,23 @@ class ZkElection implements Election {
 
     @Override
     public void close() {
-        logger.info("{} election closing", name);
+        logger.info("{} closing", name);
 
         if (running.compareAndSet(true, false)) {
             try {
                 leaderLatch.close();
             } catch (IOException e) {
-                logger.info(name +"election closed error" + e.getMessage(), e);
+                logger.info(name + " closed error" + e.getMessage(), e);
             }
 
             try {
                 listener.notLeader();
-                logger.info(name + " election has successfully exec notLeader");
+                logger.info(name + " has successfully exec notLeader");
             } catch (Exception e) {
-                logger.error(name + " election exec notLeader error: " + e.getMessage(), e);
+                logger.error(name + " exec notLeader error: " + e.getMessage(), e);
             }
         }
 
-        logger.info("{} election closed", name);
+        logger.info("{} closed", name);
     }
 }

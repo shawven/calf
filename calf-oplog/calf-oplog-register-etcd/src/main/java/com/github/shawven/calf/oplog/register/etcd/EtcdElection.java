@@ -55,6 +55,7 @@ class EtcdElection implements Election {
         this.ttl = ttl;
         this.requeue = requeue;
         this.listener = listener;
+
     }
 
     @Override
@@ -67,8 +68,8 @@ class EtcdElection implements Election {
         electWatch.start();
 
         try {
-            long id = getLeaseId();
-            logger.info("{} getLeaseId {}", name, id);
+            long id = grantLeaseId();
+            logger.info("{} grant leaseId {}", name, id);
 
             observer(name, elect, proposal);
 
@@ -86,39 +87,40 @@ class EtcdElection implements Election {
 
             try {
                 listener.isLeader();
-                logger.info(name + " election has successfully exec isLeader");
+                logger.info(name + " has successfully exec isLeader");
             } catch (Exception e) {
-                logger.error(name + " election exec isLeader error: " + e.getMessage(), e);
+                logger.error(name + " exec isLeader error: " + e.getMessage(), e);
                 throw e;
             }
 
         } catch (Exception e) {
-            logger.error(name + " election error: " + e.getMessage(), e);
+            logger.error(name + " elect error: " + e.getMessage(), e);
             requeue();
         }
     }
 
     private void requeue() {
+        logger.info("{} running: {}", name, running.get());
         if (running.compareAndSet(true, false)) {
             try {
                 closeableClient.close();
                 client.getElectionClient().resign(leaderKey);
             } catch (Exception e) {
-                logger.error(name + " election prepare requeue error: " + e.getMessage(), e);
+                logger.error(name + " prepare requeue error: " + e.getMessage(), e);
             }
 
             try {
                 listener.notLeader();
-                logger.info(name + " election has successfully exec notLeader");
+                logger.info(name + " has successfully exec notLeader");
             } catch (Exception e) {
-                logger.error(name + " election exec notLeader error: " + e.getMessage(), e);
+                logger.error(name + " exec notLeader error: " + e.getMessage(), e);
             }
-        }
 
-        if (requeue) {
-            logger.info("{} prepare enqueue", name);
-            Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
-            start();
+            if (requeue) {
+                logger.info("{} prepare enqueue", name);
+                Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
+                start();
+            }
         }
     }
 
@@ -147,7 +149,7 @@ class EtcdElection implements Election {
         });
     }
 
-    private long getLeaseId() throws InterruptedException, ExecutionException {
+    private long grantLeaseId() throws InterruptedException, ExecutionException {
         return client.getLeaseClient().grant(ttl, ttl, TimeUnit.SECONDS).get().getID();
     }
 
@@ -174,24 +176,24 @@ class EtcdElection implements Election {
 
     @Override
     public void close() {
-        logger.info("{} election closing", name);
+        logger.info("{} closing, running: {}", name, running.get());
 
         if (running.compareAndSet(true, false)) {
             try {
                 closeableClient.close();
                 client.getElectionClient().resign(leaderKey);
             } catch (Exception e) {
-                logger.error(name + " election closed error: " + e.getMessage(), e);
+                logger.error(name + " closed error: " + e.getMessage(), e);
             }
 
             try {
                 listener.notLeader();
-                logger.info("{}  election has successfully exec notLeader", name);
+                logger.info("{} has successfully exec notLeader", name);
             } catch (Exception e) {
-                logger.error(name + " election exec notLeader error: " + e.getMessage(), e);
+                logger.error(name + " exec notLeader error: " + e.getMessage(), e);
             }
         }
 
-        logger.info("{} election closed", name);
+        logger.info("{} closed", name);
     }
 }
