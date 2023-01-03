@@ -20,12 +20,15 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.annotation.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -57,46 +60,41 @@ public class BaseTests {
         startAt = 0;
     }
 
-    static Semaphore lock = new Semaphore(-1, true);
+    @Test
+    public void testSync() throws InterruptedException {
+        class task  {
 
+            int a = 1;
+            int b = 2;
+            int c = 3;
+            int d = 4;
 
-    static class task  {
-
-        int a = 1;
-        int b = 2;
-        int c = 3;
-        int d = 4;
-
-        private  void write() {
-            a = 11;
-            b = 22;
-            c = 33;
-            synchronized (this) {
-                d = 44;
+            private  void write() {
+                a = 11;
+                b = 22;
+                c = 33;
+                synchronized (this) {
+                    d = 44;
+                }
             }
-        }
 
-        private void read() {
-            int dd = 0;
-            synchronized (this) {
-                dd = d;
-            }
-            int aa = a;
-            int bb = b;
-            int cc = c;
-            if (dd == 44 ) {
-                if (aa != 11 || bb !=22 || cc != 33) {
-                    throw new RuntimeException( " " + aa + " " + bb + " " + cc + " " + dd);
+            private void read() {
+                int dd = 0;
+                synchronized (this) {
+                    dd = d;
+                }
+                int aa = a;
+                int bb = b;
+                int cc = c;
+                if (dd == 44 ) {
+                    if (aa != 11 || bb !=22 || cc != 33) {
+                        throw new RuntimeException( " " + aa + " " + bb + " " + cc + " " + dd);
+                    }
+
                 }
 
             }
-
-        }
-    };
-
-
-    @Test
-    public void testSync() throws InterruptedException {
+        };
         ExecutorService executor = Executors.newFixedThreadPool(6);
 
         for (int i = 0; i < 10000000; i++) {
@@ -136,6 +134,7 @@ public class BaseTests {
 
     @Test
     public void test() throws Exception {
+        Semaphore lock = new Semaphore(-1, true);
         ExecutorService executor = Executors.newFixedThreadPool(3);
         for (int i = 0; i < 9; i++) {
             executor.submit(() -> {
@@ -560,32 +559,58 @@ public class BaseTests {
 
     @Test
     public void testJsonMap() {
+        class Model extends HashMap<String, String> {
+
+            String a;
+            String b;
+
+            public String getA() {
+                return a;
+            }
+
+            public void setA(String a) {
+                this.a = a;
+            }
+
+            public String getB() {
+                return b;
+            }
+
+            public void setB(String b) {
+                this.b = b;
+            }
+        }
+
         Model model = new Model();
         model.put("1", "2");
         model.setA("1");
         System.out.println(new Gson().toJson(model));
     }
+
+
+
+    @Test
+    public void testAopUtils() {
+
+
+        System.out.println(AnnotationUtils.isCandidateClass(A.class, Bn.class));
+    }
+}
+
+@An
+class A {
+
 }
 
 
-class Model extends HashMap<String, String> {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@interface An {
 
-    String a;
-    String b;
+}
 
-    public String getA() {
-        return a;
-    }
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Bn {
 
-    public void setA(String a) {
-        this.a = a;
-    }
-
-    public String getB() {
-        return b;
-    }
-
-    public void setB(String b) {
-        this.b = b;
-    }
 }

@@ -1,8 +1,8 @@
 package com.github.shawven.calf.oplog.client.rabbit;
 
 import com.github.shawven.calf.oplog.base.Const;
-import com.github.shawven.calf.oplog.client.DataSubscriber;
-import com.github.shawven.calf.oplog.client.DatabaseEventHandler;
+import com.github.shawven.calf.oplog.client.DataConsumer;
+import com.github.shawven.calf.oplog.client.DataSubscribeHandler;
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -21,21 +21,21 @@ import java.util.Map;
  * @time: 2018/11/20 10:18
  * @description
  */
-public class RabbitDataSubscriber implements DataSubscriber {
+public class RabbitDataConsumer implements DataConsumer {
 
-    private final Logger logger = LoggerFactory.getLogger(RabbitDataSubscriber.class);
+    private final Logger logger = LoggerFactory.getLogger(RabbitDataConsumer.class);
 
     private RabbitTemplate rabbitTemplate;
 
     private final Gson gson = new Gson();
 
-    public RabbitDataSubscriber(RabbitTemplate rabbitTemplate) throws Exception {
+    public RabbitDataConsumer(RabbitTemplate rabbitTemplate) throws Exception {
         this.rabbitTemplate = rabbitTemplate;
     }
 
     @Override
-    public void subscribe(String clientId, Map<String, DatabaseEventHandler> handlerMap) {
-        for (Map.Entry<String, DatabaseEventHandler> entry : handlerMap.entrySet()) {
+    public void consume(String clientId, Map<String, DataSubscribeHandler> handlerMap) {
+        for (Map.Entry<String, DataSubscribeHandler> entry : handlerMap.entrySet()) {
             try {
                 consume(clientId, entry.getKey(), entry.getValue());
             } catch (IOException e) {
@@ -44,7 +44,7 @@ public class RabbitDataSubscriber implements DataSubscriber {
         }
     }
 
-    private void consume(String clientId, String routingKey, DatabaseEventHandler handler) throws IOException {
+    private void consume(String clientId, String routingKey, DataSubscribeHandler handler) throws IOException {
         Channel channel = rabbitTemplate.getConnectionFactory().createConnection().createChannel(false);
         try {
             channel.queueDeclare(clientId, true, false, true, null);

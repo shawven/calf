@@ -7,7 +7,7 @@ import java.util.Map;
  * @Ddate Created in 2018/18/01/2018/4:26 PM
  * @modified by
  */
-public interface DataSubscriber {
+public interface DataConsumer {
 
-    void subscribe(String clientId, Map<String, DatabaseEventHandler> handlerMap);
+    void consume(String clientId, Map<String, DataSubscribeHandler> handlerMap);
 }

@@ -13,10 +13,10 @@ import java.lang.annotation.*;
  * @modified by
  */
 @Documented
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-public @interface HandleDatabaseEvent {
+public @interface DataSubscriber {
 
     String namespace() default Const.DEFAULT_NAMESPACE;
 
@@ -24,5 +24,5 @@ public @interface HandleDatabaseEvent {
 
     String table();
 
-    EventAction[] events();
+    EventAction[] actions();
 }

@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.shawven.calf.oplog.base.EventBaseDTO;
 import com.github.shawven.calf.oplog.base.Const;
-import com.github.shawven.calf.oplog.client.EventBaseErrorDTO;
+import com.github.shawven.calf.oplog.client.DataErrorMsg;
 import com.github.shawven.calf.oplog.server.ops.ClientOps;
 import com.github.shawven.calf.oplog.server.ops.StatusOps;
 import com.github.shawven.calf.oplog.register.domain.ClientInfo;
@@ -148,7 +148,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public boolean deleteFromQueue(String uuid,String errClient) {
-        RMap<String, EventBaseErrorDTO> map = redissonClient.getMap(errClient, new TypedJsonJacksonCodec(String.class, EventBaseErrorDTO.class));
+        RMap<String, DataErrorMsg> map = redissonClient.getMap(errClient, new TypedJsonJacksonCodec(String.class, DataErrorMsg.class));
         map.remove(uuid);
         return true;
     }

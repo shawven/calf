@@ -1,10 +1,8 @@
 package com.github.shawven.calf.oplog.examples.listener;
 
-import com.github.shawven.calf.oplog.base.Const;
-import com.github.shawven.calf.oplog.client.DataSubscriber;
-import com.github.shawven.calf.oplog.client.DatabaseEventHandlerManager;
-import com.github.shawven.calf.oplog.client.rabbit.RabbitDataSubscriber;
-import com.github.shawven.calf.oplog.examples.handler.ExampleDataEventHadler;
+import com.github.shawven.calf.oplog.client.DataSubscribeRegistry;
+import com.github.shawven.calf.oplog.client.rabbit.RabbitDataConsumer;
+import com.github.shawven.calf.oplog.examples.handler.ExampleDataEventHandler;
 import com.rabbitmq.http.client.Client;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +32,16 @@ public class ExampleEventListener {
     private String appName;
 
     @Autowired
-    private ExampleDataEventHadler exampleDatabaseEventHandler;
+    private ExampleDataEventHandler exampleDatabaseEventHandler;
 
     @PostConstruct
     public void start() throws Exception {
         //初始化订阅的实现
-        new DatabaseEventHandlerManager(appName, new RabbitDataSubscriber(rabbitTemplate))
-                .registerHandler(exampleDatabaseEventHandler)
-                .setQueueType(Const.QUEUE_TYPE_RABBIT)
+        new DataSubscribeRegistry()
+                .setClientId(appName)
                 .setServerUrl(serverUrl)
-                .autoRegisterClient()
+                .setDataConsumer(new RabbitDataConsumer(rabbitTemplate))
+                .registerToServer()
                 .start();
     }
 }

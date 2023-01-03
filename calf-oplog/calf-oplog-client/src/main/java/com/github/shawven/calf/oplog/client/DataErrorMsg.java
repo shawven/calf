@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @Ddate Created in 2018/27/01/2018/3:24 PM
  * @modified by
  */
-public class EventBaseErrorDTO implements Serializable {
+public class DataErrorMsg implements Serializable {
 
     private static final long serialVersionUID = 4556335110286780329L;
 
@@ -17,15 +17,15 @@ public class EventBaseErrorDTO implements Serializable {
     private Exception exception;
     private String dataKey;
 
-    public EventBaseErrorDTO() {
+    public DataErrorMsg() {
     }
 
-    public EventBaseErrorDTO(EventBaseDTO eventBaseDTO, Exception exception) {
+    public DataErrorMsg(EventBaseDTO eventBaseDTO, Exception exception) {
         this.eventBaseDTO = eventBaseDTO;
         this.exception = exception;
     }
 
-    public EventBaseErrorDTO(EventBaseDTO eventBaseDTO, Exception exception, String dataKey) {
+    public DataErrorMsg(EventBaseDTO eventBaseDTO, Exception exception, String dataKey) {
         this.eventBaseDTO = eventBaseDTO;
         this.exception = exception;
         this.dataKey = dataKey;
