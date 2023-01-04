@@ -4,15 +4,16 @@ import com.github.shawven.calf.oplog.base.Const;
 import com.github.shawven.calf.oplog.client.DataConsumer;
 import com.github.shawven.calf.oplog.client.DataSubscribeHandler;
 import com.google.gson.Gson;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.*;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -25,16 +26,16 @@ public class RabbitDataConsumer implements DataConsumer {
 
     private final Logger logger = LoggerFactory.getLogger(RabbitDataConsumer.class);
 
-    private RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
-    private final Gson gson = new Gson();
+    private final List<SimpleConsumer> consumers = new ArrayList<>();
 
-    public RabbitDataConsumer(RabbitTemplate rabbitTemplate) throws Exception {
+    public RabbitDataConsumer(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
     @Override
-    public void consume(String clientId, Map<String, DataSubscribeHandler> handlerMap) {
+    public void startConsumers(String clientId, Map<String, DataSubscribeHandler> handlerMap) {
         for (Map.Entry<String, DataSubscribeHandler> entry : handlerMap.entrySet()) {
             try {
                 consume(clientId, entry.getKey(), entry.getValue());
@@ -54,7 +55,7 @@ public class RabbitDataConsumer implements DataConsumer {
 
         channel.queueBind(clientId, Const.RABBIT_EVENT_EXCHANGE, routingKey);
 
-        channel.basicConsume(clientId, false, new DefaultConsumer(channel) {
+        SimpleConsumer consumer = new SimpleConsumer(channel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                 try {
@@ -71,7 +72,32 @@ public class RabbitDataConsumer implements DataConsumer {
                     }
                 }
             }
-        });
+        };
 
+        consumer.consumerTag  = channel.basicConsume(clientId, false, consumer);
+        consumers.add(consumer);
+    }
+
+    @Override
+    public void stopConsumers(String clientId) {
+        for (SimpleConsumer consumer : consumers) {
+            synchronized (consumer) {
+                try {
+                    consumer.handleCancel(consumer.consumerTag);
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                }
+            }
+        }
+        consumers.clear();
+    }
+
+    static class SimpleConsumer extends DefaultConsumer {
+
+        private String consumerTag;
+
+        public SimpleConsumer(Channel channel) {
+            super(channel);
+        }
     }
 }

@@ -16,11 +16,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author xw
- * @date 2023/1/3
- */
-@Component
+
 public class DataListenerAnnotationBeanPostProcessor implements SmartInitializingSingleton, BeanPostProcessor {
 
     private DataSubscribeRegistry dataSubscribeRegistry;

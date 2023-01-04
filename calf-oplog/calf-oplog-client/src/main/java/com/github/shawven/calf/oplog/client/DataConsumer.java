@@ -9,5 +9,7 @@ import java.util.Map;
  */
 public interface DataConsumer {
 
-    void consume(String clientId, Map<String, DataSubscribeHandler> handlerMap);
+    void startConsumers(String clientId, Map<String, DataSubscribeHandler> handlerMap);
+
+    void stopConsumers(String clientId);
 }

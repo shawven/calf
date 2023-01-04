@@ -3,6 +3,7 @@ package com.github.shawven.calf.oplog.client;
 
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.springframework.context.SmartLifecycle;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
  */
 @Setter
 @Accessors(chain = true)
-public class DataSubscribeRegistry {
+public class DataSubscribeRegistry implements SmartLifecycle {
 
     private final static Logger log = Logger.getLogger(DataSubscribeRegistry.class.toString());
 
@@ -25,6 +26,8 @@ public class DataSubscribeRegistry {
     private String serverUrl;
 
     private DataConsumer dataConsumer;
+
+    private volatile boolean running;
 
     public DataSubscribeRegistry registerHandler(DataSubscribeHandler handler) {
         HANDLER_MAP.put(handler.key(), handler);
@@ -48,11 +51,31 @@ public class DataSubscribeRegistry {
         return this;
     }
 
+    @Override
+    public boolean isAutoStartup() {
+        return true;
+    }
+
     /**
      * 执行监听
      */
     public void start() {
-        dataConsumer.consume(clientId, HANDLER_MAP);
+        if (isRunning()) {
+            return;
+        }
+        running = true;
+        dataConsumer.startConsumers(clientId, HANDLER_MAP);
+    }
+
+    @Override
+    public void stop() {
+        running = false;
+        dataConsumer.stopConsumers(clientId);
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
     }
 
 }

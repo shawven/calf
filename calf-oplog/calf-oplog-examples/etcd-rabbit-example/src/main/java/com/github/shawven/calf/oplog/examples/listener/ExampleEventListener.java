@@ -7,6 +7,8 @@ import com.rabbitmq.http.client.Client;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -16,11 +18,8 @@ import javax.annotation.PostConstruct;
  * @time: 2018/10/16 11:38
  * @description
  */
-@Component
+@Configuration
 public class ExampleEventListener {
-
-    @Autowired
-    private Client rabbitHttpClient;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -34,14 +33,13 @@ public class ExampleEventListener {
     @Autowired
     private ExampleDataEventHandler exampleDatabaseEventHandler;
 
-    @PostConstruct
-    public void start() throws Exception {
+    @Bean
+    public DataSubscribeRegistry dataSubscribeRegistry()  {
         //初始化订阅的实现
-        new DataSubscribeRegistry()
+        return new DataSubscribeRegistry()
                 .setClientId(appName)
                 .setServerUrl(serverUrl)
-                .setDataConsumer(new RabbitDataConsumer(rabbitTemplate))
-                .registerToServer()
-                .start();
+                .setDataConsumer(new RabbitDataConsumer(rabbitTemplate));
+
     }
 }
