@@ -3,6 +3,7 @@ package com.github.shawven.calf.util;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -12,8 +13,10 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toCollection;
 
 /**
- * @author Shoven
- * @date 2019-11-20
+ * 节点树
+ *
+ * @author xw
+ * @date 2023-08-07
  */
 public class NodeTree {
 
@@ -30,52 +33,154 @@ public class NodeTree {
     }
 
     /**
-     * 寻找节点
+     * 深度优先搜索
      *
-     * @param node 待查找节点
+     * @param node 待搜索节点
      * @param predicate 断言函数
-     * @param <N> 返回类型
-     * @return 继承于Node的具体类型
+     * @param <N> 泛型类型，继承于Node的具体类型
+     * @return 目标节点
      */
-    public static <N extends Node<N>> N findNode(N node, Predicate<N> predicate) {
+    public static <N extends Node<N>> N dfs(N node, Predicate<N> predicate) {
         if (node == null) {
             return null;
         }
-        return predicate.test(node) ? node : findNode(node.getChildren(), predicate);
+        if (predicate.test(node)) {
+            return node;
+        }
+        return dfs(node.getChildren(), predicate);
     }
 
     /**
-     * 寻找节点
+     * 深度优先搜索
      *
-     * @param nodes 待查找节点列表
+     * @param nodes 待搜索节点
      * @param predicate 断言函数
-     * @param <N> 返回类型
-     * @return 继承于Node的具体类型
+     * @param <N> 泛型类型，继承于Node的具体类型
+     * @return 目标节点
      */
-    public static <N extends Node<N>> N findNode(List<N> nodes, Predicate<N> predicate) {
+    public static <N extends Node<N>> N dfs(List<N> nodes, Predicate<N> predicate) {
         if (nodes == null || nodes.isEmpty()) {
             return null;
         }
 
-        Deque<N> queue = new LinkedList<>(nodes);
+        LinkedList<N> linkedList = new LinkedList<>(nodes);
 
-        while (!queue.isEmpty()) {
-            N node = queue.pop();
+        while (!linkedList.isEmpty()) {
+            N node = linkedList.pop();
             if (predicate.test(node)) {
                 return node;
             }
             List<N> children = node.getChildren();
             if (children != null && !children.isEmpty()) {
-                children.forEach(queue::push);
+                // 添加到队列尾
+                linkedList.addAll(children);
             }
         }
         return null;
     }
 
     /**
+     * 广度优先遍历
+     *
+     * @param nodes 待搜索节点
+     * @param <N> 泛型类型
+     */
+    public static <N extends Node<N>> void bfs(List<N> nodes, Consumer<N> consumer) {
+        if (nodes == null || nodes.isEmpty()) {
+            return;
+        }
+        LinkedList<N> linkedList = new LinkedList<>(nodes);
+        while (!linkedList.isEmpty()) {
+            N node = linkedList.pop();
+            consumer.accept(node);
+
+            List<N> children = node.getChildren();
+            if (children != null && !children.isEmpty()) {
+                // 添加到队列尾
+                linkedList.addAll(children);
+            }
+        }
+    }
+
+    /**
+     * 深度优先遍历
+     *
+     * @param nodes 待搜索节点
+     * @param <N> 泛型类型
+     */
+    public static <N extends Node<N>> void dfs(List<N> nodes, Consumer<N> consumer) {
+        if (nodes == null || nodes.isEmpty()) {
+            return;
+        }
+        LinkedList<N> linkedList = new LinkedList<>(nodes);
+        while (!linkedList.isEmpty()) {
+            N node = linkedList.pop();
+            consumer.accept(node);
+
+            List<N> children = node.getChildren();
+            if (children != null && !children.isEmpty()) {
+                // 添加到队列头
+                linkedList.addAll(0, children);
+            }
+        }
+    }
+
+    /**
+     * 追踪节点（顶级节点到目标节点的路径）
+     *
+     * @param nodes 待搜索节点
+     * @param predicate 断言函数
+     * @param <N> 返回类型，继承于Node的具体类型
+     * @return 追踪链路
+     */
+    public static <N extends Node<N>> List<N> traceNode(List<N> nodes, Predicate<N> predicate) {
+        if (nodes == null || nodes.isEmpty()) {
+            return emptyList();
+        }
+        LinkedList<N> link = new LinkedList<>();
+        Deque<N> queue = new LinkedList<>();
+
+        for (N node : nodes) {
+            queue.push(node);
+            link.clear();
+
+            boolean preNodeIsLeaf = false;
+            while (!queue.isEmpty()) {
+                N elem = queue.pop();
+
+                List<N> children = elem.getChildren();
+                // 当前节点是叶子节点
+                boolean curNodeIsLeaf = children == null || children.isEmpty();
+
+                // 当前节点非叶子节点且前一个节点是叶子节点，即遍历了所有的叶子节点回退到父节点
+                if (preNodeIsLeaf && !curNodeIsLeaf) {
+                    // 父节点已经判断过直接删除
+                    link.removeLast();
+                }
+
+                // 找到退出
+                if (predicate.test(elem)) {
+                    link.addLast(elem);
+                    return link;
+                }
+
+                if (curNodeIsLeaf) {
+                    preNodeIsLeaf = true;
+                } else {
+                    // 前序遍历，先添加父节点
+                    link.addLast(elem);
+                    // 子节点入栈
+                    children.forEach(queue::push);
+                }
+            }
+        }
+        return emptyList();
+    }
+
+    /**
      * 压扁节点树成列表（平铺当前节点及其子节点）
      *
-     * @param node 待处理节点
+     * @param node 待搜索节点
      * @param <N> 节点类型
      * @return 扁平节点集合
      */
@@ -89,26 +194,15 @@ public class NodeTree {
     /**
      * 压扁多个节点树成列表（平铺当前节点及其子节点）
      *
-     * @param nodes 待处理节点集合
+     * @param nodes 待搜索节点
      * @param <N> 节点类型
      * @return 扁平节点集合
      */
     public static <N extends Node<N>> List<N> flatList(List<N> nodes) {
-        if (nodes == null || nodes.isEmpty()) {
-            return emptyList();
-        }
-        LinkedList<N> linkedList = new LinkedList<>(nodes);
         List<N> list = new ArrayList<>();
-
-        while (!linkedList.isEmpty()) {
-            N node = linkedList.pop();
-            List<N> children = node.getChildren();
-            list.add(node);
-            if (children != null && !children.isEmpty()) {
-                // 添加到队列头
-                linkedList.addAll(0, children);
-            }
-        }
+        dfs(nodes, n -> {
+            list.add(n);
+        });
         return list;
     }
 
@@ -117,17 +211,17 @@ public class NodeTree {
         /**
          * 源数据
          */
-        private List<T> data;
+        private final List<T> data;
 
         /**
-         * 根节点过滤器
+         * 根节点选择桥
          */
-        private Predicate<T> rootFilter;
+        private Predicate<T> selector;
 
         /**
-         * 子节点过滤器
+         * 父子节点连接器
          */
-        private BiPredicate<T, T> childFilter;
+        private BiPredicate<T, T> connector;
 
         /**
          * 节点转换器
@@ -139,24 +233,24 @@ public class NodeTree {
         }
 
         /**
-         * 设置根节点过滤器
+         * 设置根节点选择器
          *
-         * @param rootFilter 根节点过滤器
-         * @return NodeTree2
+         * @param selector 根节点选择器
+         * @return NodeTree
          */
-        public TreeBuilder<T, R> rootFilter(Predicate<T> rootFilter) {
-            this.rootFilter = rootFilter;
+        public TreeBuilder<T, R> select(Predicate<T> selector) {
+            this.selector = selector;
             return this;
         }
 
         /**
-         * 设置孩子节点过滤器 parent, child 第一个为父节点， 第二个为待查找的子节点
+         * 设置父子节点连接器 parent, child 第一个为父节点， 第二个为待查找的子节点
          *
-         * @param childFilter 孩子节点过滤器
+         * @param connector 子节点连接器
          * @return NodeTree2
          */
-        public TreeBuilder<T, R> childFilter(BiPredicate<T, T> childFilter) {
-            this.childFilter = childFilter;
+        public TreeBuilder<T, R> connect(BiPredicate<T, T> connector) {
+            this.connector = connector;
             return this;
         }
 
@@ -172,22 +266,22 @@ public class NodeTree {
         }
 
         public List<R> build() {
-            Objects.requireNonNull(rootFilter, "父节点选择器不能为空");
-            Objects.requireNonNull(childFilter, "孩子节点选择器不能为空");
+            Objects.requireNonNull(selector, "跟节点选择器不能为空");
+            Objects.requireNonNull(connector, "父子节点连接器不能为空");
 
             if (data == null || data.isEmpty()) {
                 return emptyList();
             }
-            // 输入和返回都实现了Node，则无需转换
+            // 输入和输出类型都实现了Node，则无需转换
             if (data.iterator().next() instanceof Node) {
                 nodeConvert = n -> (R)n;
             } else {
-                Objects.requireNonNull(nodeConvert, "节点转换器不能为空");
+                Objects.requireNonNull(nodeConvert, "输入节点转换器不能为空");
             }
 
             Map<Boolean, List<T>> map = data.stream()
                     .filter(Objects::nonNull)
-                    .collect(groupingBy(o -> rootFilter.test(o)));
+                    .collect(groupingBy(o -> selector.test(o)));
 
             // 子节点列表
             List<T> children = map.getOrDefault(false, emptyList());
@@ -211,7 +305,7 @@ public class NodeTree {
                     T child = iterator.next();
 
                     // 已找到子节点
-                    if (childFilter.test(oldParent, child)) {
+                    if (connector.test(oldParent, child)) {
                         // 子节点转换
                         R newChild = nodeConvert.apply(child);
 
@@ -283,7 +377,7 @@ public class NodeTree {
          * @return 子节点集合
          */
         default T findChild(Predicate<T> predicate) {
-            return findNode(getChildren(), predicate);
+            return dfs(getChildren(), predicate);
         }
 
         /**

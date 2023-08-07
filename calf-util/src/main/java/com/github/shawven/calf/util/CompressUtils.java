@@ -22,6 +22,7 @@ import java.nio.file.Files;
  * @date 2023/3/7
  */
 public class CompressUtils {
+
     public static byte[] zip(File[] sourceFiles) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         compress(sourceFiles, new ZipArchiveOutputStream(bos));

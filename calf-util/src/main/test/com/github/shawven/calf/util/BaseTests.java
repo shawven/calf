@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.nlf.calendar.Lunar;
 import com.nlf.calendar.Solar;
 import com.nlf.calendar.util.HolidayUtil;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -590,10 +591,8 @@ public class BaseTests {
 
 
     @Test
-    public void testAopUtils() {
-
-
-        System.out.println(AnnotationUtils.isCandidateClass(A.class, Bn.class));
+    public void testAopUtils() throws IOException {
+        FileUtils.writeByteArrayToFile(new File("d:/byte.json"), new Gson().toJson(ImmutableMap.of("1", Arrays.asList("1", "2"))).getBytes());
     }
 }
 
