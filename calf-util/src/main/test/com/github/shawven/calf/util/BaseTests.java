@@ -323,7 +323,7 @@ public class BaseTests {
 
         );
 
-        List<Menu> tree = TreeNode.<Menu, Menu>from(menus)
+        List<Menu> tree = TreeNode.from(menus)
                 .select(menu -> menu.id.length() == 1)
                 .connect((parent, child) -> child.name.startsWith(parent.name)
                         && child.name.length() - 1 == parent.name.length()

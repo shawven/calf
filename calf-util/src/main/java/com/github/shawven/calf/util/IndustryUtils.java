@@ -81,7 +81,7 @@ public class IndustryUtils {
         List<IndustryRaw> raws = new Gson().fromJson(data, new TypeToken<List<IndustryRaw>>() {
         }.getType());
 
-        List<Industry> industries = TreeNode.<IndustryRaw, Industry>from(raws)
+        List<Industry> industries = TreeNode.from(raws)
                 .select(industry -> industry.getCode().length() == 1)
                 .connect((parent, child) -> {
                     String parentId= parent.getId();
@@ -96,14 +96,13 @@ public class IndustryUtils {
                     }
 
                 })
-                .map(industryRaw -> {
+                .build(industryRaw -> {
                     Industry industry = new Industry();
                     industry.setCategory(industryRaw.getCode());
                     industry.setCode(industryRaw.getCode());
                     industry.setName(industryRaw.getName().trim());
                     return industry;
-                })
-                .build();
+                });
         mergeCode(industries, null);
         return industries;
     }

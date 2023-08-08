@@ -235,14 +235,13 @@ public class TreeNode {
      *
      * @param data 数据集合
      * @param <T> 输入类型
-     * @param <R> 返回类型
      * @return TreeBuilder
      */
-    public static <T, R extends Node<R>> TreeNodeBuilder<T, R> from(List<T> data) {
+    public static <T> TreeNodeBuilder<T> from(List<T> data) {
         return new TreeNodeBuilder<>(data);
     }
 
-    public static class TreeNodeBuilder<T, R extends Node<R>> {
+    public static class TreeNodeBuilder<T> {
 
         /**
          * 源数据
@@ -259,11 +258,6 @@ public class TreeNode {
          */
         private BiPredicate<T, T> connector;
 
-        /**
-         * 节点转换器
-         */
-        private Function<T, R> nodeConvert;
-
         public TreeNodeBuilder(List<T> data) {
             this.data = data;
         }
@@ -274,7 +268,7 @@ public class TreeNode {
          * @param selector 根节点选择器
          * @return NodeTree
          */
-        public TreeNodeBuilder<T, R> select(Predicate<T> selector) {
+        public TreeNodeBuilder<T> select(Predicate<T> selector) {
             this.selector = selector;
             return this;
         }
@@ -285,34 +279,33 @@ public class TreeNode {
          * @param connector 子节点连接器
          * @return NodeTree2
          */
-        public TreeNodeBuilder<T, R> connect(BiPredicate<T, T> connector) {
+        public TreeNodeBuilder<T> connect(BiPredicate<T, T> connector) {
             this.connector = connector;
             return this;
         }
 
-        /**
-         * 设置节点转换器
-         *
-         * @param nodeConvert 节点转换器
-         * @return NodeTree2
-         */
-        public TreeNodeBuilder<T, R> map(Function<T, R> nodeConvert) {
-            this.nodeConvert = nodeConvert;
-            return this;
-        }
 
-        public List<R> build() {
-            Objects.requireNonNull(selector, "跟节点选择器不能为空");
-            Objects.requireNonNull(connector, "父子节点连接器不能为空");
-
+        public List<T> build() {
             if (data == null || data.isEmpty()) {
                 return emptyList();
             }
-            // 输入和输出类型都实现了Node，则无需转换
-            if (data.iterator().next() instanceof Node) {
-                nodeConvert = n -> (R)n;
-            } else {
-                Objects.requireNonNull(nodeConvert, "输入节点转换器不能为空");
+
+            if (!(data.iterator().next() instanceof Node)) {
+                throw new IllegalStateException("输入不是Node类型需设置节点连接器");
+            }
+
+            // 输入实现了Node，则默认可转换
+            Function<T, ? extends Node> convert = t -> (Node)t;
+            return (List<T>) build(convert);
+        }
+
+        public <R extends Node<R>> List<R> build(Function<T, R> convert) {
+            Objects.requireNonNull(selector, "跟节点选择器不能为空");
+            Objects.requireNonNull(connector, "父子节点连接器不能为空");
+            Objects.requireNonNull(convert, "输入节点转换器不能为空");
+
+            if (data == null || data.isEmpty()) {
+                return emptyList();
             }
 
             Map<Boolean, List<T>> map = data.stream()
@@ -325,7 +318,7 @@ public class TreeNode {
             LinkedList<T> roots = new LinkedList<>(map.getOrDefault(true, emptyList()));
 
             // 新根节点
-            LinkedList<R> newRoots = roots.stream().map(nodeConvert).collect(toCollection(LinkedList::new));
+            LinkedList<R> newRoots = roots.stream().map(convert).collect(toCollection(LinkedList::new));
             // 返回结果
             List<R> res = new ArrayList<>(newRoots);
 
@@ -343,7 +336,7 @@ public class TreeNode {
                     // 已找到子节点
                     if (connector.test(oldParent, child)) {
                         // 子节点转换
-                        R newChild = nodeConvert.apply(child);
+                        R newChild = convert.apply(child);
 
                         if (newChild instanceof DeNode) {
                             ((DeNode) newChild).setParent((DeNode)newParent);
