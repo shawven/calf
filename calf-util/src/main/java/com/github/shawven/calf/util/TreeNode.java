@@ -2,10 +2,7 @@ package com.github.shawven.calf.util;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -13,24 +10,12 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toCollection;
 
 /**
- * 节点树
+ * 树节点
  *
  * @author xw
  * @date 2023-08-07
  */
-public class NodeTree {
-
-    /**
-     * 返回节点树构造器
-     *
-     * @param data 数据集合
-     * @param <T> 输入类型
-     * @param <R> 返回类型
-     * @return TreeBuilder
-     */
-    public static <T, R extends Node<R>> TreeBuilder<T, R> from(List<T> data) {
-        return new TreeBuilder<>(data);
-    }
+public class TreeNode {
 
     /**
      * 深度优先搜索
@@ -80,9 +65,33 @@ public class NodeTree {
     }
 
     /**
+     * 深度优先遍历
+     *
+     * @param nodes 待搜索节点
+     * @param <N> 泛型类型
+     */
+    public static <N extends Node<N>> void dfs(List<N> nodes, Consumer<N> consumer) {
+        if (nodes == null || nodes.isEmpty()) {
+            return;
+        }
+        LinkedList<N> linkedList = new LinkedList<>(nodes);
+        while (!linkedList.isEmpty()) {
+            N node = linkedList.pop();
+            consumer.accept(node);
+
+            List<N> children = node.getChildren();
+            if (children != null && !children.isEmpty()) {
+                // 添加到队列头
+                linkedList.addAll(0, children);
+            }
+        }
+    }
+
+    /**
      * 广度优先遍历
      *
      * @param nodes 待搜索节点
+     * @param consumer 消费者
      * @param <N> 泛型类型
      */
     public static <N extends Node<N>> void bfs(List<N> nodes, Consumer<N> consumer) {
@@ -103,24 +112,39 @@ public class NodeTree {
     }
 
     /**
-     * 深度优先遍历
+     *  广度优先遍历
      *
      * @param nodes 待搜索节点
+     * @param consumer 带遍历层数得消费者
      * @param <N> 泛型类型
      */
-    public static <N extends Node<N>> void dfs(List<N> nodes, Consumer<N> consumer) {
+    public static <N extends Node<N>> void bfs(List<N> nodes, BiConsumer<Integer, N> consumer) {
         if (nodes == null || nodes.isEmpty()) {
             return;
         }
-        LinkedList<N> linkedList = new LinkedList<>(nodes);
+        int level = 1;
+
+        LinkedList<Object> linkedList = new LinkedList<>(nodes);
         while (!linkedList.isEmpty()) {
-            N node = linkedList.pop();
-            consumer.accept(node);
+            N node = null;
+            Object elem = linkedList.pop();
+
+            if (elem instanceof Integer) {
+                // 层数
+                level = (int) elem;
+                node = (N)linkedList.pop();
+            } else {
+                node = (N)elem;
+            }
+
+            consumer.accept(level, node);
 
             List<N> children = node.getChildren();
             if (children != null && !children.isEmpty()) {
-                // 添加到队列头
-                linkedList.addAll(0, children);
+                // 层数+1
+                linkedList.add(level + 1);
+                // 添加到队列尾
+                linkedList.addAll(children);
             }
         }
     }
@@ -178,7 +202,7 @@ public class NodeTree {
     }
 
     /**
-     * 压扁节点树成列表（平铺当前节点及其子节点）
+     * 压扁树节点成列表（平铺当前节点及其子节点）
      *
      * @param node 待搜索节点
      * @param <N> 节点类型
@@ -192,7 +216,7 @@ public class NodeTree {
     }
 
     /**
-     * 压扁多个节点树成列表（平铺当前节点及其子节点）
+     * 压扁多个树节点成列表（平铺当前节点及其子节点）
      *
      * @param nodes 待搜索节点
      * @param <N> 节点类型
@@ -206,7 +230,19 @@ public class NodeTree {
         return list;
     }
 
-    public static class TreeBuilder<T, R extends Node<R>> {
+    /**
+     * 返回树节点构造器
+     *
+     * @param data 数据集合
+     * @param <T> 输入类型
+     * @param <R> 返回类型
+     * @return TreeBuilder
+     */
+    public static <T, R extends Node<R>> TreeNodeBuilder<T, R> from(List<T> data) {
+        return new TreeNodeBuilder<>(data);
+    }
+
+    public static class TreeNodeBuilder<T, R extends Node<R>> {
 
         /**
          * 源数据
@@ -228,7 +264,7 @@ public class NodeTree {
          */
         private Function<T, R> nodeConvert;
 
-        public TreeBuilder(List<T> data) {
+        public TreeNodeBuilder(List<T> data) {
             this.data = data;
         }
 
@@ -238,7 +274,7 @@ public class NodeTree {
          * @param selector 根节点选择器
          * @return NodeTree
          */
-        public TreeBuilder<T, R> select(Predicate<T> selector) {
+        public TreeNodeBuilder<T, R> select(Predicate<T> selector) {
             this.selector = selector;
             return this;
         }
@@ -249,7 +285,7 @@ public class NodeTree {
          * @param connector 子节点连接器
          * @return NodeTree2
          */
-        public TreeBuilder<T, R> connect(BiPredicate<T, T> connector) {
+        public TreeNodeBuilder<T, R> connect(BiPredicate<T, T> connector) {
             this.connector = connector;
             return this;
         }
@@ -260,7 +296,7 @@ public class NodeTree {
          * @param nodeConvert 节点转换器
          * @return NodeTree2
          */
-        public TreeBuilder<T, R> map(Function<T, R> nodeConvert) {
+        public TreeNodeBuilder<T, R> map(Function<T, R> nodeConvert) {
             this.nodeConvert = nodeConvert;
             return this;
         }
@@ -355,6 +391,7 @@ public class NodeTree {
      * @param <T>
      */
     public interface Node<T extends Node<T>> extends Serializable {
+
         /**
          * 获取所有孩子节点
          *

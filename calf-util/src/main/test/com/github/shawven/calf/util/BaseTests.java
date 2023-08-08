@@ -6,7 +6,6 @@ import com.google.common.collect.*;
 import com.google.gson.Gson;
 import com.nlf.calendar.Lunar;
 import com.nlf.calendar.Solar;
-import com.nlf.calendar.util.HolidayUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -18,12 +17,9 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,7 +34,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -256,7 +251,7 @@ public class BaseTests {
 
     @Test
     public void testNodeTree2() {
-        class Menu implements NodeTree.Node<Menu> {
+        class Menu implements TreeNode.Node<Menu> {
 
             @Override
             public List<Menu> getChildren() {
@@ -272,7 +267,7 @@ public class BaseTests {
     }
     @Test
     public void testNodeTree() {
-        class Menu implements NodeTree.Node<Menu> {
+        class Menu implements TreeNode.Node<Menu> {
             String name;
             String id;
 
@@ -328,9 +323,9 @@ public class BaseTests {
 
         );
 
-        List<Menu> tree = NodeTree.<Menu, Menu>from(menus)
-                .rootFilter(menu -> menu.id.length() == 1)
-                .childFilter((parent, child) -> child.name.startsWith(parent.name)
+        List<Menu> tree = TreeNode.<Menu, Menu>from(menus)
+                .select(menu -> menu.id.length() == 1)
+                .connect((parent, child) -> child.name.startsWith(parent.name)
                         && child.name.length() - 1 == parent.name.length()
                 )
                 .build();

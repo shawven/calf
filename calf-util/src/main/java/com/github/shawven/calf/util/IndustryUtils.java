@@ -10,6 +10,7 @@ import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -73,16 +74,16 @@ public class IndustryUtils {
         Objects.requireNonNull(name, "行业名称不能为空");
         final String findName = name.trim();
         List<Industry> industries = new ArrayList<>(getIndustries());
-        return NodeTree.findNode(industries, industry -> industry.getName().equals(findName));
+        return TreeNode.dfs(industries, (Predicate<Industry>) industry -> industry.getName().equals(findName));
     }
 
     private static List<Industry> transform(String data) {
         List<IndustryRaw> raws = new Gson().fromJson(data, new TypeToken<List<IndustryRaw>>() {
         }.getType());
 
-        List<Industry> industries =NodeTree.<IndustryRaw, Industry>from(raws)
-                .rootFilter(industry -> industry.getCode().length() == 1)
-                .childFilter((parent, child) -> {
+        List<Industry> industries = TreeNode.<IndustryRaw, Industry>from(raws)
+                .select(industry -> industry.getCode().length() == 1)
+                .connect((parent, child) -> {
                     String parentId= parent.getId();
                     String childId = child.getId();
                     String parentCode = parent.getCode();
@@ -122,7 +123,7 @@ public class IndustryUtils {
     }
 
 
-    public static class Industry implements NodeTree.Node<Industry> {
+    public static class Industry implements TreeNode.Node<Industry> {
         /**
          * 行业分类
          */
