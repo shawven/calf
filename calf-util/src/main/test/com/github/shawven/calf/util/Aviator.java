@@ -1,14 +1,17 @@
 package com.github.shawven.calf.util;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.google.common.collect.ImmutableMap;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.function.AbstractFunction;
 import com.googlecode.aviator.runtime.type.AviatorLong;
 import com.googlecode.aviator.runtime.type.AviatorObject;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.RegExUtils;
 import org.junit.Test;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.io.IOException;
 import java.util.Date;
@@ -24,32 +27,21 @@ public class Aviator {
     @Test
     public void compile() throws IOException {
         String path = "D:\\Workspace\\calf\\calf-util\\src\\main\\test\\com\\github\\shawven\\calf\\util\\";
-        AviatorEvaluator.getInstance().compileScript(path + "new.av", true).execute();
+        Expression expression = AviatorEvaluator.getInstance().compileScript(path + "new.av", true);
+        expression.execute();
     }
 
     @Test
     public void compile2() throws IOException {
+//        AviatorEvaluator.setOption(Options.ALWAYS_PARSE_FLOATING_POINT_NUMBER_INTO_DECIMAL, true);
+//        AviatorEvaluator.setOption(Options.ALWAYS_PARSE_INTEGRAL_NUMBER_INTO_DECIMAL, true);
+
+        ImmutableMap<String, Object> args = ImmutableMap.of("a", 0.1, "b", 0.2, "c", 3.0);
         String expression = """
-                use java.util.*;
-                                
-                let list = new ArrayList(10);
-                                
-                seq.add(list, 1);
-                seq.add(list, 2);
-                                
-                p("list[0]=#{list[0]}");
-                p("list[1]=#{list[1]}");
-                                
-                let set = new HashSet();
-                seq.add(set, "a");
-                seq.add(set, "a");
-                                
-                p("set type is: " + type(set));
-                p("set is: #{set}");
-                p("#{seq}");
-                                
+                (a + b) / 2        
                 """;
-        AviatorEvaluator.getInstance().execute(expression);
+        System.out.println(AviatorEvaluator.getInstance().execute(expression, args));
+        System.out.println(AviatorEvaluator.getInstance().execute(expression, JSONObject.from(args)));
     }
 
     @Test
@@ -57,7 +49,28 @@ public class Aviator {
         String expression = "3 + 2 * 6";
         Object result = AviatorEvaluator.execute(expression);
         System.out.println(result);
+
+
+        SpelExpressionParser parser = new SpelExpressionParser();
+        System.out.println(parser.parseExpression("T(Math).pow(2, T(org.apache.commons.lang3.RandomUtils).nextInt(1,9))").getValue());
     }
+
+    @Test
+    public void simpleTest2(){
+        AviatorEvaluator.setOption(Options.NIL_WHEN_PROPERTY_NOT_FOUND, true);
+
+        String expression = "#b.c.d";
+        ImmutableMap<String, Object> env = ImmutableMap.of(
+                "a", 1,
+                "b", ImmutableMap.of("d", 1)
+        );
+        System.out.println(AviatorEvaluator.execute(expression, env));
+
+        AviatorEvaluator.setOption(Options.NIL_WHEN_PROPERTY_NOT_FOUND, false);
+
+//        System.out.println(AviatorEvaluator.execute(expression, env));
+    }
+
 
     @Test
     public void variableTest(){
@@ -105,6 +118,24 @@ public class Aviator {
 
         // 输出结果
         System.out.println(result);
+    }
+
+    @Test
+    public void customSequence(){
+        // 声明变量
+        Map<String, Object> map = new HashMap<>();
+        map.put("a", 50);
+        map.put("b", 20);
+
+        // 执行
+        Object execute = AviatorEvaluator.execute("""
+                        let r = range(-5, 5);
+                        let es = filter(r, lambda(x) -> x %2 == 0 end);
+                        println("bs is: "  + es);
+                """, map);
+
+        // 输出结果
+        System.out.println(execute);
     }
 
 
