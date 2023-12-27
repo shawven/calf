@@ -38,7 +38,7 @@ public class Aviator {
 
         ImmutableMap<String, Object> args = ImmutableMap.of("a", 0.1, "b", 0.2, "c", 3.0);
         String expression = """
-                (a + b) / 2        
+                (a + b) / 2       
                 """;
         System.out.println(AviatorEvaluator.getInstance().execute(expression, args));
         System.out.println(AviatorEvaluator.getInstance().execute(expression, JSONObject.from(args)));
