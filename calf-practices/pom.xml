@@ -23,7 +23,7 @@
     </properties>
 
     <modules>
-        <module>demo-practice</module>
+        <module>web-practice</module>
         <module>es7-practice</module>
         <module>websocket-practice</module>
         <module>feign-practice</module>

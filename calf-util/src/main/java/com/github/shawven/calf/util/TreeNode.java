@@ -296,10 +296,13 @@ public class TreeNode {
 
             // 输入实现了Node，则默认可转换
             Function<T, ? extends Node> convert = t -> (Node)t;
-            return (List<T>) build(convert);
+            if (selector != null)  {
+                return (List<T>) buildWithRootSelector(convert);
+            }
+            return (List<T>) buildWithoutRootSelector(convert);
         }
 
-        public <R extends Node<R>> List<R> build(Function<T, R> convert) {
+        private  <R extends Node<R>> List<R> buildWithRootSelector(Function<T, R> convert) {
             Objects.requireNonNull(selector, "跟节点选择器不能为空");
             Objects.requireNonNull(connector, "父子节点连接器不能为空");
             Objects.requireNonNull(convert, "输入节点转换器不能为空");
@@ -356,6 +359,62 @@ public class TreeNode {
             }
 
             return res;
+        }
+
+        private  <R extends Node<R>> List<R> buildWithoutRootSelector(Function<T, R> convert) {
+            Objects.requireNonNull(connector, "父子节点连接器不能为空");
+            Objects.requireNonNull(convert, "输入节点转换器不能为空");
+
+            if (data == null || data.isEmpty()) {
+                return emptyList();
+            }
+
+            // 子节点列表
+            List<T> children = data;
+            // 根节点
+            LinkedList<T> roots = new LinkedList<>(data);
+
+            // 新根节点
+            LinkedList<R> newRoots = roots.stream().map(convert).collect(toCollection(LinkedList::new));
+            // 返回结果
+            Set<R> res = new LinkedHashSet<>(newRoots);
+
+            while (!roots.isEmpty()) {
+                // 弹出临时父节点
+                T oldParent = roots.pop();
+                // 弹出临时已转换的父节点
+                R newParent = newRoots.pop();
+
+                // 遍历整个子列表，寻找根节点的直接直接子节点
+                Iterator<T> iterator = children.iterator();
+                while (iterator.hasNext()) {
+                    T child = iterator.next();
+
+                    // 已找到子节点
+                    if (connector.test(oldParent, child)) {
+                        // 子节点转换
+                        R newChild = convert.apply(child);
+
+                        if (newChild instanceof DeNode) {
+                            ((DeNode) newChild).setParent((DeNode)newParent);
+                        }
+
+                        // 构造父子关系.最终返回的是转换后的节
+                        addChild(newParent, newChild);
+                        // 已经成为子节点的需要从根节点移除（依赖equals和hashcode）
+                        res.remove(newChild);
+
+                        // 子节点入栈
+                        roots.push(child);
+                        newRoots.push(newChild);
+
+                        // 排除已找到挂载子节点
+                        iterator.remove();
+                    }
+                }
+            }
+
+            return new ArrayList<>(res);
         }
 
         /**

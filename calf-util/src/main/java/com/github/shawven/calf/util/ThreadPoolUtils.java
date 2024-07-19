@@ -7,9 +7,11 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -95,6 +97,28 @@ public class ThreadPoolUtils {
         return opsForDefault().getExecutor();
     }
 
+    public static CompletableFuture<Void> allOf(List<Runnable> tasks) {
+        return allOf(tasks.toArray(new Runnable[0]));
+    }
+
+    /**
+     * CompletableFuture allOf
+     *
+     * @param tasks
+     * @return
+     */
+    public static CompletableFuture<Void> allOf(Runnable... tasks) {
+        ThreadPoolTaskExecutor executor = opsForDefault().getExecutor();
+
+        int len = tasks.length;
+        CompletableFuture<?>[] futures = new CompletableFuture<?>[len];
+        for (int i = 0; i < len; i++) {
+            futures[i] = CompletableFuture.runAsync(tasks[i], executor);
+        }
+
+        return CompletableFuture.allOf(futures);
+    }
+
     private static ThreadPoolTaskExecutor newExecutor(String threadPrefix, int corePoolSize, int maxPoolSize, int queueSize) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         // 设置核心线程数
@@ -137,8 +161,6 @@ public class ThreadPoolUtils {
 
     public static CustomizableThreadFactory newThreadFactory(String prefix) {
         return new CustomizableThreadFactory(prefix) {
-            private static final long serialVersionUID = -8293867781666698804L;
-
             @Override
             public Thread createThread(Runnable runnable) {
                 Thread thread = super.createThread(runnable);
@@ -159,9 +181,9 @@ public class ThreadPoolUtils {
         static final Ops INSTANCE = new DefaultExecutorOps();
 
         private static final String THREAD_PREFIX = "io-task-";
-        private static final int DEFAULT_CORE_POOL_SIZE = 500;
-        private static final int DEFAULT_MAX_POOL_SIZE = 1000;
-        private static final int DEFAULT_QUEUE_SIZE = 30;
+        private static final int DEFAULT_CORE_POOL_SIZE = 10;
+        private static final int DEFAULT_MAX_POOL_SIZE = 500;
+        private static final int DEFAULT_QUEUE_SIZE = 0;
         private static final ThreadPoolTaskExecutor DEFAULT_EXECUTOR =
                 newExecutor(THREAD_PREFIX, DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_POOL_SIZE, DEFAULT_QUEUE_SIZE);
 
@@ -178,7 +200,7 @@ public class ThreadPoolUtils {
 
         static final Ops INSTANCE = new ThirdExecutorOps();
 
-        private static final String THREAD_PREFIX = "tio-task-";
+        private static final String THREAD_PREFIX = "io-task-";
         private static final int THIRD_CORE_POOL_SIZE = 5;
         private static final int THIRD_MAX_POOL_SIZE = 5;
         private static final int THIRD_QUEUE_SIZE = 100000;

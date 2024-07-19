@@ -28,14 +28,4 @@ public class ValidateController {
         return Response.ok();
     }
 
-//    @GetMapping("method")
-//    @Valid
-//    public ResponseEntity<?> testMethod1(SearchQueryRequest request) {
-//        return Response.ok();
-//    }
-//
-//    @GetMapping("method2")
-//    public ResponseEntity<?> testMethod2(@Valid @NotBlank(message = "名词不能为空") String name) {
-//        return Response.ok();
-//    }
 }

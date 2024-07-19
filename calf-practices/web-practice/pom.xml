@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>com.github.shawven.calf.practices</groupId>
-    <artifactId>demo-practice</artifactId>
+    <artifactId>web-practice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <name>demo-practice</name>
