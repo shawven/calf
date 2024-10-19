@@ -10,4 +10,8 @@ class KafkaPracticeApplicationTests {
     void contextLoads() {
     }
 
+    @Test
+    void testMethod() {
+
+    }
 }

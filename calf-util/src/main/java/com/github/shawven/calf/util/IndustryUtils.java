@@ -40,9 +40,7 @@ public class IndustryUtils {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            industries = new Gson().fromJson(data, new TypeToken<List<Industry>>() {
-            }.getType());
-//            List<Industry> industries = transform(data);
+            industries = new Gson().fromJson(data, new TypeToken<List<Industry>>() {}.getType());
             reference = new SoftReference<>(industries);
         }
         return industries.parallelStream().map(SerializationUtils::clone).collect(Collectors.toList());
@@ -75,36 +73,6 @@ public class IndustryUtils {
         final String findName = name.trim();
         List<Industry> industries = new ArrayList<>(getIndustries());
         return TreeNode.dfs(industries, (Predicate<Industry>) industry -> industry.getName().equals(findName));
-    }
-
-    private static List<Industry> transform(String data) {
-        List<IndustryRaw> raws = new Gson().fromJson(data, new TypeToken<List<IndustryRaw>>() {
-        }.getType());
-
-        List<Industry> industries = TreeNode.from(raws)
-                .select(industry -> industry.getCode().length() == 1)
-                .connect((parent, child) -> {
-                    String parentId= parent.getId();
-                    String childId = child.getId();
-                    String parentCode = parent.getCode();
-                    String childCode = child.getCode();
-                    if (parent.getCode().length() == 1 && childCode.length() == 2) {
-                        return parentId.substring(0, parentId.length() - 2)
-                                .equals(childId.substring(0, childId.length() - 2));
-                    } else {
-                        return childCode.startsWith(parentCode) && childCode.length() == parentCode.length() + 1;
-                    }
-
-                })
-                .build(industryRaw -> {
-                    Industry industry = new Industry();
-                    industry.setCategory(industryRaw.getCode());
-                    industry.setCode(industryRaw.getCode());
-                    industry.setName(industryRaw.getName().trim());
-                    return industry;
-                });
-        mergeCode(industries, null);
-        return industries;
     }
 
     private static void mergeCode(List<Industry> industries, String parentCode) {
