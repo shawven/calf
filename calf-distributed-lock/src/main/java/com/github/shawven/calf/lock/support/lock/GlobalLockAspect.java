@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
@@ -45,37 +46,81 @@ public class GlobalLockAspect {
         String lockKey = getLockKey(pjp);
         RLock lock = redissonClient.getLock(lockKey);
 
-        long timeToExclusive = annotation.timeToExclusive();
-        boolean nonExclusive = timeToExclusive == 0;
+        long waitTime = annotation.waitTime();
+        long leaseTime = annotation.leaseTime();
+        boolean release = annotation.release();
+        String fallback = annotation.fallback();
 
         if (annotation.tryLock()) {
-            boolean locked = nonExclusive ? lock.tryLock() : lock.tryLock(-1, timeToExclusive, TimeUnit.SECONDS);
+            boolean locked = false;
+            try {
+                locked = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("try acquire globalLock {} interrupted!", lockKey);
+                    return invokeFallback(pjp, fallback);
+                }
+            }
             try {
                 if (locked) {
-                    logger.debug("try acquire globalLock {} success!", lockKey);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("try acquire globalLock {} success!", lockKey);
+                    }
+
                     return pjp.proceed();
                 } else {
                     if (logger.isDebugEnabled()) {
                         logger.debug("try acquire globalLock {} failure!", lockKey);
                     }
 
-                    return null;
+                    return invokeFallback(pjp, fallback);
                 }
             } finally {
-                if (nonExclusive && locked) {
+                if (release && locked) {
                     release(lock, lockKey);
                 }
             }
         } else {
-            lock.lock();
             try {
-                logger.debug("acquire globalLock {} success!", lockKey);
+                lock.lockInterruptibly(leaseTime, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("acquire globalLock {} interrupted!", lockKey);
+                    return invokeFallback(pjp, fallback);
+                }
+            }
+            try {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("acquire globalLock {} success!", lockKey);
+                }
+
                 return pjp.proceed();
             } finally {
-                if (nonExclusive) {
+                if (release) {
                     release(lock, lockKey);
                 }
             }
+        }
+    }
+
+    /**
+     * 调用降级方法
+     *
+     * @param joinPoint
+     * @param fallback
+     * @return
+     */
+    private Object invokeFallback(JoinPoint joinPoint, String fallback) {
+        if (StringUtils.isBlank(fallback)) {
+            throw new IllegalArgumentException("fallback should not be empty");
+        }
+
+        Object target = joinPoint.getTarget();
+        try {
+            Method method = target.getClass().getDeclaredMethod(fallback);
+            return method.invoke(joinPoint.getThis(), joinPoint.getArgs());
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
